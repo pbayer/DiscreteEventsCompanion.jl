@@ -1,4 +1,4 @@
-using Documenter, DiscreteEventsCompanion
+using Documenter
 
 makedocs(
     modules = [DiscreteEventsCompanion],
