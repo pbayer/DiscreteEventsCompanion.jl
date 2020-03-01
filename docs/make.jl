@@ -1,7 +1,6 @@
 using Documenter
 
 makedocs(
-    modules = [DiscreteEventsCompanion],
     format = Documenter.HTML(prettyurls = get(ENV, "CI", nothing) == "true"),
     sitename = "DiscreteEventsCompanion.jl",
     authors  = "Paul Bayer",
