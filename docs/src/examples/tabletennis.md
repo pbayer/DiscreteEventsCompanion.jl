@@ -5,8 +5,8 @@ In table tennis we have some physical constraints, standard moves and rules, but
 First we need to call the needed modules:
 
 ```julia
-using Simulate, Printf
-import Simulate.init!
+using DiscreteEvents, Printf
+import DiscreteEvents.init!
 ```
 
 Then we need some definitions for states, events and players:

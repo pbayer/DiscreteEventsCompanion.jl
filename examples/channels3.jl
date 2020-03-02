@@ -1,6 +1,6 @@
 # the channel example using an activity-based approach
 #
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 mutable struct Server
   id::Int64

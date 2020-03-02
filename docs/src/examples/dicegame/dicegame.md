@@ -32,7 +32,7 @@ The workers take on average 3.5 time units for processing an item and they are a
 
 
 ```julia
-using Simulate, Distributions, DataFrames, Random
+using DiscreteEvents, Distributions, DataFrames, Random
 
 mutable struct Worker
     nr::Int64              # worker number
@@ -138,7 +138,7 @@ This gives an average of 6.5 inventory items in channels 2-5. But as we see in t
 
 ## Parametrizing the model
 
-For further investigations we parametrize our model. This is not easily done in graphically oriented simulators, but we can do it with `Simulate.jl`.
+For further investigations we parametrize our model. This is not easily done in graphically oriented simulators, but we can do it with `DiscreteEvents.jl`.
 
 As parameters we take:
 
@@ -577,4 +577,4 @@ Starting from a simple game and with only a quite small simulation model we coul
 
 The most interesting thing to note here is, that from seemingly quite unpredictable behaviour – look at the inventory chart of the beginning – emerge some quite predictable characteristics out of multiple discrete event simulations with parameter variation combined with some not too sophisticated statistics.
 
-We could not have done those experiments and analyses with real lines as it is possible with simulations on a modern computer with `Julia` and `Simulate.jl`.
+We could not have done those experiments and analyses with real lines as it is possible with simulations on a modern computer with `Julia` and `DiscreteEvents.jl`.

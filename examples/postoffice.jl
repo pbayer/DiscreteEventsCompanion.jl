@@ -1,4 +1,4 @@
-using Simulate, Distributions
+using DiscreteEvents, Distributions
 
 function people(sim::Simulation, β::Float64, queue::Array{Int64,1}, clerk::Resource)
     i = 1

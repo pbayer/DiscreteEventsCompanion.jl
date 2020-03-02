@@ -1,6 +1,6 @@
 # Examples - overview
 
-The examples are intended to show how `Simulate.jl` can be used and how different approaches to modeling and simulation can be employed and combined with it.
+The examples are intended to show how `DiscreteEvents.jl` can be used and how different approaches to modeling and simulation can be employed and combined with it.
 
 - [**Table tennis**](tabletennis.md): a state-based simulation,
 - [**Single server**](singleserver.md): an activity-based simulation of a single

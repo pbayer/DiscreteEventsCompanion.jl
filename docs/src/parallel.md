@@ -1,6 +1,6 @@
 # Parallel simulations
 
-Currently `Simulate.jl` enables two approaches to parallel simulations.
+Currently `DiscreteEvents.jl` enables two approaches to parallel simulations.
 
 ## Simulations in parallel
 
@@ -30,7 +30,7 @@ processes. The clock executes them sequentially on one thread. But modern comput
 
 Multithreading introduces an **uncertainty** into simulations: If an event ``e_x`` has a scheduling time before event ``e_y`` on another thread both lying inside the same time interval ``t_x + Δt``, maybe – depending on differing thread loads – ``e_y`` gets executed before ``e_x``. There are several techniques to reduce this uncertainty:
 
-1. If there is a causal connection between two events such that ``e_y`` depends on ``e_x``, the first one can be scheduled as [`event!`](https://pbayer.github.io/Simulate.jl/dev/usage/#Simulate.event!) with `sync=true` to *force* its execution before the second. But such dependencies are not always known beforehand in simulations.
+1. If there is a causal connection between two events such that ``e_y`` depends on ``e_x``, the first one can be scheduled as [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.event!) with `sync=true` to *force* its execution before the second. But such dependencies are not always known beforehand in simulations.
 2. You can choose to *group* causally connected events on one thread by scheduling them together on a specific parallel clock, such that they are executed in sequence. Consider a factory simulation: in real factories shops are often decoupled by buffers. You can allocate processes, events and samples of each shop  together on a thread. See [grouping](@ref grouping) below.
 3. You can generally reduce the synchronization cycle Δt such that clocks get synchronized more often.
 

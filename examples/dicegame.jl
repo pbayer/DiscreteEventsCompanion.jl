@@ -1,4 +1,4 @@
-using Simulate, Distributions
+using DiscreteEvents, Distributions
 
 function boy(sim::Simulation, simlog, nr::Int64, bowls)
   roll = logvar("Boy"*string(nr), 0)

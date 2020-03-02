@@ -1,12 +1,12 @@
 #
-# This file is part of the Simulate.jl Julia package, MIT license
+# This file is part of the DiscreteEvents.jl Julia package, MIT license
 #
 # Paul Bayer, 2020
 #
 # This is a Julia package for discrete event simulation
 #
 
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 function simple(c::Clock, input::Channel, output::Channel, name, id, op)
     token = take!(input)         # take something from the input

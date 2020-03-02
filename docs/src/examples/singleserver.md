@@ -11,10 +11,10 @@ This example is from Choi, Kang: Modeling and Simulation of Discrete-Event Syste
 
 ### Implementing it
 
-We use this simple example for illustration of how it can be modeled, simulated and analyzed using `Simulate.jl`. First we have to import the necessary modules:
+We use this simple example for illustration of how it can be modeled, simulated and analyzed using `DiscreteEvents.jl`. First we have to import the necessary modules:
 
 ```julia
-using Simulate, Random, Distributions, DataFrames, Plots, LaTeXStrings
+using DiscreteEvents, Random, Distributions, DataFrames, Plots, LaTeXStrings
 pyplot()
 ```
 
@@ -244,4 +244,4 @@ plot!(df1.Lm, df1.Lm*5, label="theory "*L"(\overline{L}\times 5)")
 
 ![Little's law](../images/sserver5.png)
 
-Data seems not quite to fit theory. Reason is that the system is not stationary. But for a first approach, Little's law seems not to be a bad one. In order to analyze stability and [stationarity](https://en.wikipedia.org/wiki/Stationary_process) and to improve, we could refine our analysis by taking only the second half of the simulation data or by doing more simulation runs and having some more fun with `Simulate.jl` ...
+Data seems not quite to fit theory. Reason is that the system is not stationary. But for a first approach, Little's law seems not to be a bad one. In order to analyze stability and [stationarity](https://en.wikipedia.org/wiki/Stationary_process) and to improve, we could refine our analysis by taking only the second half of the simulation data or by doing more simulation runs and having some more fun with `DiscreteEvents.jl` ...

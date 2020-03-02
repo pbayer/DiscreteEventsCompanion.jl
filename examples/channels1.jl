@@ -1,7 +1,7 @@
 # the channel example using an event-based approach
 #
 
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 mutable struct Server
   id::Int64

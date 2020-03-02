@@ -6,7 +6,7 @@ We have provided 10% extra capacity, so our expectation is that there should not
 
 ![post office](PostOffice.png)
 
-Let's do a process-based simulation using `Simulate`. We need
+Let's do a process-based simulation using `DiscreteEvents`. We need
 
 1. a source: all the **people**, providing an unlimited supply for customers,
 2. **customers** with their demands and their limited patience,
@@ -17,7 +17,7 @@ First we must load the needed modules, describe a customer and define some helpe
 
 
 ```julia
-using Simulate, Random, Distributions, DataFrames
+using DiscreteEvents, Random, Distributions, DataFrames
 
 mutable struct Customer
     id::Int64

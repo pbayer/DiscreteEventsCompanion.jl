@@ -1,6 +1,6 @@
 # the channel example using a state-based approach
 #
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 abstract type Q end  # states
 struct Idle <: Q end

@@ -1,10 +1,10 @@
 #
-# This example shows the use of processes and channels with Simulate.jl
+# This example shows the use of processes and channels with DiscreteEvents.jl
 #
 # pb, 2019-11-09
 #
 
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 function simple(c::Clock, input::Channel, output::Channel, name, id, op)
     token = take!(input)         # take something from the input

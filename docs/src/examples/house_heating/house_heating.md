@@ -30,7 +30,7 @@ First we setup the physical model:
 
 
 ```julia
-using Simulate, Plots, DataFrames, Random, Distributions, LaTeXStrings
+using DiscreteEvents, Plots, DataFrames, Random, Distributions, LaTeXStrings
 
 const Th = 40     # temperature of heating fluid
 const R = 1e-6    # thermal resistance of room insulation
@@ -78,7 +78,7 @@ function switch(t1=20, t2=23)                       # simulate the thermostat
     end
 end
 
-Simulate.sample!(SF(setTemperatures), Δt)           # setup sampling
+DiscreteEvents.sample!(SF(setTemperatures), Δt)           # setup sampling
 switch()                                            # start the thermostat
 
 @time run!(𝐶, 24)
@@ -130,7 +130,7 @@ df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 for i in 1:2                                 # put 2 people in the house
     process!(SP(i, people), 1)               # run process only once
 end
-Simulate.sample!(SF(setTemperatures), Δt)    # set sampling function
+DiscreteEvents.sample!(SF(setTemperatures), Δt)    # set sampling function
 switch()                                     # start the thermostat
 
 @time run!(𝐶, 24)

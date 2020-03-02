@@ -1,4 +1,4 @@
-using Simulate, Printf, Random
+using DiscreteEvents, Printf, Random
 
 function watchdog(name)
     delay!(until, 6 + rand())
