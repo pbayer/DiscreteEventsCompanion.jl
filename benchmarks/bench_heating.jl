@@ -8,7 +8,7 @@
 # Benchmark adopted from the house_heating.ipynb example
 #
 
-using Simulate, Random, Distributions, Statistics, BenchmarkTools
+using DiscreteEvents, Random, Distributions, Statistics, BenchmarkTools
 import Dates.now
 
 const Th = 40     # temperature of heating fluid
@@ -82,7 +82,7 @@ run!(𝐶, 48)
 # take measurements
 println(now())
 @time onthread(2) do; setup(); end
-@time onthread(2) do; info = run!(𝐶, 48); end
+@time onthread(2) do; global info = run!(𝐶, 48); end
 println(info)
 println("measurements:", length(house.datTr), " mean_tr=", mean(house.datTr))
 

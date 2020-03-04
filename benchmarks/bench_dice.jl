@@ -8,7 +8,7 @@
 # Benchmark adopted from the dicegame.ipynb example
 #
 
-using Simulate, Distributions, Random, BenchmarkTools
+using DiscreteEvents, Distributions, Random, BenchmarkTools
 import Dates.now
 
 mutable struct Worker

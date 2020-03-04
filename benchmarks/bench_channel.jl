@@ -8,7 +8,7 @@
 # Benchmark adopted from the channel1.jl example
 #
 
-using Simulate, BenchmarkTools, Random
+using DiscreteEvents, BenchmarkTools, Random
 import Dates.now
 
 function take(id::Int64, ch::Channel, step::Int64, qpi::Array{Float64,1})
