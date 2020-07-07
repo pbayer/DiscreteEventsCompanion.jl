@@ -134,84 +134,85 @@ Note that we modeled the arrivals "event-based".
 
 ### Activity based approach
 
+Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb)[^3] and implement it as a sequence of activities:
+
+```julia
+using DiscreteEvents, Printf, Distributions, Random
+
+mutable struct Server
+    clock::Clock
+    id::Int
+    input::Channel{Int}
+    output::Channel{Int}
+    dist::Distribution
+    job::Int
+end
+
+Random.seed!(8710)   # set random number seed for reproducibility
+num_customers = 10   # total number of customers generated
+c = 2                # number of servers
+μ = 1.0 / 2          # service rate
+λ = 0.9              # arrival rate
+arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
+service_dist = Exponential(1/μ); # service time distribution
+
+# now we implement the activities
+load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
+
+function serve(S::Server)
+    S.job = take!(S.input)
+    @printf("%5.3f: server %d took job %d\n", tau(S.clock), S.id, S.job)
+    event!(S.clock, (fun(finish, S)), after, rand(S.dist))
+end
+
+function finish(S::Server)
+    put!(S.output, S.job)
+    @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
+    S.job=0
+    load(S)
+end
+
+input = Channel{Int}(32)  # create two channels
+output = Channel{Int}(32)
+jobno = 1
+
+# this implements the arrival process
+function arrive(c)
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno)
+    put!(input, jobno)
+    global jobno += 1
+    if jobno ≤ num_customers
+        event!(c, fun(arrive, c), after, rand(arrival_dist))
+    end
+end
+
+clk = Clock()
+S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+map(s->load(s), S)
+arrive(clk)
+run!(c, 10)
+```
+```
+0.000: customer 1 arrived
+0.010: server 1 took job 1
+0.123: customer 2 arrived
+0.130: server 2 took job 2
+0.196: server 1 finished job 1
+0.354: customer 3 arrived
+...
+7.381: server 2 took job 9
+7.845: server 1 finished job 4
+7.845: server 1 took job 10
+8.789: server 2 finished job 9
+9.104: server 1 finished job 10
+"run! finished with 19 clock events, 1002 sample steps, simulation time: 10.0"
+```
+
 ## Process flow
 
 In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a discrete event system. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.
 
 This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock`.
-
-
----------------
-
-
-## Activity based modeling
-
-The server's *activity* is the processing of the token. A timed Petri net would look like:
-
-![timed petri net](images/activity.png)
-
-The *arrive* "transition" puts a "token" in the *Queue*. If both "places" *Idle* and *Queue* have tokens, the server *takes* them, shifts one to *Busy* and *puts* out two after a timed transition with delay ``v_{put}``. Then it is *Idle* again and the cycle restarts.
-
-The server's activity is described by the blue box. Following the Petri net, you should implement a state variable with states Idle and Busy, but you don't need to if you separate the activities in time. You need a data structure for the server and define a function for the activity:
-
-```julia
-using DiscreteEvents, Printf, Random
-
-mutable struct Server
-  id::Int64
-  name::AbstractString
-  input::Channel
-  output::Channel
-  op     # operation
-  token  # current token
-
-  Server(id, name, input, output, op) = new(id, name, input, output, op, nothing)
-end
-
-arrive(S::Server) = event!(fun(serve, S), fun(isready, S.input))
-
-function serve(S::Server)
-    S.token = take!(S.input)
-    @printf("%5.2f: %s %d took token %d\n", tau(), S.name, S.id, S.token)
-    event!((fun(put!, S.output, S.op(S.id, S.token)), fun(arrive, S)), after, rand())
-end
-
-reset!(𝐶)
-Random.seed!(123)
-
-ch1 = Channel(32)  # create two channels
-ch2 = Channel(32)
-
-s = shuffle(1:8)
-for i in 1:2:8
-    arrive(Server(s[i], "foo", ch1, ch2, +))
-    arrive(Server(s[i+1], "bar", ch2, ch1, *))
-end
-
-put!(ch1, 1) # put first token into channel 1
-
-run!(𝐶, 10)
-```
-
-```julia
-julia> include("docs/examples/channels3.jl")
- 0.01: foo 4 took token 1
- 0.12: bar 6 took token 5
- 0.29: foo 1 took token 30
- 0.77: bar 8 took token 31
- 1.64: foo 2 took token 248
- 2.26: bar 3 took token 250
- ...
- 6.70: bar 5 took token 545653
- 6.91: foo 4 took token 2728265
- 7.83: bar 6 took token 2728269
- 8.45: foo 1 took token 16369614
- 9.26: bar 8 took token 16369615
- 9.82: foo 2 took token 130956920
-"run! finished with 20 clock events, simulation time: 10.0"
-```
-
-## Process based modeling
 
 Here you combine it all in a simple function of *take!*-*delay!*-*put!* like in the activity based example, but running in the loop of a process. Processes can wait or delay and are suspended and reactivated by Julia's scheduler according to background events. There is no need to handle events explicitly and no need for a server data type since a process keeps its own data. Processes must look careful to their timing and therefore you must enclose the IO-operation in a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call:
 
@@ -405,9 +406,7 @@ We have now all major schemes: events, continuous sampling and processes combine
 
 **see also**: the [full house heating example](examples/house_heating/house_heating.md) for further explanations.
 
-## Theories
-
-There are some theories about the different approaches (1) event based, (2) state based, (3) activity based and (4) process based. Choi and Kang [^1] have written an entire book about the first three approaches. Basically they can be converted to each other. Cassandras and Lafortune [^2] call those "the event scheduling scheme" and the 4th approach "the process-oriented simulation scheme" [^3]. There are communities behind the various views and `DiscreteEvents.jl` wants to be useful for them all.
 
 [^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
 [^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
+[^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia.
