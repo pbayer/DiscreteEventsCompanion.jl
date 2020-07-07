@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Modeling approaches · DiscreteEventsCompanion.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DiscreteEventsCompanion.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Overview</a></li><li class="current"><a class="toctext" href>Modeling approaches</a><ul class="internal"><li><a class="toctext" href="#Event-scheduling-1">Event scheduling</a></li><li><a class="toctext" href="#Process-flow-1">Process flow</a></li><li><a class="toctext" href="#Activity-based-modeling-1">Activity based modeling</a></li><li><a class="toctext" href="#Process-based-modeling-1">Process based modeling</a></li><li><a class="toctext" href="#Comparison-1">Comparison</a></li><li><a class="toctext" href="#Combined-approach-1">Combined approach</a></li><li><a class="toctext" href="#Theories-1">Theories</a></li></ul></li><li><a class="toctext" href="../timer/">Real time clocks</a></li><li><a class="toctext" href="../performance/">Performance</a></li><li><a class="toctext" href="../parallel/">Parallel simulations</a></li><li><a class="toctext" href="../benchmarks/">Benchmarks</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Modeling approaches</a></li></ul><a class="edit-page" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/approach.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Modeling approaches</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Modeling-approaches-1" href="#Modeling-approaches-1">Modeling approaches</a></h1><blockquote><p>All models are wrong. Some are useful. (George Box)</p></blockquote><p>There are different approaches in modeling <em>discrete event systems (DES)</em> for simulation. All are limiting in some way. <code>DiscreteEvents.jl</code> tries to provide you with a simple, yet versatile grammar for modeling.</p><h2><a class="nav-anchor" id="Event-scheduling-1" href="#Event-scheduling-1">Event scheduling</a></h2><p>Following Cassandras<a href="#footnote-1">[1]</a> we can consider DES as stochastic timed automata <span>$(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)$</span> where</p><div>\[\begin{array}{rl}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Modeling approaches · DiscreteEventsCompanion.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link href="../assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>DiscreteEventsCompanion.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" id="search-form" action="../search/"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li><a class="toctext" href="../">Overview</a></li><li class="current"><a class="toctext" href>Modeling approaches</a><ul class="internal"><li><a class="toctext" href="#Event-scheduling-1">Event scheduling</a></li><li><a class="toctext" href="#Process-flow-1">Process flow</a></li><li><a class="toctext" href="#Comparison-1">Comparison</a></li><li><a class="toctext" href="#Combined-approach-1">Combined approach</a></li></ul></li><li><a class="toctext" href="../timer/">Real time clocks</a></li><li><a class="toctext" href="../performance/">Performance</a></li><li><a class="toctext" href="../parallel/">Parallel simulations</a></li><li><a class="toctext" href="../benchmarks/">Benchmarks</a></li></ul></nav><article id="docs"><header><nav><ul><li><a href>Modeling approaches</a></li></ul><a class="edit-page" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/approach.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/><div id="topbar"><span>Modeling approaches</span><a class="fa fa-bars" href="#"></a></div></header><h1><a class="nav-anchor" id="Modeling-approaches-1" href="#Modeling-approaches-1">Modeling approaches</a></h1><blockquote><p>All models are wrong. Some are useful. (George Box)</p></blockquote><p>There are different approaches in modeling <em>discrete event systems (DES)</em> for simulation. All are limiting in some way. <code>DiscreteEvents.jl</code> tries to provide you with a simple, yet versatile grammar for modeling.</p><h2><a class="nav-anchor" id="Event-scheduling-1" href="#Event-scheduling-1">Event scheduling</a></h2><p>Following Cassandras<a href="#footnote-1">[1]</a> we can consider DES as stochastic timed automata <span>$(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)$</span> where</p><div>\[\begin{array}{rl}
   \mathcal{E} &amp; \textrm{countable event set} \\
   \mathcal{X} &amp; \textrm{countable state space} \\
   \Gamma(x)   &amp; \textrm{feasible or enabled events}: x \in \mathcal{X}, \Gamma(x) \subseteq \mathcal{E} \\
@@ -91,56 +91,72 @@ run!(c, 10)</code></pre><pre><code class="language-none">0.01: server 4 took job
 9.52: server 7 finished job 17
 9.52: server 7 took job 28
 ...
-&quot;run! finished with 161 clock events, 90 sample steps, simulation time: 10.0&quot;</code></pre><p>Note that we modeled the arrivals &quot;event-based&quot;.</p><h3><a class="nav-anchor" id="Activity-based-approach-1" href="#Activity-based-approach-1">Activity based approach</a></h3><h2><a class="nav-anchor" id="Process-flow-1" href="#Process-flow-1">Process flow</a></h2><p>In yet another view we look at <strong>entities</strong> (e.g. messages, customers, jobs, goods) undergoing a <em>process</em> as they flow through a discrete event system. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.</p><p>This view can be expressed as <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1">process</a>es taking <code>wait!</code> and <code>delay!</code> on a <code>Clock</code>.</p><hr/><h2><a class="nav-anchor" id="Activity-based-modeling-1" href="#Activity-based-modeling-1">Activity based modeling</a></h2><p>The server&#39;s <em>activity</em> is the processing of the token. A timed Petri net would look like:</p><p><img src="../images/activity.png" alt="timed petri net"/></p><p>The <em>arrive</em> &quot;transition&quot; puts a &quot;token&quot; in the <em>Queue</em>. If both &quot;places&quot; <em>Idle</em> and <em>Queue</em> have tokens, the server <em>takes</em> them, shifts one to <em>Busy</em> and <em>puts</em> out two after a timed transition with delay <span>$v_{put}$</span>. Then it is <em>Idle</em> again and the cycle restarts.</p><p>The server&#39;s activity is described by the blue box. Following the Petri net, you should implement a state variable with states Idle and Busy, but you don&#39;t need to if you separate the activities in time. You need a data structure for the server and define a function for the activity:</p><pre><code class="language-julia">using DiscreteEvents, Printf, Random
+&quot;run! finished with 161 clock events, 90 sample steps, simulation time: 10.0&quot;</code></pre><p>Note that we modeled the arrivals &quot;event-based&quot;.</p><h3><a class="nav-anchor" id="Activity-based-approach-1" href="#Activity-based-approach-1">Activity based approach</a></h3><p>Here events are expressed as activities. We take the <a href="https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb">example of a multi-server M/M/c queue</a><a href="#footnote-3">[3]</a> and implement it as a sequence of activities:</p><pre><code class="language-julia">using DiscreteEvents, Printf, Distributions, Random
 
 mutable struct Server
-  id::Int64
-  name::AbstractString
-  input::Channel
-  output::Channel
-  op     # operation
-  token  # current token
-
-  Server(id, name, input, output, op) = new(id, name, input, output, op, nothing)
+    clock::Clock
+    id::Int
+    input::Channel{Int}
+    output::Channel{Int}
+    dist::Distribution
+    job::Int
 end
 
-arrive(S::Server) = event!(fun(serve, S), fun(isready, S.input))
+Random.seed!(8710)   # set random number seed for reproducibility
+num_customers = 10   # total number of customers generated
+c = 2                # number of servers
+μ = 1.0 / 2          # service rate
+λ = 0.9              # arrival rate
+arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
+service_dist = Exponential(1/μ); # service time distribution
+
+# now we implement the activities
+load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
 
 function serve(S::Server)
-    S.token = take!(S.input)
-    @printf(&quot;%5.2f: %s %d took token %d\n&quot;, tau(), S.name, S.id, S.token)
-    event!((fun(put!, S.output, S.op(S.id, S.token)), fun(arrive, S)), after, rand())
+    S.job = take!(S.input)
+    @printf(&quot;%5.3f: server %d took job %d\n&quot;, tau(S.clock), S.id, S.job)
+    event!(S.clock, (fun(finish, S)), after, rand(S.dist))
 end
 
-reset!(𝐶)
-Random.seed!(123)
-
-ch1 = Channel(32)  # create two channels
-ch2 = Channel(32)
-
-s = shuffle(1:8)
-for i in 1:2:8
-    arrive(Server(s[i], &quot;foo&quot;, ch1, ch2, +))
-    arrive(Server(s[i+1], &quot;bar&quot;, ch2, ch1, *))
+function finish(S::Server)
+    put!(S.output, S.job)
+    @printf(&quot;%5.3f: server %d finished job %d\n&quot;, tau(S.clock), S.id, S.job)
+    S.job=0
+    load(S)
 end
 
-put!(ch1, 1) # put first token into channel 1
+input = Channel{Int}(32)  # create two channels
+output = Channel{Int}(32)
+jobno = 1
 
-run!(𝐶, 10)</code></pre><pre><code class="language-julia">julia&gt; include(&quot;docs/examples/channels3.jl&quot;)
- 0.01: foo 4 took token 1
- 0.12: bar 6 took token 5
- 0.29: foo 1 took token 30
- 0.77: bar 8 took token 31
- 1.64: foo 2 took token 248
- 2.26: bar 3 took token 250
- ...
- 6.70: bar 5 took token 545653
- 6.91: foo 4 took token 2728265
- 7.83: bar 6 took token 2728269
- 8.45: foo 1 took token 16369614
- 9.26: bar 8 took token 16369615
- 9.82: foo 2 took token 130956920
-&quot;run! finished with 20 clock events, simulation time: 10.0&quot;</code></pre><h2><a class="nav-anchor" id="Process-based-modeling-1" href="#Process-based-modeling-1">Process based modeling</a></h2><p>Here you combine it all in a simple function of <em>take!</em>-<em>delay!</em>-<em>put!</em> like in the activity based example, but running in the loop of a process. Processes can wait or delay and are suspended and reactivated by Julia&#39;s scheduler according to background events. There is no need to handle events explicitly and no need for a server data type since a process keeps its own data. Processes must look careful to their timing and therefore you must enclose the IO-operation in a <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!"><code>now!</code></a> call:</p><pre><code class="language-julia">function simple(input::Channel, output::Channel, name, id, op)
+# this implements the arrival process
+function arrive(c)
+    @printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(c), jobno)
+    put!(input, jobno)
+    global jobno += 1
+    if jobno ≤ num_customers
+        event!(c, fun(arrive, c), after, rand(arrival_dist))
+    end
+end
+
+clk = Clock()
+S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+map(s-&gt;load(s), S)
+arrive(clk)
+run!(c, 10)</code></pre><pre><code class="language-none">0.000: customer 1 arrived
+0.010: server 1 took job 1
+0.123: customer 2 arrived
+0.130: server 2 took job 2
+0.196: server 1 finished job 1
+0.354: customer 3 arrived
+...
+7.381: server 2 took job 9
+7.845: server 1 finished job 4
+7.845: server 1 took job 10
+8.789: server 2 finished job 9
+9.104: server 1 finished job 10
+&quot;run! finished with 19 clock events, 1002 sample steps, simulation time: 10.0&quot;</code></pre><h2><a class="nav-anchor" id="Process-flow-1" href="#Process-flow-1">Process flow</a></h2><p>In yet another view we look at <strong>entities</strong> (e.g. messages, customers, jobs, goods) undergoing a <em>process</em> as they flow through a discrete event system. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.</p><p>This view can be expressed as <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1">process</a>es taking <code>wait!</code> and <code>delay!</code> on a <code>Clock</code>.</p><p>Here you combine it all in a simple function of <em>take!</em>-<em>delay!</em>-<em>put!</em> like in the activity based example, but running in the loop of a process. Processes can wait or delay and are suspended and reactivated by Julia&#39;s scheduler according to background events. There is no need to handle events explicitly and no need for a server data type since a process keeps its own data. Processes must look careful to their timing and therefore you must enclose the IO-operation in a <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!"><code>now!</code></a> call:</p><pre><code class="language-julia">function simple(input::Channel, output::Channel, name, id, op)
     token = take!(input)         # take something, eventually wait for it
     now!(fun(println, @sprintf(&quot;%5.2f: %s %d took token %d&quot;, tau(), name, id, token)))
     d = delay!(rand())           # wait for a given time
@@ -246,4 +262,4 @@ plot!(df.t, df.te, label=L&quot;T_e&quot;)
 plot!(df.t, df.heating, label=&quot;heating&quot;)
 xlabel!(&quot;hours&quot;)
 ylabel!(&quot;temperature&quot;)
-title!(&quot;House heating with people&quot;)</code></pre><p><img src="../examples/house_heating/output_7_0.svg" alt="svg"/></p><p>We have now all major schemes: events, continuous sampling and processes combined in one example.</p><p><strong>see also</strong>: the <a href="../examples/house_heating/house_heating/">full house heating example</a> for further explanations.</p><h2><a class="nav-anchor" id="Theories-1" href="#Theories-1">Theories</a></h2><p>There are some theories about the different approaches (1) event based, (2) state based, (3) activity based and (4) process based. Choi and Kang <a href="#footnote-1">[1]</a> have written an entire book about the first three approaches. Basically they can be converted to each other. Cassandras and Lafortune <a href="#footnote-2">[2]</a> call those &quot;the event scheduling scheme&quot; and the 4th approach &quot;the process-oriented simulation scheme&quot; <a href="#footnote-3">[3]</a>. There are communities behind the various views and <code>DiscreteEvents.jl</code> wants to be useful for them all.</p><div class="footnote" id="footnote-1"><a href="#footnote-1"><strong>[1]</strong></a><p>Cassandras and Lafortune: <em>Introduction to Discrete Event Systems</em>, Springer, 2008, Ch. 10</p></div><div class="footnote" id="footnote-2"><a href="#footnote-2"><strong>[2]</strong></a><p>Choi and Kang: <em>Modeling and Simulation of Discrete-Event Systems</em>, Wiley, 2013</p></div><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Overview</span></a><a class="next" href="../timer/"><span class="direction">Next</span><span class="title">Real time clocks</span></a></footer></article></body></html>
+title!(&quot;House heating with people&quot;)</code></pre><p><img src="../examples/house_heating/output_7_0.svg" alt="svg"/></p><p>We have now all major schemes: events, continuous sampling and processes combined in one example.</p><p><strong>see also</strong>: the <a href="../examples/house_heating/house_heating/">full house heating example</a> for further explanations.</p><div class="footnote" id="footnote-1"><a href="#footnote-1"><strong>[1]</strong></a><p>Cassandras and Lafortune: <em>Introduction to Discrete Event Systems</em>, Springer, 2008, Ch. 10</p></div><div class="footnote" id="footnote-2"><a href="#footnote-2"><strong>[2]</strong></a><p>Choi and Kang: <em>Modeling and Simulation of Discrete-Event Systems</em>, Wiley, 2013</p></div><div class="footnote" id="footnote-3"><a href="#footnote-3"><strong>[3]</strong></a><p>see also: <a href="https://en.wikipedia.org/wiki/M/M/c_queue">M/M/c queue</a> on Wikipedia.</p></div><footer><hr/><a class="previous" href="../"><span class="direction">Previous</span><span class="title">Overview</span></a><a class="next" href="../timer/"><span class="direction">Next</span><span class="title">Real time clocks</span></a></footer></article></body></html>
