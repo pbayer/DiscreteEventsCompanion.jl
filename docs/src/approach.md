@@ -1,169 +1,148 @@
-# Approaches to modeling and simulation
+# Modeling approaches
 
-`DiscreteEvents.jl` supports different approaches to modeling and simulation of *discrete event systems (DES)*. It provides three major schemes: 1) an event-scheduling scheme, 2) a process-oriented scheme and 3) continuous sampling. With them different modeling strategies can be applied.
+> All models are wrong. Some are useful. (George Box)
 
-A problem can be expressed differently through various modeling approaches. A simple problem can illustrate this :
+There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents.jl` tries to provide you with a simple, yet versatile grammar for modeling.
 
-> A server *takes* something from an input, *processes* it for some time and
-> *puts* it out to an output. There are 8 servers in the system, 4 foos and 4 bars
-> interacting with each other via two channels.
+## Event scheduling
 
+Following Cassandras[^1] we can consider DES as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
 
-## Event based modeling
+```math
+\begin{array}{rl}
+  \mathcal{E} & \textrm{countable event set} \\
+  \mathcal{X} & \textrm{countable state space} \\
+  \Gamma(x)   & \textrm{feasible or enabled events}: x \in \mathcal{X}, \Gamma(x) \subseteq \mathcal{E} \\
+  p(x';x,e')  & \textrm{state transition probability}: x,x' \in \mathcal{X}, e' \in \mathcal{E} \\
+  p_0(x)      & \textrm{pmf} P[X_0=x]: x \in \mathcal{X}, X_o \textrm{initial state} \\
+  G_i         & \textrm{stochastic clock structure}: i \in \mathcal{E}
+\end{array}
+```
 
-In this view *events* occur in time and trigger further events. Here the three server actions are seen as events and can be described in an event graph:
+`DiscreteEvents.jl` provides a [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) ``G_i`` and [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1). Everything else can be expressed with Julia functions (or expressions).
 
-![event graph](images/event.png)
+Choi and Kang[^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
 
-You define a data structure for the server, provide functions for the three actions, create channels and servers and start:
+### Event based approach
+
+We can simply schedule Julia functions as events, possibly triggering other events.
 
 ```julia
-using DiscreteEvents, Printf, Random
+using DiscreteEvents, Distributions, Random
 
-mutable struct Server
-  id::Int64
-  name::AbstractString
-  input::Channel
-  output::Channel
-  op     # operation to take
-  token  # current token
+Random.seed!(123)
+ex = Exponential()
 
-  Server(id, name, input, output, op) = new(id, name, input, output, op, nothing)
+chit(c) = (print("."), event!(c, fun(chat, c), after, rand(ex)))
+chat(c) = (print(":"), event!(c, fun(chit, c), after, rand(ex)))
+
+c = Clock()
+chit(c)
+run!(c, 10)
+```
+
+This is useful when we don't have to care much about states.
+
+### State based approach
+
+Events are expressed as state transitions ``\mathcal{f}(x, \gamma)`` with ``x \in \mathcal{X},\ \gamma \in \Gamma(x)`` of finite automata. The following example models 8 servers as state machines serving a queue of jobs:
+
+```julia
+using DiscreteEvents, Printf, Random, Distributions
+
+const p = 0.3          # probability of finishing
+
+abstract type 𝑋 end    # define states 𝑋
+struct Idle <: 𝑋 end
+struct Busy <: 𝑋 end
+
+abstract type Γ end    # define events Γ
+struct Load <: Γ end
+struct Release <: Γ end
+
+mutable struct Server  # state machine body
+    id::Int
+    c::Clock
+    state::𝑋
+    job::Int
 end
 
-function take(S::Server)
-    if isready(S.input)
-        S.token = take!(S.input)
-        @printf("%5.2f: %s %d took token %d\n", tau(), S.name, S.id, S.token)
-        event!(fun(put, S), after, rand())         # call put after some time
+ex = Exponential()
+jobno = 1
+
+queue = Vector{Int}()
+done  = Vector{Int}()
+Base.isready(x::Array) = !isempty(x)
+
+# transition functions 𝒇 (can be implemented with Julia's multiple dispatch)
+function 𝒇(A::Server, ::Idle, ::Load)
+    A.job = pop!(queue)
+    A.state = Busy()
+    @printf("%5.2f: server %d took job %d\n", tau(A.c), A.id, A.job)
+    event!(A.c, fun(𝒇, A, A.state, Release()), after, rand(ex))
+end
+
+function 𝒇(A::Server, ::Busy, ::Release)
+    if rand() > p
+        push!(queue, A.job)
     else
-        event!(fun(take, S), fun(isready, S.input)) # call again if input is ready
+        pushfirst!(done, A.job)
+        @printf("%5.2f: server %d finished job %d\n", tau(A.c), A.id, A.job)
     end
-end
-
-function put(S::Server)
-    put!(S.output, S.op(S.id, S.token))
-    S.token = nothing
-    take(S)
-end
-
-reset!(𝐶)
-Random.seed!(123)
-
-ch1 = Channel(32)  # create two channels
-ch2 = Channel(32)
-
-s = shuffle(1:8)
-for i in 1:2:8
-    take(Server(s[i], "foo", ch1, ch2, +))
-    take(Server(s[i+1], "bar", ch2, ch1, *))
-end
-
-put!(ch1, 1) # put first token into channel 1
-
-run!(𝐶, 10)
-```
-
-```julia
-julia> include("docs/examples/channels1.jl")
- 0.01: foo 4 took token 1
- 0.12: bar 6 took token 5
- 0.29: foo 1 took token 30
- 0.77: bar 8 took token 31
- 1.64: foo 2 took token 248
- 2.26: bar 3 took token 250
-...
- 6.70: bar 5 took token 545653
- 6.91: foo 4 took token 2728265
- 7.83: bar 6 took token 2728269
- 8.45: foo 1 took token 16369614
- 9.26: bar 8 took token 16369615
- 9.82: foo 2 took token 130956920
-"run! finished with 20 clock events, simulation time: 10.0"
-```
-
-## State based modeling
-
-Here the server has three states: *Idle*, *Busy* and *End* (where *End* does nothing). On an arrival event it resets its internal clock ``x=0`` and determines the service time ``t_s``, moves to *Busy*, *works* on its input and puts it out when ``t_s`` is over. Then it goes back to *Idle*. A state transition diagram (Mealy model) of the timed automaton would look like:
-
-![timed automaton](images/state.png)
-
-Again you need a data structure for the server (state …). You define states and events and implement a `δ` transition function with two methods. Thereby you dispatch on states and events. Since you don't need to implement all combinations of states and events, you may implement a fallback transition.
-
-```julia
-using DiscreteEvents, Printf, Random
-
-abstract type Q end  # states
-struct Idle <: Q end
-struct Busy <: Q end
-abstract type Σ end  # events
-struct Arrive <: Σ end
-struct Leave <: Σ end
-
-mutable struct Server
-    id::Int64
-    name::AbstractString
-    input::Channel
-    output::Channel
-    op     # operation to take
-    state::Q
-    token  # current token
-
-    Server(id, name, input, output, op) = new(id, name, input, output, op, Idle(), nothing)
-end
-
-arrive(A) = event!(fun(δ, A, A.state, Arrive()), fun(isready, A.input))
-
-function δ(A::Server, ::Idle, ::Arrive)
-    A.token = take!(A.input)
-    @printf("%5.2f: %s %d took token %d\n", tau(), A.name, A.id, A.token)
-    A.state=Busy()
-    event!(fun(δ, A, A.state, Leave()), after, rand())
-end
-
-function δ(A::Server, ::Busy, ::Leave)
-    put!(A.output, A.op(A.id,A.token))
+    A.job = 0
     A.state=Idle()
-    arrive(A)
+    event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
 end
 
-δ(A::Server, q::Q, σ::Σ) =               # fallback transition
-        println(stderr, "$(A.name) $(A.id) undefined transition $q, $σ")
+function 𝒇(A::Server, 𝑥::𝑋, γ::Γ)       # catch all
+    println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+end
 
-reset!(𝐶)
+# setup a clock and 8 servers
 Random.seed!(123)
+c = Clock()
 
-ch1 = Channel(32)  # create two channels
-ch2 = Channel(32)
-
-s = shuffle(1:8)
-for i in 1:2:8
-    arrive(Server(s[i], "foo", ch1, ch2, +))
-    arrive(Server(s[i+1], "bar", ch2, ch1, *))
+A = [Server(i, c, Idle(), 0) for i ∈ 1:8]
+for i ∈ shuffle(1:8)
+    event!(c, fun(𝒇, A[i], A[i].state, Load()), fun(isready, queue))
 end
 
-put!(ch1, 1) # put first token into channel 1
+# simulate arrivals ("event-based")
+event!(c, (fun(pushfirst!, queue, ()->jobno), ()->global jobno += 1), every, rand(ex))
 
-run!(𝐶, 10)
+run!(c, 10)
 ```
 
-```julia
-julia> include("docs/examples/channels2.jl")
- 0.01: foo 4 took token 1
- 0.12: bar 6 took token 5
- 0.29: foo 1 took token 30
- 0.77: bar 8 took token 31
- 1.64: foo 2 took token 248
- 2.26: bar 3 took token 250
- ...
- 6.70: bar 5 took token 545653
- 6.91: foo 4 took token 2728265
- 7.83: bar 6 took token 2728269
- 8.45: foo 1 took token 16369614
- 9.26: bar 8 took token 16369615
- 9.82: foo 2 took token 130956920
-"run! finished with 20 clock events, simulation time: 10.0"
 ```
+0.01: server 4 took job 1
+0.12: server 6 took job 2
+0.23: server 1 took job 3
+0.31: server 4 took job 1
+...
+9.46: server 8 took job 21
+9.48: server 5 finished job 8
+9.48: server 5 took job 26
+9.48: server 2 finished job 23
+9.48: server 2 took job 27
+9.52: server 7 finished job 17
+9.52: server 7 took job 28
+...
+"run! finished with 161 clock events, 90 sample steps, simulation time: 10.0"
+```
+
+Note that we modeled the arrivals "event-based".
+
+### Activity based approach
+
+## Process flow
+
+In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a discrete event system. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.
+
+This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock`.
+
+
+---------------
+
 
 ## Activity based modeling
 
@@ -430,6 +409,5 @@ We have now all major schemes: events, continuous sampling and processes combine
 
 There are some theories about the different approaches (1) event based, (2) state based, (3) activity based and (4) process based. Choi and Kang [^1] have written an entire book about the first three approaches. Basically they can be converted to each other. Cassandras and Lafortune [^2] call those "the event scheduling scheme" and the 4th approach "the process-oriented simulation scheme" [^3]. There are communities behind the various views and `DiscreteEvents.jl` wants to be useful for them all.
 
-[^1]:  [Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013](https://books.google.com/books?id=0QpwAAAAQBAJ)
-[^2]:  [Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10](https://books.google.com/books?id=AxguNHDtO7MC)
-[^3]: to be fair, the 4th approach is called by Choi and Kang "parallel simulation".
+[^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
+[^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
