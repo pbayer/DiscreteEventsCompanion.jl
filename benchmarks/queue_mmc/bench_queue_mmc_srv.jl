@@ -43,13 +43,13 @@ function run_model(arrival_dist, service_dist, num_customers, num_servers, t)
 end
 
 function run_model(num_customers)
-    result = @benchmark run_model($arrival_dist, $service_dist, $num_customers, $num_servers, 2000000)
-    return mean(result).time*1e-9
+    result = @benchmark run_model($arrival_dist, $service_dist, $num_customers, $num_servers, 2000000) samples=100000
+    return mean(result).time*1e-3
 end
 
 _bench[end] = true
 N = [10,1000,2000,4000]
 
 times = run_model.(N)
-plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
+plot(N, times, xlabel="Customers", ylabel="Time (μs)", leg=false, grid=false)
 savefig("img/bench_queue_mmc_srv.png")
