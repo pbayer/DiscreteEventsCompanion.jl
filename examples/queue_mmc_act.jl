@@ -45,8 +45,8 @@ function arrive(c)
     end
 end
 
-c = Clock()
-S = [Server(c,i,input,output,service_dist,0) for i ∈ 1:num_servers]
+clk = Clock()
+S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:num_servers]
 map(s->load(s), S)
-arrive(c)
-run!(c, 10)
+event!(clk, fun(arrive, clk), after, rand(arrival_dist))
+run!(clk, 20)

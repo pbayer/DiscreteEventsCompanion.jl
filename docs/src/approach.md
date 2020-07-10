@@ -187,25 +187,26 @@ function arrive(c)
 end
 
 clk = Clock()
-S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:num_servers]
 map(s->load(s), S)
-arrive(clk)
-run!(c, 10)
+event!(clk, fun(arrive, clk), after, rand(arrival_dist))
+run!(clk, 20)
 ```
 ```
-0.000: customer 1 arrived
-0.010: server 1 took job 1
-0.123: customer 2 arrived
-0.130: server 2 took job 2
-0.196: server 1 finished job 1
-0.354: customer 3 arrived
+0.123: customer 1 arrived
+0.130: server 1 took job 1
+0.226: customer 2 arrived
+0.230: server 2 took job 2
+0.546: server 1 finished job 1
 ...
-7.381: server 2 took job 9
-7.845: server 1 finished job 4
-7.845: server 1 took job 10
-8.789: server 2 finished job 9
-9.104: server 1 finished job 10
-"run! finished with 19 clock events, 1002 sample steps, simulation time: 10.0"
+9.475: customer 9 arrived
+9.530: server 2 took job 9
+10.066: server 1 finished job 8
+10.257: customer 10 arrived
+10.260: server 1 took job 10
+10.626: server 1 finished job 10
+10.789: server 2 finished job 9
+"run! finished with 20 clock events, 1168 sample steps, simulation time: 20.0"
 ```
 
 ## Process flow
@@ -217,42 +218,59 @@ This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.
 Here you combine it all in a simple function of *take!*-*delay!*-*put!* like in the activity based example, but running in the loop of a process. Processes can wait or delay and are suspended and reactivated by Julia's scheduler according to background events. There is no need to handle events explicitly and no need for a server data type since a process keeps its own data. Processes must look careful to their timing and therefore you must enclose the IO-operation in a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call:
 
 ```julia
-function simple(input::Channel, output::Channel, name, id, op)
-    token = take!(input)         # take something, eventually wait for it
-    now!(fun(println, @sprintf("%5.2f: %s %d took token %d", tau(), name, id, token)))
-    d = delay!(rand())           # wait for a given time
-    put!(output, op(token, id))  # put something else out, eventually wait
+using DiscreteEvents, Printf, Distributions, Random
+
+Random.seed!(8710)   # set random number seed for reproducibility
+num_customers = 10   # total number of customers generated
+num_servers = 2      # number of servers
+μ = 1.0 / 2          # service rate
+λ = 0.9              # arrival rate
+arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
+service_dist = Exponential(1/μ); # service time distribution
+
+# describe the server process
+function server(clk::Clock, id::Int, input::Channel, output::Channel, service_dist::Distribution)
+    job = take!(input)
+    now!(clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
+    delay!(clk, rand(service_dist))
+    now!(clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
+    put!(output, job)
 end
 
-ch1 = Channel(32)  # create two channels
-ch2 = Channel(32)
-
-for i in 1:2:8    # create and register 8 Prces
-    process!(Prc(i, simple, ch1, ch2, "foo", i, +))
-    process!(Prc(i+1, simple, ch2, ch1, "bar", i+1, *))
+# model arrivals
+function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
+    for i = 1:num_customers # initialize customers
+        delay!(clock, rand(arrival_dist))
+        put!(queue, i)
+        now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
+    end
 end
 
-reset!(𝐶)
-put!(ch1, 1) # put first token into channel 1
-run!(𝐶, 10)
+# initialize simulation environment
+clock = Clock()
+input = Channel{Int}(Inf)
+output = Channel{Int}(Inf)
+for i in 1:num_servers
+    process!(clock, Prc(i, server, i, input, output, service_dist))
+end
+process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
+run!(clock, 20)
 ```
 
-```julia
-julia> include("docs/examples/channels4.jl")
- 0.00: foo 7 took token 1
- 0.77: bar 4 took token 8
- 1.71: foo 3 took token 32
- 2.38: bar 2 took token 35
- 2.78: foo 5 took token 70
- 3.09: bar 8 took token 75
- ...
- 7.64: foo 7 took token 1387926
- 7.91: bar 4 took token 1387933
- 8.36: foo 3 took token 5551732
- 8.94: bar 2 took token 5551735
- 9.20: foo 5 took token 11103470
- 9.91: bar 8 took token 11103475
-"run! finished with 21 clock events, simulation time: 10.0"
+```
+0.123: customer 1 arrived
+0.123: server 1 serving customer 1
+0.226: customer 2 arrived
+0.226: server 2 serving customer 2
+....
+9.475: customer 9 arrived
+9.475: server 2 serving customer 9
+10.027: server 1 finished serving 8
+10.257: customer 10 arrived
+10.257: server 1 serving customer 10
+10.624: server 1 finished serving 10
+10.734: server 2 finished serving 9
+"run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
 
 ## Comparison
