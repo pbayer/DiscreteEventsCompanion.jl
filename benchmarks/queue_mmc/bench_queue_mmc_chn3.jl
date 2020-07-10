@@ -1,7 +1,6 @@
 #
-# with this 2nd modification arrivals occur during simulation
-# and thus the customer/process queue gets shorter.
-# --> the simulation should scale better
+# this is a modification of the bench_queue_mmc_chn2.jl (with arrival process)
+# modified to run on thread 2
 #
 using DiscreteEvents, Distributions, Random, BenchmarkTools
 using Plots, Printf
@@ -26,7 +25,7 @@ function customer(clk::Clock, server::Channel, id::Int, ds::Distribution)
     _bench[end] || now!(clk, ()->@printf("%5.3f: customer %d exited service\n", tau(clk), id))
 end
 
-# model arrivals
+# model the arrival process
 function arrivals(clock, server, num_customers, arrival_dist)
     for i = 1:num_customers # initialize customers
         delay!(clock, rand(arrival_dist))
@@ -56,4 +55,4 @@ N = [10,1000,2000,4000]
 
 times = run_model.(N)
 plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
-savefig("bench_queue_mmc_chn3.png")
+savefig("img/bench_queue_mmc_chn3.png")

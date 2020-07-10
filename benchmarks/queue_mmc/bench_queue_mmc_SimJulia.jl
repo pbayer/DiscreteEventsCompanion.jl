@@ -4,8 +4,9 @@
 #
 # only modified for benchmarking
 #
+cd(@__DIR__)
 using Distributions, SimJulia, ResumableFunctions, Random
-using BenchmarkTools
+using BenchmarkTools, Plots
 
 const _bench = [false]
 
@@ -38,7 +39,14 @@ function run_model(arrival_dist, service_dist, num_customers, num_servers)
     run(sim) # run simulation
 end
 
-# run_model(arrival_dist, service_dist, num_customers, num_servers)
+function run_model(num_customers)
+    result = @benchmark run_model($arrival_dist, $service_dist, $num_customers, $num_servers)
+    return mean(result).time*1e-9
+end
 
 _bench[end] = true
-@benchmark run_model(arrival_dist, service_dist, num_customers, num_servers)
+N = [10,1000,2000,4000]
+
+times = run_model.(N)
+plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
+savefig("img/bench_queue_mmc_SimJulia.png")

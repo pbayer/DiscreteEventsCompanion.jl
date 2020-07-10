@@ -1,4 +1,9 @@
-using DiscreteEvents, DataStructures, Distributions, Random, BenchmarkTools
+#
+# this is an adoption of the example found on
+# https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb
+# to DiscreteEvents
+#
+using DiscreteEvents, Distributions, Random, BenchmarkTools
 using Plots, Printf
 const _bench = [false]
 
@@ -49,4 +54,4 @@ N = [10,1000,2000,4000]
 
 times = run_model.(N)
 plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
-savefig("bench_queue_mmc_chn.png")
+savefig("img/bench_queue_mmc_chn.png")

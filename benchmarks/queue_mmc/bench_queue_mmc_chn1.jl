@@ -1,7 +1,8 @@
 #
-# this is modified to run on thread 2
+# this is the benchmark bench_queue_mmc_chn.jl
+# modified only to run on thread 2
 #
-using DiscreteEvents, DataStructures, Distributions, Random, BenchmarkTools
+using DiscreteEvents, Distributions, Random, BenchmarkTools
 using Plots, Printf
 const _bench = [false]
 
@@ -54,4 +55,4 @@ N = [10,1000,2000,4000]
 
 times = run_model.(N)
 plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
-savefig("bench_queue_mmc_chn1.png")
+savefig("img/bench_queue_mmc_chn1.png")
