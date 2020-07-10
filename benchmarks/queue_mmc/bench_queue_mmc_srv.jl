@@ -25,7 +25,7 @@ end
 # model arrivals
 function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
     for i = 1:num_customers # initialize customers
-        delay!(clock, rand(arrival_dist))
+        delay!(clk, rand(arrival_dist))
         put!(queue, i)
         _bench[end] || now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
@@ -40,16 +40,17 @@ function run_model(arrival_dist, service_dist, num_customers, num_servers, t)
     end
     process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
     run!(clock, t)
+    return output
 end
 
 function run_model(num_customers)
-    result = @benchmark run_model($arrival_dist, $service_dist, $num_customers, $num_servers, 2000000) samples=100000
-    return mean(result).time*1e-3
+    result = @benchmark run_model($arrival_dist, $service_dist, $num_customers, $num_servers, 2000000)
+    return mean(result).time*1e-9
 end
 
 _bench[end] = true
 N = [10,1000,2000,4000]
 
 times = run_model.(N)
-plot(N, times, xlabel="Customers", ylabel="Time (μs)", leg=false, grid=false)
+plot(N, times, xlabel="Customers", ylabel="Time (seconds)", leg=false, grid=false)
 savefig("img/bench_queue_mmc_srv.png")

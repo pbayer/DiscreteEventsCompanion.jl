@@ -38,13 +38,13 @@ The **server model** (`bench_queue_mmc_srv.jl`)
 
 ![the server model](img/bench_queue_mmc_srv.png)
 
-This is again faster than the last one (we are in the milliseconds now) and it scales much better since we have to do the expensive task setup only for three tasks (regardless of the number of customers). Can we speed up this further by running it on a separate processor core?
+As expected this faster than the modified model and scales well. Can we speed up this further by running it on a separate processor core?
 
 The **server model on thread 2** (`bench_queue_mmc_srv1.jl`)
 
 ![the server model on thread 2](img/bench_queue_mmc_srv1.png)
 
-Now it takes about 127 μs with no discernible pattern of scaling (statistical fluctuations).
+Now it takes about 30 ms.
 
 ## An activity based solution
 

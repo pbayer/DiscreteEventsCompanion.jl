@@ -20,7 +20,7 @@ end
 # model arrivals
 function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
     for i = 1:num_customers # initialize customers
-        delay!(clock, rand(arrival_dist))
+        delay!(clk, rand(arrival_dist))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
