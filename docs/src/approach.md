@@ -2,7 +2,18 @@
 
 > All models are wrong. Some are useful. (George Box)
 
-There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents.jl` tries to provide you with a simple, yet versatile grammar for modeling.
+There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide you with a simple, yet versatile grammar for modeling. Basically **events** here are Julia functions or expressions, which get executed at a given time.
+
+## Sampling
+
+The simplest mechanism for generating discrete events in time is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can use this in various ways:
+
+- we can define sampling events with `periodic!(clk, fun, Δt)`
+- we can define repeating events with `event!(clk, fun, every, t)`
+- we can setup conditional events with `event!(clk, fun, cond)` where sampling is
+  switched on implicitly and the condition `cond` is checked every time interval `Δt`.
+
+With sampling we can model periodic events but no stochastic event sequences of DES. Sampling is useful for DES if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
 
 ## Event scheduling
 
@@ -134,7 +145,7 @@ Note that we modeled the arrivals "event-based".
 
 ### Activity based approach
 
-Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb)[^3] and implement it as a sequence of activities:
+Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb)[^3] and implement it as a sequence of server activities:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -188,7 +199,7 @@ end
 
 clk = Clock()
 S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:num_servers]
-map(s->load(s), S)
+map(s->load(s), S)  # start the servers
 event!(clk, fun(arrive, clk), after, rand(arrival_dist))
 run!(clk, 20)
 ```
@@ -273,7 +284,11 @@ run!(clock, 20)
 "run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
 
+Note that the times deviate slightly from the activity based implementation because here we don't use conditional events and therefore have no time divergence due to sampling [^4].  
+
 ## Comparison
+
+
 
 The output of the last example is different from the first three approaches because we did not shuffle (the shuffling of the processes is done by the scheduler). So if the output depends very much on the sequence of events and you need to have reproducible results, explicitly controlling for the events like in the first three examples is preferable. If you are more interested in statistical evaluation - which is often the case -, the 4th approach is appropriate.
 
@@ -427,4 +442,5 @@ We have now all major schemes: events, continuous sampling and processes combine
 
 [^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
 [^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
-[^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia.
+[^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
+[^4]: the load activity in the activity based example uses a conditional event and  switches on sampling: the condition is checked periodically. But this introduces a time divergence into the simulation.
