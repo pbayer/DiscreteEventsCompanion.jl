@@ -1,3 +1,7 @@
+#
+# This example is an activity based implementation of an M/M/c queue
+# with 10 customers and two servers
+#
 using DiscreteEvents, Printf, Distributions, Random
 
 mutable struct Server
@@ -11,12 +15,14 @@ end
 
 Random.seed!(8710)   # set random number seed for reproducibility
 num_customers = 10   # total number of customers generated
-num_servers = 2      # number of servers
+c = 2                # number of servers
 μ = 1.0 / 2          # service rate
 λ = 0.9              # arrival rate
 arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
 service_dist = Exponential(1/μ); # service time distribution
+const jobno = [1]    # job counter
 
+# activities are functions calling each other directly or as events
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
 
 function serve(S::Server)
@@ -32,21 +38,25 @@ function finish(S::Server)
     load(S)
 end
 
-input = Channel{Int}(32)  # create two channels
-output = Channel{Int}(32)
-jobno = 1
-
-function arrive(c)
-    @printf("%5.3f: customer %d arrived\n", tau(c), jobno)
-    put!(input, jobno)
-    global jobno += 1
-    if jobno ≤ num_customers
-        event!(c, fun(arrive, c), after, rand(arrival_dist))
+# model the arrivals
+function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
+    jobno[1] += 1
+    if jobno[1] ≤ num
+        event!(c, fun(arrive, c, input, num, dist), after, rand(dist))
     end
 end
 
+# setup the simulation environment
 clk = Clock()
-S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:num_servers]
-map(s->load(s), S)
-event!(clk, fun(arrive, clk), after, rand(arrival_dist))
-run!(clk, 20)
+input = Channel{Int}(32)  # create two channels
+output = Channel{Int}(32)
+jobno[1] = 1              # reset job counter
+
+# create and start the servers and the arrival process
+srv = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+map(s->load(s), srv)
+event!(clk, fun(arrive, clk, input, num_customers, arrival_dist), after, rand(arrival_dist))
+
+run!(clk, 20)  # run the simulation

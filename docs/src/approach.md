@@ -13,11 +13,11 @@ The simplest mechanism for generating discrete events in time is to have a clock
 - we can setup conditional events with `event!(clk, fun, cond)` where sampling is
   switched on implicitly and the condition `cond` is checked every time interval `Δt`.
 
-With sampling we can model periodic events but no stochastic event sequences of DES. Sampling is useful for DES if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
+With sampling we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful for DES if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
 
 ## Event scheduling
 
-Following Cassandras[^1] we can consider DES as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
+Following Cassandras[^1] we can consider discrete event systems (DES) as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
 
 ```math
 \begin{array}{rl}
@@ -30,7 +30,7 @@ Following Cassandras[^1] we can consider DES as stochastic timed automata ``(\ma
 \end{array}
 ```
 
-`DiscreteEvents.jl` provides a [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) ``G_i`` and [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1). Everything else can be expressed with Julia functions (or expressions).
+`DiscreteEvents.jl` provides the [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) ``G_i`` and an event generating mechanism: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1). Everything else can be expressed with Julia functions (or expressions).
 
 Choi and Kang[^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
 
@@ -85,7 +85,7 @@ queue = Vector{Int}()
 done  = Vector{Int}()
 Base.isready(x::Array) = !isempty(x)
 
-# transition functions 𝒇 (can be implemented with Julia's multiple dispatch)
+# transition functions 𝒇(x, γ) (implemented with Julia's multiple dispatch)
 function 𝒇(A::Server, ::Idle, ::Load)
     A.job = pop!(queue)
     A.state = Busy()
@@ -166,9 +166,12 @@ c = 2                # number of servers
 λ = 0.9              # arrival rate
 arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
 service_dist = Exponential(1/μ); # service time distribution
+const jobno = [1]    # job counter
 
-# now we implement the activities
+# activities are functions calling each other directly or as events
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
+    # we check the availability of the input channel explicitly ↑
+    # since we don't want to block.
 
 function serve(S::Server)
     S.job = take!(S.input)
@@ -183,25 +186,28 @@ function finish(S::Server)
     load(S)
 end
 
-input = Channel{Int}(32)  # create two channels
-output = Channel{Int}(32)
-jobno = 1
-
-# this implements the arrival process
-function arrive(c)
-    @printf("%5.3f: customer %d arrived\n", tau(c), jobno)
-    put!(input, jobno)
-    global jobno += 1
-    if jobno ≤ num_customers
-        event!(c, fun(arrive, c), after, rand(arrival_dist))
+# model the arrivals
+function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
+    jobno[1] += 1
+    if jobno[1] ≤ num
+        event!(c, fun(arrive, c, input, num, dist), after, rand(dist))
     end
 end
 
+# setup the simulation environment
 clk = Clock()
-S = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:num_servers]
-map(s->load(s), S)  # start the servers
-event!(clk, fun(arrive, clk), after, rand(arrival_dist))
-run!(clk, 20)
+input = Channel{Int}(32)  # create two channels
+output = Channel{Int}(32)
+jobno[1] = 1              # reset job counter
+
+# create and start the servers and the arrival process
+srv = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+map(s->load(s), srv)
+event!(clk, fun(arrive, clk, input, num_customers, arrival_dist), after, rand(arrival_dist))
+
+run!(clk, 20)  # run the simulation
 ```
 ```
 0.123: customer 1 arrived
@@ -220,13 +226,13 @@ run!(clk, 20)
 "run! finished with 20 clock events, 1168 sample steps, simulation time: 20.0"
 ```
 
+Note that the checking of the input channel in `load ...` switches on sampling implicitly (1168 sample steps).
+
 ## Process flow
 
-In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a discrete event system. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.
+In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.
 
-This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock`.
-
-Here you combine it all in a simple function of *take!*-*delay!*-*put!* like in the activity based example, but running in the loop of a process. Processes can wait or delay and are suspended and reactivated by Julia's scheduler according to background events. There is no need to handle events explicitly and no need for a server data type since a process keeps its own data. Processes must look careful to their timing and therefore you must enclose the IO-operation in a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call:
+This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock` or implicitly blocking until it can `take!` something from a `Channel` or `put!` it back. Processes are functions running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or to the availability of resources. They don't need to handle events explicitly and keep their own data. An implementation of the M/M/c problem goes like this:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -284,11 +290,16 @@ run!(clock, 20)
 "run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
 
-Note that the times deviate slightly from the activity based implementation because here we don't use conditional events and therefore have no time divergence due to sampling [^4].  
+Note that
+
+- the times deviate slightly from the activity based implementation because here we don't use conditional events and therefore have no time divergence due to sampling [^4]. We had no need to use sampling (0 sample steps) since the blocking on channels is handled by Julia internally.
+- Processes must transfer IO-operations with a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call to the clock.
 
 ## Comparison
 
+=====
 
+The following needs rework: 
 
 The output of the last example is different from the first three approaches because we did not shuffle (the shuffling of the processes is done by the scheduler). So if the output depends very much on the sequence of events and you need to have reproducible results, explicitly controlling for the events like in the first three examples is preferable. If you are more interested in statistical evaluation - which is often the case -, the 4th approach is appropriate.
 
