@@ -6,14 +6,13 @@ There are different approaches in modeling *discrete event systems (DES)* for si
 
 ## Sampling
 
-The simplest mechanism for generating discrete events in time is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can use this in various ways:
+The simplest mechanism for generating discrete events in time is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can generate periodic events in various ways:
 
-- we can define sampling events with `periodic!(clk, fun, Δt)`
-- we can define repeating events with `event!(clk, fun, every, t)`
-- we can setup conditional events with `event!(clk, fun, cond)` where sampling is
-  switched on implicitly and the condition `cond` is checked every time interval `Δt`.
+- sampling events with `periodic!(clk, fun, Δt)` go on the clock sample rate `Δt`,
+- repeating events with `event!(clk, fun, every, t)` are executed every given `t`,
+- conditional events with `event!(clk, fun, cond)` switch on sampling with sample rate `Δt` until the condition `cond` is fulfilled.
 
-With sampling we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful for DES if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
+Thus we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful for modeling discrete event systems if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
 
 ## Event scheduling
 
@@ -48,15 +47,20 @@ chit(c) = (print("."), event!(c, fun(chat, c), after, rand(ex)))
 chat(c) = (print(":"), event!(c, fun(chit, c), after, rand(ex)))
 
 c = Clock()
-chit(c)
+event!(c, fun(chit, c), after, rand(ex))
+event!(c, println, at, 10)
 run!(c, 10)
+```
+```
+.:.:.:.:.:.:.:.:.
+"run! finished with 18 clock events, 0 sample steps, simulation time: 10.0"
 ```
 
 This is useful when we don't have to care much about states.
 
 ### State based approach
 
-Events are expressed as state transitions ``\mathcal{f}(x, \gamma)`` with ``x \in \mathcal{X},\ \gamma \in \Gamma(x)`` of finite automata. The following example models 8 servers as state machines serving a queue of jobs:
+Events can be expressed as state transitions ``\mathcal{f}(x, \gamma)`` with ``x \in \mathcal{X},\ \gamma \in \Gamma(x)`` of finite automata. The following example models 8 servers as state machines serving a queue of jobs:
 
 ```julia
 using DiscreteEvents, Printf, Random, Distributions
@@ -145,7 +149,7 @@ Note that we modeled the arrivals "event-based".
 
 ### Activity based approach
 
-Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb)[^3] and implement it as a sequence of server activities:
+Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^3] and implement it as a sequence of server activities:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -193,6 +197,8 @@ function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
     jobno[1] += 1
     if jobno[1] ≤ num
         event!(c, fun(arrive, c, input, num, dist), after, rand(dist))
+      else
+        event!(c, fun(stop!, c), after, 2/μ)
     end
 end
 
@@ -222,17 +228,19 @@ run!(clk, 20)  # run the simulation
 10.257: customer 10 arrived
 10.260: server 1 took job 10
 10.626: server 1 finished job 10
-10.789: server 2 finished job 9
-"run! finished with 20 clock events, 1168 sample steps, simulation time: 20.0"
+10.739: server 2 finished job 9
+"run! halted with 21 clock events, 1426 sample steps, simulation time: 14.26"
 ```
 
-Note that the checking of the input channel in `load ...` switches on sampling implicitly (1168 sample steps).
+Note that
+- the checking of the input channel in `load ...` switches on sampling implicitly (1026 sample steps),
+- the `arrive` function stops the clock
 
 ## Process flow
 
-In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then undergo a transformation (e.g. transport, treatment or service) taking some time.
+In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then to undergo a transformation (e.g. transport, treatment or service) taking some time.
 
-This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock` or implicitly blocking until it can `take!` something from a `Channel` or `put!` it back. Processes are functions running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or to the availability of resources. They don't need to handle events explicitly and keep their own data. An implementation of the M/M/c problem goes like this:
+This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock` or implicitly blocking until they can `take!` something from a `Channel` or `put!` it back. Processes are functions running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or to the availability of resources. They don't need to handle events explicitly and keep their own data. An implementation of the M/M/c queue goes like this:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -263,7 +271,7 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
     end
 end
 
-# initialize simulation environment
+# initialize the simulation environment and run
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
@@ -299,7 +307,7 @@ Note that
 
 =====
 
-The following needs rework: 
+**The following needs rework:**
 
 The output of the last example is different from the first three approaches because we did not shuffle (the shuffling of the processes is done by the scheduler). So if the output depends very much on the sequence of events and you need to have reproducible results, explicitly controlling for the events like in the first three examples is preferable. If you are more interested in statistical evaluation - which is often the case -, the 4th approach is appropriate.
 

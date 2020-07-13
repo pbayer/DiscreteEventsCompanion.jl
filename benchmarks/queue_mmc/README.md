@@ -44,13 +44,17 @@ The **server model on thread 2** (`bench_queue_mmc_srv1.jl`)
 
 ![the server model on thread 2](img/bench_queue_mmc_srv1.png)
 
-Now it takes about 30 ms.
+Now it takes about 30 ms for 4000 customers.
 
 ## An activity based solution
 
-There are yet other ways to model the M/M/c problem. Here we have done an activity based solution only based on events.
+There are yet other ways to model the M/M/c problem. Here we have done an activity based solution only based on events. This model doesn't work with processes/tasks. There is no task-switching and no intervention of the Julia scheduler, just functions calling each other.
 
-- yet to do
+The **activity based model** (`bench_queue_mmc_act.jl`)
+
+![the activity based model](img/bench_queue_mmc_act.png)
+
+This takes about 60 ms for 4000 customers. It is slower than the last one since it has to check for conditions with clock sampling.
 
 ## Conclusion
 

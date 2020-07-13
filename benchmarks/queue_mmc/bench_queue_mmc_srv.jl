@@ -40,7 +40,6 @@ function run_model(arrival_dist, service_dist, num_customers, num_servers, t)
     end
     process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
     run!(clock, t)
-    return output
 end
 
 function run_model(num_customers)

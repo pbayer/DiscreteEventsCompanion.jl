@@ -13,5 +13,6 @@ chit(c) = (print("."), event!(c, fun(chat, c), after, rand(ex)))
 chat(c) = (print(":"), event!(c, fun(chit, c), after, rand(ex)))
 
 c = Clock()
-chit(c)
+event!(c, fun(chit, c), after, rand(ex))
+event!(c, println, at, 10)
 run!(c, 10)
