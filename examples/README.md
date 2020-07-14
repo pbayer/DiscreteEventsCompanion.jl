@@ -1,7 +1,10 @@
 # Example programs
 
-- `greeting.jl`: an initial example
-- `tabletennis.jl`: a simple table tennis simulation
-- `channel[1-4].jl`: the four channel examples show the same problem expressed in four different modeling approaches. See the [documentation](https://pbayer.github.io/DiscreteEvents.jl/dev/approach/).
+example programs are explained in the [documentation](https://pbayer.github.io/DiscreteEventsCompanion.jl/dev/)
 
-Other examples are from an earlier version of `PFlow` and have yet to be adapted.
+- `chitchat.jl`: basic event scheduling
+- `server.jl`: a state machine example
+- `queue_mmc_act.jl`: an activity-based model of a M/M/c queue
+- `queue_mmc_srv.jl`: a process-oriented model of the M/M/c queue
+- `queue_mmc_chn.jl`: yet another M/M/c model (slow!)
+- `tabletennis.jl`: a state machine simulation of a game

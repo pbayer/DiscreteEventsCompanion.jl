@@ -1,4 +1,4 @@
-# Modeling approaches
+# Modeling
 
 > All models are wrong. Some are useful. (George Box)
 
@@ -16,7 +16,7 @@ Thus we can model periodic events but no stochastic event sequences, characteris
 
 ## Event scheduling
 
-Following Cassandras[^1] we can consider discrete event systems (DES) as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
+Following Cassandras [^1] we can consider discrete event systems (DES) as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
 
 ```math
 \begin{array}{rl}
@@ -31,7 +31,7 @@ Following Cassandras[^1] we can consider discrete event systems (DES) as stochas
 
 `DiscreteEvents.jl` provides the [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) ``G_i`` and an event generating mechanism: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1). Everything else can be expressed with Julia functions (or expressions).
 
-Choi and Kang[^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
+Choi and Kang [^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
 
 ### Event based approach
 
