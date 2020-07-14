@@ -2,17 +2,19 @@
 
 > All models are wrong. Some are useful. (George Box)
 
-There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide you with a simple, yet versatile grammar for modeling. Basically **events** here are Julia functions or expressions, which get executed at a given time.
+There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide you with a simple, yet versatile and powerful grammar for combining the approaches.
+
+Discrete events basically are Julia functions or expressions, which get executed at a given time.
 
 ## Sampling
 
-The simplest mechanism for generating discrete events in time is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can generate periodic events in various ways:
+The simplest mechanism for generating discrete events is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can generate periodic events in various ways:
 
 - sampling events with `periodic!(clk, fun, Δt)` go on the clock sample rate `Δt`,
 - repeating events with `event!(clk, fun, every, t)` are executed every given `t`,
 - conditional events with `event!(clk, fun, cond)` switch on sampling with sample rate `Δt` until the condition `cond` is fulfilled.
 
-Thus we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful for modeling discrete event systems if we have repeated or periodic events interacting with them or if we want to check for conditions or if we want to trace or visualize the system periodically.
+Such we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful if we have repeated or periodic events interacting with DES, we want to check for conditions or trace or visualize the system periodically.
 
 ## Event scheduling
 
@@ -65,15 +67,16 @@ Events can be expressed as state transitions ``\mathcal{f}(x, \gamma)`` with ``x
 ```julia
 using DiscreteEvents, Printf, Random, Distributions
 
-const p = 0.3          # probability of finishing
+const p = 0.3
 
-abstract type 𝑋 end    # define states 𝑋
+abstract type 𝑋 end    # define states
 struct Idle <: 𝑋 end
 struct Busy <: 𝑋 end
 
-abstract type Γ end    # define events Γ
+abstract type Γ end    # events
 struct Load <: Γ end
 struct Release <: Γ end
+struct Setup <: Γ end
 
 mutable struct Server  # state machine body
     id::Int
@@ -83,13 +86,11 @@ mutable struct Server  # state machine body
 end
 
 ex = Exponential()
-jobno = 1
-
 queue = Vector{Int}()
 done  = Vector{Int}()
 Base.isready(x::Array) = !isempty(x)
 
-# transition functions 𝒇(x, γ) (implemented with Julia's multiple dispatch)
+# transition functions
 function 𝒇(A::Server, ::Idle, ::Load)
     A.job = pop!(queue)
     A.state = Busy()
@@ -106,50 +107,48 @@ function 𝒇(A::Server, ::Busy, ::Release)
     end
     A.job = 0
     A.state=Idle()
-    event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
+    event!(A.c, fun(𝒇, A, A.state, Setup()), after, rand(ex)/5)
 end
 
-function 𝒇(A::Server, 𝑥::𝑋, γ::Γ)       # catch all
-    println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+𝒇(A::Server, ::Idle, ::Setup) = event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
+𝒇(A::Server, 𝑥::𝑋, γ::Γ) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+
+# model arrivals
+function arrive(clk::Clock, job)
+    pushfirst!(queue, job)
+    event!(clk, fun(arrive, clk, job+1), after, rand(ex))
 end
 
-# setup a clock and 8 servers
+# setup simulation environment and run simulation
 Random.seed!(123)
 c = Clock()
-
 A = [Server(i, c, Idle(), 0) for i ∈ 1:8]
 for i ∈ shuffle(1:8)
     event!(c, fun(𝒇, A[i], A[i].state, Load()), fun(isready, queue))
 end
-
-# simulate arrivals ("event-based")
-event!(c, (fun(pushfirst!, queue, ()->jobno), ()->global jobno += 1), every, rand(ex))
-
+event!(c, fun(arrive, c, 1), after, rand(ex))
 run!(c, 10)
 ```
 
 ```
-0.01: server 4 took job 1
-0.12: server 6 took job 2
-0.23: server 1 took job 3
-0.31: server 4 took job 1
+0.12: server 4 took job 1
+0.41: server 6 took job 2
+0.60: server 4 finished job 1
+0.68: server 6 finished job 2
+1.68: server 1 took job 3
 ...
-9.46: server 8 took job 21
-9.48: server 5 finished job 8
-9.48: server 5 took job 26
-9.48: server 2 finished job 23
-9.48: server 2 took job 27
-9.52: server 7 finished job 17
-9.52: server 7 took job 28
-...
-"run! finished with 161 clock events, 90 sample steps, simulation time: 10.0"
+9.13: server 2 took job 5
+9.28: server 3 finished job 3
+9.92: server 5 took job 9
+9.95: server 2 finished job 5
+"run! finished with 58 clock events, 1001 sample steps, simulation time: 10.0"
 ```
 
-Note that we modeled the arrivals "event-based".
+Note that we modeled the arrivals "event-based" (without considering any state).
 
 ### Activity based approach
 
-Here events are expressed as activities. We take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^3] and implement it as a sequence of server activities:
+Here we take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^3] and implement it as a sequence of server activities:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -233,7 +232,7 @@ run!(clk, 20)  # run the simulation
 ```
 
 Note that
-- the checking of the input channel in `load ...` switches on sampling implicitly (1026 sample steps),
+- the checking of the input channel in `load ...` switches on sampling implicitly (1426 sample steps),
 - the `arrive` function stops the clock
 
 ## Process flow
@@ -300,7 +299,7 @@ run!(clock, 20)
 
 Note that
 
-- the times deviate slightly from the activity based implementation because here we don't use conditional events and therefore have no time divergence due to sampling [^4]. We had no need to use sampling (0 sample steps) since the blocking on channels is handled by Julia internally.
+- the times deviate from the activity based implementation because here we do not use conditional events and therefore have no time divergence due to sampling [^4].
 - Processes must transfer IO-operations with a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call to the clock.
 
 ## Comparison
@@ -462,4 +461,4 @@ We have now all major schemes: events, continuous sampling and processes combine
 [^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
 [^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
 [^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
-[^4]: the load activity in the activity based example uses a conditional event and  switches on sampling: the condition is checked periodically. But this introduces a time divergence into the simulation.
+[^4]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally.

@@ -33,7 +33,7 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
 end
 
 function run_model(arrival_dist, service_dist, num_customers, num_servers, t)
-    DiscreteEvents.onthread(2) do
+    onthread(2) do
         clock = Clock()
         input = Channel{Int}(Inf)
         output = Channel{Int}(Inf)

@@ -7,10 +7,12 @@ makedocs(
     pages = [
         "index.md",
         "approach.md",
-        "timer.md",
+        "examples/examples.md",
         "performance.md",
         "parallel.md",
-        "benchmarks.md"
+        "timer.md",
+        "benchmarks.md",
+        "internals.md"
     ]
 )
 

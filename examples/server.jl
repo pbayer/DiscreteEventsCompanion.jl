@@ -14,6 +14,7 @@ struct Busy <: 𝑋 end
 abstract type Γ end    # events
 struct Load <: Γ end
 struct Release <: Γ end
+struct Setup <: Γ end
 
 mutable struct Server  # state machine body
     id::Int
@@ -23,8 +24,6 @@ mutable struct Server  # state machine body
 end
 
 ex = Exponential()
-jobno = 1
-
 queue = Vector{Int}()
 done  = Vector{Int}()
 Base.isready(x::Array) = !isempty(x)
@@ -46,21 +45,24 @@ function 𝒇(A::Server, ::Busy, ::Release)
     end
     A.job = 0
     A.state=Idle()
-    event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
+    event!(A.c, fun(𝒇, A, A.state, Setup()), after, rand(ex)/5)
 end
 
-function 𝒇(A::Server, 𝑥::𝑋, γ::Γ)       # catch all
-    println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+𝒇(A::Server, ::Idle, ::Setup) = event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
+𝒇(A::Server, 𝑥::𝑋, γ::Γ) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+
+# model arrivals
+function arrive(clk::Clock, job)
+    pushfirst!(queue, job)
+    event!(clk, fun(arrive, clk, job+1), after, rand(ex))
 end
 
+# setup simulation environment and run simulation
 Random.seed!(123)
 c = Clock()
-
 A = [Server(i, c, Idle(), 0) for i ∈ 1:8]
 for i ∈ shuffle(1:8)
     event!(c, fun(𝒇, A[i], A[i].state, Load()), fun(isready, queue))
 end
-
-event!(c, (fun(pushfirst!, queue, ()->jobno), ()->global jobno += 1), every, rand(ex))
-
+event!(c, fun(arrive, c, 1), after, rand(ex))
 run!(c, 10)
