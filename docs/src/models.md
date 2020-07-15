@@ -1,20 +1,27 @@
-# Modeling
+# Models
 
-> All models are wrong. Some are useful. (George Box)
 
-There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide you with a simple, yet versatile and powerful grammar for combining the approaches.
+```math
+\begin{aligned}
+\hspace{5em} && \textit{All models are wrong. Some are useful. (George Box)}
+\end{aligned}
+```
 
-Discrete events basically are Julia functions or expressions, which get executed at a given time.
+There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide a simple, yet versatile and powerful grammar for combining the approaches.
+
+Discrete events here are Julia functions or expressions executed at a given time.
 
 ## Sampling
 
-The simplest mechanism for generating discrete events is to have a clock `clk` executing a function `fun` periodically at a given sample rate or after a given time interval. We can generate periodic events in various ways:
+The simplest mechanism for generating discrete events is to have a clock `clk` executing a function `𝑓` periodically. We can generate periodic events in various ways:
 
-- sampling events with `periodic!(clk, fun, Δt)` go on the clock sample rate `Δt`,
-- repeating events with `event!(clk, fun, every, t)` are executed every given `t`,
-- conditional events with `event!(clk, fun, cond)` switch on sampling with sample rate `Δt` until the condition `cond` is fulfilled.
+- sampling events with `periodic!(clk, 𝑓, Δt)` are executed at the clock sample rate `Δt`,
+- repeating events with `event!(clk, 𝑓, every, Δt)` are executed every given interval `Δt`,
+- conditional events with `event!(clk, 𝒈, 𝑓)` check the condition `𝑓` at the clock's sample rate `Δt` until it returns `true`. Then `𝑔` is executed.
 
-Such we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful if we have repeated or periodic events interacting with DES, we want to check for conditions or trace or visualize the system periodically.
+Thus we can model periodic events but no stochastic event sequences, characteristic of DES. Sampling is useful if we want to model repeated or periodic events interacting with a DES, check conditions, trace or visualise the system periodically.
+
+Sampling introduces a time uncertainty into simulations since it triggers changes, takes measurements or checks for conditions only at a given time interval Δt.
 
 ## Event scheduling
 
@@ -31,7 +38,7 @@ Following Cassandras [^1] we can consider discrete event systems (DES) as stocha
 \end{array}
 ```
 
-`DiscreteEvents.jl` provides the [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) ``G_i`` and an event generating mechanism: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1). Everything else can be expressed with Julia functions (or expressions).
+As seen before `DiscreteEvents.jl` provides [clock structures](clocks.md) ``G_i`` and  [event generating mechanisms](events.md). Everything else can be expressed in Julia.
 
 Choi and Kang [^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
 
@@ -239,7 +246,7 @@ Note that
 
 In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then to undergo a transformation (e.g. transport, treatment or service) taking some time.
 
-This view can be expressed as [process](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1)es taking `wait!` and `delay!` on a `Clock` or implicitly blocking until they can `take!` something from a `Channel` or `put!` it back. Processes are functions running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or to the availability of resources. They don't need to handle events explicitly and keep their own data. An implementation of the M/M/c queue goes like this:
+This view can be expressed as [processes](processes.md) waiting and delaying on a clock or implicitly blocking until they can `take!` something from a `Channel` or `put!` it back. An implementation of the M/M/c queue goes like this:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -461,4 +468,4 @@ We have now all major schemes: events, continuous sampling and processes combine
 [^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
 [^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
 [^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
-[^4]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally.
+[^4]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally on the clock.

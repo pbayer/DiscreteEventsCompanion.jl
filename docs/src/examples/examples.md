@@ -1,4 +1,4 @@
-# Examples - overview
+# Examples
 
 The examples are intended to show how `DiscreteEvents.jl` can be used and how different approaches to modeling and simulation can be employed and combined with it.
 

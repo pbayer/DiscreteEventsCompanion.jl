@@ -1,12 +1,14 @@
 # Overview
 
-This is the companion site to [`DiscreteEvents.jl`](https://github.com/pbayer/DiscreteEvents.jl). It is a documentation in development, still not and possibly never perfect about
+This is the companion site to [`DiscreteEvents.jl`](https://pbayer.github.io/DiscreteEvents.jl/dev/). It is a documentation in development, still not and possibly never perfect about
 
-- [**Modeling**](approach.md): different approaches to modeling and simulation,
+- [**Clocks**](clocks.md): clock structures for discrete event systems (DES),
+- [**Events**](events.md): how to generate events,
+- [**Processes**](processes.md): how to define and start processes,
+- [**Models**](models.md): approaches to modeling and simulation,
 - [**Examples**](examples/examples.md): examples to look at and learn from,
 - [**Performance**](performance.md): good performance for simulations,
 - [**Parallel simulation**](parallel.md): parallelizing simulations,
-- [**Real time clocks**](timer.md): using system time,
 - [**Benchmarks**](benchmarks.md): some speed measurements,
 - [**Internals**](internals.md): internal functions
 

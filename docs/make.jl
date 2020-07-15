@@ -6,11 +6,13 @@ makedocs(
     authors  = "Paul Bayer",
     pages = [
         "index.md",
-        "approach.md",
+        "clocks.md",
+        "events.md",
+        "processes.md",
+        "models.md",
         "examples/examples.md",
         "performance.md",
         "parallel.md",
-        "timer.md",
         "benchmarks.md",
         "internals.md"
     ]
