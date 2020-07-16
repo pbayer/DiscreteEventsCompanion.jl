@@ -9,11 +9,9 @@
 
 There are different approaches in modeling *discrete event systems (DES)* for simulation. All are limiting in some way. `DiscreteEvents` tries to provide a simple, yet versatile and powerful grammar for combining the approaches.
 
-Discrete events here are Julia functions or expressions executed at a given time.
-
 ## Sampling
 
-The simplest mechanism for generating discrete events is to have a clock `clk` executing a function `𝑓` periodically. We can generate periodic events in various ways:
+The simplest mechanism for generating [discrete events](events.md) is to have a [clock](clocks.md) `clk` executing a function `𝑓` periodically. We can generate periodic events in various ways:
 
 - sampling events with `periodic!(clk, 𝑓, Δt)` are executed at the clock sample rate `Δt`,
 - repeating events with `event!(clk, 𝑓, every, Δt)` are executed every given interval `Δt`,

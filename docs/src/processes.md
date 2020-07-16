@@ -1,16 +1,16 @@
 # Processes
 
-[Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) are functions describing sequences of events, running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or resources available. They keep their own data.
+[Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) are functions describing sequences of events and running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or resources available. They keep their own data.
 
 ## Syntax
 
-Processes use a syntax different from event handling. With
+Processes use a syntax different from event handling. They
 
-- `delay!`: they suspend and get reactivated (by the clock) at/after a given time,
-- `wait!`: they suspend and get reactivated after a given condition becomes true,
-- `now!`: they transfer IO-operations to the clock,
-- `take!`: they take an item from a channel or wait until it becomes available,
-- `put!`: they put something into a channel or wait if it is full until it becomes available.
+- [`delay!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.delay!):  suspend and get reactivated (by the clock) at/after a given time,
+- [`wait!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.wait!):  suspend and get reactivated after a given condition becomes true,
+- [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!):  transfer IO-operations to the clock,
+- [`take!`](https://docs.julialang.org/en/v1/base/parallel/#Base.take!-Tuple{Channel}): take an item from a channel or wait until it becomes available,
+- [`put!`](https://docs.julialang.org/en/v1/base/parallel/#Base.put!-Tuple{Channel,Any}): put something into a channel or wait if it is full until it becomes available.
 
 The following code example defines two processes:
 
@@ -34,7 +34,7 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
 end
 ```
 
-Note that functions due to run as processes must have a `::Clock` variable as their first argument.
+Note that to run as processes functions must have a `::Clock` variable as their first argument.
 
 ## Startup
 
