@@ -31,7 +31,7 @@ Following Cassandras [^1] we can consider discrete event systems (DES) as stocha
   \mathcal{X} & \textrm{countable state space} \\
   \Gamma(x)   & \textrm{feasible or enabled events}: x \in \mathcal{X}, \Gamma(x) \subseteq \mathcal{E} \\
   p(x';x,e')  & \textrm{state transition probability}: x,x' \in \mathcal{X}, e' \in \mathcal{E} \\
-  p_0(x)      & \textrm{pmf} P[X_0=x]: x \in \mathcal{X}, X_o \textrm{initial state} \\
+  p_0(x)      & \textrm{pmf}\ P[X_0=x]: x \in \mathcal{X}, X_o \textrm{initial state} \\
   G_i         & \textrm{stochastic clock structure}: i \in \mathcal{E}
 \end{array}
 ```

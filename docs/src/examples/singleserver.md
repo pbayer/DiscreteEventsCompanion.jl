@@ -2,7 +2,7 @@
 
 This example is from Choi, Kang: Modeling and Simulation of Discrete-Event Systems, p. 18. It describes a single server system. The event graph given is:
 
-![single server](../images/sserver.svg)
+![single server](../img/sserver.svg)
 
 1. Initially there are no jobs in the queue ``Q`` and the machine ``M`` is idle.
 2. Jobs arrive with an inter-arrival-time ``t_a``and are added to ``Q``.
@@ -149,7 +149,7 @@ end
 trajectory_plot()
 ```
 
-![trajectory plot 1](../images/sserver1.png)
+![trajectory plot 1](../img/sserver1.png)
 
 It seems that the queue increases over time. Thus we are interested in the behaviour of our model over a longer time. Therefore we switch off printing and continue the simulation for further 970 "minutes".
 
@@ -159,7 +159,7 @@ run!(𝐶, 970)        # we continue the simulation
 trajectory_plot()
 ```
 
-![trajectory plot 2](../images/sserver2.png)
+![trajectory plot 2](../img/sserver2.png)
 
 It seems that buffer size is increasing ever more over time. In the plot now machine load and stock aren't very instructive, so let's compare lead time ``W`` and number of jobs in the system ``L = \text{buffer_size} + \text{machine_load}``:
 
@@ -178,7 +178,7 @@ plot(d.time, d.W, label="W [min]", xlabel="time [min]", lw=2, legend=:topleft, t
 plot!(d.time, d.L, label="L [jobs]", lw=2)
 ```
 
-![L and W over time](../images/sserver3.png)
+![L and W over time](../img/sserver3.png)
 
 Lead time ``W`` and unfinished jobs ``L`` are clearly increasing, the system is not stationary and gets jammed over time. Let's collect some stats:
 
@@ -221,7 +221,7 @@ scatter(df1.c, df1.Wm, title=L"\overline{W}"*" and "*L"\overline{L}"*" over serv
 scatter!(df1.c, df1.Lm, marker = (:x, 4), label=L"\overline{L}"*" [jobs]")
 ```
 
-![W and L over server capacity](../images/sserver4.png)
+![W and L over server capacity](../img/sserver4.png)
 
 We need to increase server capacity much in order to avoid long queues and waiting times.
 
@@ -242,6 +242,6 @@ scatter(df1.Lm, df1.Wm, xlabel=L"\overline{L}"*" [jobs]", ylabel=L"\overline{W}"
 plot!(df1.Lm, df1.Lm*5, label="theory "*L"(\overline{L}\times 5)")
 ```
 
-![Little's law](../images/sserver5.png)
+![Little's law](../img/sserver5.png)
 
 Data seems not quite to fit theory. Reason is that the system is not stationary. But for a first approach, Little's law seems not to be a bad one. In order to analyze stability and [stationarity](https://en.wikipedia.org/wiki/Stationary_process) and to improve, we could refine our analysis by taking only the second half of the simulation data or by doing more simulation runs and having some more fun with `DiscreteEvents.jl` ...
