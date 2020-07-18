@@ -1,6 +1,6 @@
 # Processes
 
-[Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) are functions describing sequences of events and running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or resources available. They keep their own data.
+[Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) are functions describing sequences of events and running as asynchronous Julia tasks. They can wait or delay and are suspended and reactivated by Julia's scheduler according to background events or availability of resources. They keep their own data.
 
 ## Syntax
 
@@ -9,8 +9,10 @@ Processes use a syntax different from event handling. They
 - [`delay!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.delay!):  suspend and get reactivated (by the clock) at/after a given time,
 - [`wait!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.wait!):  suspend and get reactivated after a given condition becomes true,
 - [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!):  transfer IO-operations to the clock,
-- [`take!`](https://docs.julialang.org/en/v1/base/parallel/#Base.take!-Tuple{Channel}): take an item from a channel or wait until it becomes available,
-- [`put!`](https://docs.julialang.org/en/v1/base/parallel/#Base.put!-Tuple{Channel,Any}): put something into a channel or wait if it is full until it becomes available.
+- [`take!`](https://docs.julialang.org/en/v1/base/parallel/#Base.take!-Tuple{Channel}): take an item from a channel or block until it becomes available,
+- [`put!`](https://docs.julialang.org/en/v1/base/parallel/#Base.put!-Tuple{Channel,Any}): put something into a channel or block if it is full until it becomes available.
+
+The first three commands: `delay`, `wait` and `now` create events on the clock's timeline and are handled by its event scheduler. The blocking commands should only be used in an asynchronous task and never within the main process [^1].
 
 The following code example defines two processes:
 
@@ -34,11 +36,11 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
 end
 ```
 
-Note that to run as processes functions must have a `::Clock` variable as their first argument.
+Note that to run as processes functions must have a `Clock` variable as their first argument.
 
 ## Startup
 
-With the following commands we can register and start processes under the clock.
+With the following commands you can register and start processes under the clock.
 
 - [`Prc`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Prc): prepares a function to run as a process in a simulation,
 - [`process!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.process!): Register a `Prc` to a clock, start it in a loop as an asynchronous process and return its id.
@@ -79,7 +81,7 @@ If the task had failed, we would get the stacktrace with that command.
 
 If we then run the clock (e.g. `run!(clock, 20)`), it increments time, the `arrivals` process puts the first item into the queue, the first `server` process can take it and so on. The three processes run and are handled by the Julia scheduler asynchronously to the main task (where the `clock` runs in).
 
-If we don't want to compete our processes against other background tasks handled also by the Julia scheduler, we can speed up things significantly by executing them on another processor core:
+If we don't want to compete our processes against other background tasks handled also by the Julia scheduler on thread 1, we can speed up things significantly by executing them on another processor core:
 
 ```julia
 onthread(2) do
@@ -97,3 +99,5 @@ end
 !!! note
 
     For that to work, [`JULIA_NUM_TREADS`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS-1) must be set accordingly.
+
+[^1]: If you want to use `take!` or `put!` on channels inside the main program, make sure that they are available (with `isready(ch)` or `length(ch.data) < ch.sz_max`) before calling them in order to avoid blocking.
