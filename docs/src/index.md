@@ -6,6 +6,7 @@ This is the companion site to [`DiscreteEvents.jl`](https://pbayer.github.io/Dis
 - [**Events**](events.md): how to generate events,
 - [**Processes**](processes.md): how to define and start processes,
 - [**Models**](models.md): approaches to modeling and simulation,
+- [**A hybrid system**](hybrid.md): combining the approaches,
 - [**Examples**](examples/examples.md): examples to look at and learn from,
 - [**Performance**](performance.md): good performance for simulations,
 - [**Parallel simulation**](parallel.md): parallelizing simulations,

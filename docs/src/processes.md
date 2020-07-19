@@ -12,7 +12,7 @@ Processes use a syntax different from event handling. They
 - [`take!`](https://docs.julialang.org/en/v1/base/parallel/#Base.take!-Tuple{Channel}): take an item from a channel or block until it becomes available,
 - [`put!`](https://docs.julialang.org/en/v1/base/parallel/#Base.put!-Tuple{Channel,Any}): put something into a channel or block if it is full until it becomes available.
 
-The first three commands: `delay`, `wait` and `now` create events on the clock's timeline and are handled by its event scheduler. The blocking commands should only be used in an asynchronous task and never within the main process [^1].
+The first three commands: `delay!`, `wait!` and `now!` create events on the clock's timeline and are handled by its event scheduler. The blocking commands should only be used in processes (asynchronous tasks) and never within the main program or in the Julia REPL [^1].
 
 The following code example defines two processes:
 

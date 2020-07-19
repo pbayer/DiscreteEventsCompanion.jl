@@ -10,6 +10,7 @@ makedocs(
         "events.md",
         "processes.md",
         "models.md",
+        "hybrid.md",
         "examples/examples.md",
         "performance.md",
         "parallel.md",

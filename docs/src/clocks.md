@@ -2,7 +2,7 @@
 
 In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock [^1]. An event sequence Γ = {γ₁, γ₂, ...} has measured times t₁ < t₂ < ... From that we draw inferences about causality and dependencies.
 
-In `DiscreteEvents` we turn this on its head: A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) can register events and trigger them at given times or under given conditions. It doesn't measure time, it "is" time. We can create it, run it, stop time, run it for a while, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
+A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` registers events and triggers them at given times or under given conditions. It doesn't measure time, it owns time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
 
 ## Virtual clocks
 
@@ -23,11 +23,13 @@ julia> run!(clk, 10)
 "run! finished with 0 clock events, 0 sample steps, simulation time: 10.0"
 ```
 
-If we run the clock a duration Δt=10, it jumps immediately ahead since it has nothing to do.
+If we run the clock for Δt=10, it jumps immediately ahead since it has nothing to do.
+
+### Time units
 
 ## Real time clocks
 
-A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's clock and measures time in seconds [s]. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
+A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's physical clock and measures time in seconds [s]. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
 
 ```julia
 julia> rtc = createRTClock(0.01, 99)
@@ -35,13 +37,13 @@ Real time clock 99 on thread 8: state=DiscreteEvents.Idle(), t=0.0001193 s, T=0.
    scheduled ev:0, cev:0, sampl:0
 ```
 
-Here we have created an real time clock with id=99 and a clock resolution of T=0.01 s. It installed itself on thread 8. When the message was created, the clock had just advanced 0.0001193 s. When we query its time thereafter, it shows the time in seconds passed since startup:
+Here we have created a real time clock with id=99 on thread 8. It has a clock period of T=0.01 s and synchronizes at that resolution with the system clock running in ns. When the start message was created, the clock had just advanced 0.0001193 s. When we query its time thereafter, it returns the time in seconds passed since startup:
 
 ```julia
-julia> tau(rtc)
+julia> tau(rtc)         # query time
 14.045107885001926
 
-julia> rtc.time
+julia> rtc.time         # synonymous way to get time
 17.910258978001366
 ```
 
@@ -67,7 +69,7 @@ julia> clk.time             # then you can select one of them
 0.0
 ```
 
-You can switch off pretty printing and then get the Julia `Base.show_default`:
+You can switch off pretty printing and then get the Julia `Base.show_default` display:
 
 ```julia
 julia> DiscreteEvents.prettyClock(false)
@@ -76,13 +78,9 @@ julia> clk
 Clock(0, DiscreteEvents.Undefined(), 0.0, , 0.01, DiscreteEvents.ClockChannel[], DiscreteEvents.Schedule(DataStructures.PriorityQueue{DiscreteEvents.DiscreteEvent,Float64,Base.Order.ForwardOrdering}(), DiscreteEvents.DiscreteCond[], DiscreteEvents.Sample[]), Dict{Any,Prc}(), 0.01, 0.0, 0.0, 0, 0)
 ```
 
-In Atom's workspace then you can access the clock's structure for further diagnosis.
+In [Juno](http://docs.junolab.org/)'s workspace then you can access a `Clock` variable's structure and dig deeper into it:
 
 ![atom workspace](img/clock.png)
 
-- sampling rate
-- time units
 
-to do
-
-[^1]: In essence we count the number of naturally occuring periodic events to measure time: the revolution of a planet, our heart beat, the swing of a pendulum …
+[^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … Sure enough our measurement methods have advanced.
