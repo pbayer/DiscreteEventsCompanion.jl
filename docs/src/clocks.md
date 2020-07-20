@@ -1,18 +1,18 @@
 # Clocks
 
-In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock [^1]. An event sequence Γ = {γ₁, γ₂, ...} has measured times t₁ < t₂ < ... From that we draw inferences about causality and dependencies.
+In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock ``C`` [^1]. An event sequence ``\;S = \{e_1, e_2, ..., e_n\}\;`` has measured times ``\;t_1 < t_2 < ... < t_n``. From that we draw inferences about causality and dependencies.
 
-A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` registers events and triggers them at given times or under given conditions. It doesn't measure time, it owns time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
+A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` registers events and triggers them at given times or under given conditions. It doesn't measure time, it "owns" time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
 
 ## Virtual clocks
 
-Virtual clocks are not constrained by any physical time measurement. They don't have to wait an hour for the next event to occur, but can right jump to it. Time is only a number and the computer executes an event sequence as fast as possible.
+Virtual clocks are not constrained by physical time. They don't have to wait an hour for the next event to occur, but can right jump to it. Time is only a number and the computer executes an event sequence as fast as possible.
 
 ```julia
 julia> using DiscreteEvents
 
 julia> clk = Clock()
-Clock 0, thrd 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:0
+Clock 0, thread 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:0
   scheduled ev:0, cev:0, sampl:0
 ```
 

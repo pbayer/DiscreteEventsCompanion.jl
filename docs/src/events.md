@@ -1,6 +1,21 @@
 # Events
 
-We consider time as given or measured by a clock. An event can then be viewed as something happening at a time instant, a change in data or a state transition. In order to represent an event we want to take some action at time `t`.
+We consider time as given or measured by a clock ``C``. Furthermore we characterize  discrete event systems (DES) [^1] by
+
+```math
+\begin{array}{lll}
+  \mathcal{X}&=\{s_i, s_j, ..., s_n\} & \textrm{a discrete set of states} \\
+  \mathcal{E}&=\{\alpha, \beta, \gamma, ...\} & \textrm{a countable set of events or state transitions}
+\end{array}
+```
+
+Each event ``\;e_i \in \mathcal{E}\;`` in an event sequence ``\;\{e_1, e_2, e_3, ...\}\;`` is associated with a time ``t_i``. We can write it as a sequence of tuples:
+
+```math
+(e_1,t_1),(e_2,t_2),(e_3,t_3), ..., (e_n,t_n)
+```
+
+Likewise `DiscreteEvents` represents an event as an *action* ``e_i`` at a time ``t_i``.
 
 ## Actions
 
@@ -33,7 +48,7 @@ Simple expressions like `a+1` or function calls like `println()` are not `Action
 
 ## Data
 
-Actions (expressions and functions) have access to data within their scope but often we want to pass the data to functions as arguments. Then we can use [`fun`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun) to create an executable closure object, containing the function with its arguments:
+Actions (expressions and functions) have access to data within their scope, but often we want to pass the data to functions as arguments. We can use [`fun`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun) to create an executable closure object, containing the function with its arguments:
 
 ```julia
 julia> a = 1; b = 2; c = 3;         # create some global data
@@ -53,7 +68,7 @@ julia> ff()                         # which we can execute later
 
 ### Current data
 
-But in simulations most often we want our actions at execution time to get the current data. To achieve this, we change our `ff` closure:
+In simulations most often we want our actions at execution time to get the current data. To achieve this, we change our `ff` closure:
 
 ```julia
 julia> ff = fun(f, ()->a, ()->b, ()->c)  # capture the data at execution time
@@ -87,12 +102,12 @@ julia> ff()
 12
 ```
 
-Note that you got a warning because this is not recommended.
+Note that you got a warning because this is slow and not recommended.
 
 
 ### Modifying data
 
-The best way to reference data is to have your actions work with mutable values (like `Array`s)[^1]. Then you can also modify your data at event time, which is what you often want:
+The best way to reference data is to have your actions work with mutable values (like `Array`s)[^2]. Then you can also modify your data at event time, which is what you often want:
 
 ```julia
 julia> mutable struct Counter       # define a counter type
@@ -117,15 +132,15 @@ Counter(1)
 
 ## Scheduling
 
-Scheduling introduces a time delay between the definition of an event and its execution. *Timed events* are actions scheduled at a given time. *Conditional events* are actions scheduled until a given condition becomes true. Events can be scheduled on a clock before or during it is running. But they are executed only by a running clock at their due time.
+Scheduling introduces a time delay between the definition of an event and its execution. *Timed events* are actions scheduled to execute at a given time. *Conditional events* are actions scheduled to execute when a given condition becomes true. Events can be scheduled on a clock before or during it is running. But they are executed at their due time only by a running clock.
 
 ### Timed events
 
-With a clock `G`, an action `γᵢ` and a known event time `t` we can schedule timed events:
+With a clock ``C``, an action ``\gamma`` and a known event time ``t`` we can schedule timed events:
 
-- `event!(G, γᵢ, t)` or `event!(G, γᵢ, at, t)`: `G` executes `γᵢ` **at** time `t`,
-- `event!(G, γᵢ, after, Δt)`: `G` executes `γᵢ` **after** a time interval `Δt`,
-- `event!(G, γᵢ, every, Δt)`: `G` executes `γᵢ` **every** time interval `Δt`.
+- `event!(C, γ, t)` or `event!(C, γ, at, t)`: ``C`` executes ``γ`` **at** time ``t``,
+- `event!(C, γ, after, Δt)`: ``C`` executes ``γ`` **after** a time interval ``Δt``,
+- `event!(C, γ, every, Δt)`: ``C`` executes ``γ`` **every** time interval ``Δt``.
 
 ```julia
 using DiscreteEvents, Plots
@@ -147,7 +162,7 @@ plot(x, y, linetype=:steppost, xlabel="t", ylabel="a", legend=false)
 
 ### Conditional events
 
-With a conditional event: `event!(G, γⱼ, γᵩ)` the clock `G` executes the pseudo action `γᵩ` at its sample rate `Δt`. `γᵩ` must check for event conditions. As soon as it returns `true`, the clock executes `γⱼ`. If `γᵩ` is a tuple of actions, all of them must return `true` to trigger the execution of `γⱼ`.
+With a conditional event: `event!(C, γ, ξ)` the clock ``C`` executes the pseudo action ``ξ`` at its sample rate ``Δt``. ``ξ`` must check for event conditions. As soon as it returns `true`, the clock executes ``γ``. If ``ξ`` is a tuple of actions, all of them must return `true` to trigger the execution of ``γ``.
 
 ```julia
 c = Clock()
@@ -165,9 +180,9 @@ plot!(x, yb, label="b")
 
 ![conditional event](img/cev.png)
 
-A conditional event introduces a time uncertainty ≤ Δt into simulations caused by the clock sample rate `Δt`.
+A conditional event introduces a time uncertainty ``\;η ≤ Δt\;`` into simulations caused by the clock sample rate ``Δt``.
 
-see [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1)
+see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1)
 
-
-[^1]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).
+[^1]: Here we follow roughly Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and causing transitions from one state value to another."
+[^2]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).
