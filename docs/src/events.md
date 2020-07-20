@@ -1,25 +1,25 @@
 # Events
 
-We consider time as given or measured by a clock ``C``. Furthermore we characterize  discrete event systems (DES) [^1] by
+We consider time as given or measured by a clock ``C``. Furthermore we characterise a discrete event system (DES) [^1] by
 
 ```math
 \begin{array}{lll}
-  \mathcal{X}&=\{s_i, s_j, ..., s_n\} & \textrm{a discrete set of states} \\
+  \mathcal{X}&=\{s_i, s_j, ..., s_n\} & \textrm{a discrete set of states}, \\
   \mathcal{E}&=\{\alpha, \beta, \gamma, ...\} & \textrm{a countable set of events or state transitions}
 \end{array}
 ```
 
-Each event ``\;e_i \in \mathcal{E}\;`` in an event sequence ``\;\{e_1, e_2, e_3, ...\}\;`` is associated with a time ``t_i``. We can write it as a sequence of tuples:
+Each event ``\;e_i \in \mathcal{E}\;`` in an observed event sequence ``\,\{e_1, e_2, e_3, ...\}\,`` is associated with a time ``\,t_i``. We can write it as a sequence of tuples:
 
 ```math
-(e_1,t_1),(e_2,t_2),(e_3,t_3), ..., (e_n,t_n)
+\{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
 ```
 
-Likewise `DiscreteEvents` represents an event as an *action* ``e_i`` at a time ``t_i``.
+Likewise `DiscreteEvents` represents an event as an *action* ``\,e_i\,`` at a time ``\,t_i``.
 
 ## Actions
 
-An [`Action`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Action) is an [expression](https://docs.julialang.org/en/v1/manual/metaprogramming/#Expressions-and-evaluation-1), a [function](https://docs.julialang.org/en/v1/manual/functions/) object or a [tuple](https://docs.julialang.org/en/v1/manual/functions/#Tuples-1) of them, which will be executed at that time:
+An [`Action`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Action) is a Julia [expression](https://docs.julialang.org/en/v1/manual/metaprogramming/#Expressions-and-evaluation-1), a [function](https://docs.julialang.org/en/v1/manual/functions/) object or a [tuple](https://docs.julialang.org/en/v1/manual/functions/#Tuples-1) of them, which will be executed at a given time:
 
 ```julia
 julia> using DiscreteEvents
@@ -132,15 +132,20 @@ Counter(1)
 
 ## Scheduling
 
-Scheduling introduces a time delay between the definition of an event and its execution. *Timed events* are actions scheduled to execute at a given time. *Conditional events* are actions scheduled to execute when a given condition becomes true. Events can be scheduled on a clock before or during it is running. But they are executed at their due time only by a running clock.
+Scheduling registers events to the clock and introduces a time delay between the definition of an event and its execution.
+
+- *Timed events* are actions scheduled to execute at a given time.
+- *Conditional events* are actions scheduled to execute when a given condition becomes true.
+
+Events can be scheduled to a clock before or during it is running. But they are checked and executed at their due time only by a running clock.
 
 ### Timed events
 
 With a clock ``C``, an action ``\gamma`` and a known event time ``t`` we can schedule timed events:
 
-- `event!(C, γ, t)` or `event!(C, γ, at, t)`: ``C`` executes ``γ`` **at** time ``t``,
-- `event!(C, γ, after, Δt)`: ``C`` executes ``γ`` **after** a time interval ``Δt``,
-- `event!(C, γ, every, Δt)`: ``C`` executes ``γ`` **every** time interval ``Δt``.
+- `event!(C, γ, t)` or `event!(C, γ, at, t)`: ``\hspace{3pt}C`` executes ``γ`` **at** time ``t``,
+- `event!(C, γ, after, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **after** a time interval ``Δt``,
+- `event!(C, γ, every, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **every** time interval ``Δt``.
 
 ```julia
 using DiscreteEvents, Plots
@@ -180,7 +185,23 @@ plot!(x, yb, label="b")
 
 ![conditional event](img/cev.png)
 
-A conditional event introduces a time uncertainty ``\;η ≤ Δt\;`` into simulations caused by the clock sample rate ``Δt``.
+A conditional event introduces a time uncertainty ``\,η < Δt\,`` into simulations caused by the clock sample rate ``Δt``.
+
+## Diagnosis
+
+If we query the clock in the last example before running, it shows that two timed events `ev:2` and one conditional events `cev:1` have been scheduled:
+
+```julia
+julia> c
+Clock 0, thread 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:0
+  scheduled ev:2, cev:1, sampl:0
+```
+
+The registered events can be found in the scheduling structure `c.sc` of the clock. Better is to switch off pretty printing with `DiscreteEvents.prettyClock(false)` and to dive into them in the Atom workspace:
+
+![clock schedule](img/sched.png)
+
+
 
 see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1)
 
