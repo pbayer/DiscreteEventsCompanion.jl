@@ -11,10 +11,10 @@ abstract type 𝑋 end    # define states
 struct Idle <: 𝑋 end
 struct Busy <: 𝑋 end
 
-abstract type Γ end    # events
-struct Load <: Γ end
-struct Release <: Γ end
-struct Setup <: Γ end
+abstract type 𝐸 end    # events
+struct Load <: 𝐸 end
+struct Release <: 𝐸 end
+struct Setup <: 𝐸 end
 
 mutable struct Server  # state machine body
     id::Int
@@ -49,7 +49,7 @@ function 𝒇(A::Server, ::Busy, ::Release)
 end
 
 𝒇(A::Server, ::Idle, ::Setup) = event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
-𝒇(A::Server, 𝑥::𝑋, γ::Γ) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+𝒇(A::Server, 𝑥::𝑋, γ::𝐸) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
 
 # model arrivals
 function arrive(clk::Clock, job)

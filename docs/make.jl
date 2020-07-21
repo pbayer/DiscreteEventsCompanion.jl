@@ -9,6 +9,7 @@ makedocs(
         "clocks.md",
         "events.md",
         "processes.md",
+        "random.md",
         "models.md",
         "hybrid.md",
         "examples/examples.md",

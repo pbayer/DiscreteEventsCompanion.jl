@@ -4,7 +4,7 @@ We consider time as given or measured by a clock ``C``. Furthermore we character
 
 ```math
 \begin{array}{lll}
-  \mathcal{X}&=\{s_i, s_j, ..., s_n\} & \textrm{a discrete set of states}, \\
+  \mathcal{X}&=\{x_i, x_j, ..., x_n\} & \textrm{a discrete set of states}, \\
   \mathcal{E}&=\{\alpha, \beta, \gamma, ...\} & \textrm{a countable set of events or state transitions}
 \end{array}
 ```

@@ -22,22 +22,7 @@ Sampling introduces a time uncertainty into simulations since it triggers change
 
 ## Event scheduling
 
-Following Cassandras [^1] we can consider discrete event systems (DES) as stochastic timed automata ``(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)`` where
-
-```math
-\begin{array}{rl}
-  \mathcal{E} & \textrm{countable event set} \\
-  \mathcal{X} & \textrm{countable state space} \\
-  \Gamma(x)   & \textrm{feasible or enabled events}: x \in \mathcal{X}, \Gamma(x) \subseteq \mathcal{E} \\
-  p(x';x,e')  & \textrm{state transition probability}: x,x' \in \mathcal{X}, e' \in \mathcal{E} \\
-  p_0(x)      & \textrm{pmf}\ P[X_0=x]: x \in \mathcal{X}, X_o \textrm{initial state} \\
-  G_i         & \textrm{stochastic clock structure}: i \in \mathcal{E}
-\end{array}
-```
-
-As seen before `DiscreteEvents.jl` provides [clock structures](clocks.md) ``G_i`` and  [event generating mechanisms](events.md). Everything else can be expressed in Julia.
-
-Choi and Kang [^2] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
+Choi and Kang [^1] outline three approaches to event scheduling: 1) event, 2) state and 3) activity based.
 
 ### Event based approach
 
@@ -77,10 +62,10 @@ abstract type 𝑋 end    # define states
 struct Idle <: 𝑋 end
 struct Busy <: 𝑋 end
 
-abstract type Γ end    # events
-struct Load <: Γ end
-struct Release <: Γ end
-struct Setup <: Γ end
+abstract type 𝐸 end    # events
+struct Load <: 𝐸 end
+struct Release <: 𝐸 end
+struct Setup <: 𝐸 end
 
 mutable struct Server  # state machine body
     id::Int
@@ -115,7 +100,7 @@ function 𝒇(A::Server, ::Busy, ::Release)
 end
 
 𝒇(A::Server, ::Idle, ::Setup) = event!(A.c, fun(𝒇, A, A.state, Load()), fun(isready, queue))
-𝒇(A::Server, 𝑥::𝑋, γ::Γ) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
+𝒇(A::Server, 𝑥::𝑋, γ::𝐸) = println(stderr, "$(A.name) $(A.id) undefined transition $𝑥, $γ")
 
 # model arrivals
 function arrive(clk::Clock, job)
@@ -152,7 +137,7 @@ Note that we modeled the arrivals "event-based" (without considering any state).
 
 ### Activity based approach
 
-Here we take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^3] and implement it as a sequence of server activities:
+Here we take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^2] and implement it as a sequence of server activities:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -303,7 +288,7 @@ run!(clock, 20)
 
 Note that
 
-- the times deviate from the activity based implementation because here we do not use conditional events and therefore have no time divergence due to sampling [^4].
+- the times deviate from the activity based implementation because here we do not use conditional events and therefore have no time divergence due to sampling [^3].
 - Processes must transfer IO-operations with a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call to the clock.
 
 ## Comparison
@@ -323,7 +308,6 @@ Physical systems can be modeled as *continuous systems* (nature does not jump), 
 While continuous systems are the domain of differential equations, discrete and hybrid systems may be modeled easier with `DiscreteEvents.jl` by combining the *event-scheduling*, the *process-based* and the *continuous-sampling* schemes.
 
 
-[^1]:  Cassandras and Lafortune: *Introduction to Discrete Event Systems*, Springer, 2008, Ch. 10
-[^2]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
-[^3]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
-[^4]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally on the clock.
+[^1]:  Choi and Kang: *Modeling and Simulation of Discrete-Event Systems*, Wiley, 2013
+[^2]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
+[^3]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally on the clock.
