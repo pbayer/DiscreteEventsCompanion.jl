@@ -1,8 +1,8 @@
-#
-# This file is part of the DiscreteEventsCompanion.jl Julia package, MIT license
-#
-# This example illustrates the state-based approach
-#
+# Multi-Server State-based
+
+Events can be expressed as state transitions ``\mathcal{f}(x, \gamma)`` with ``x \in \mathcal{X},\ \gamma \in \Gamma(x)`` of finite automata. The following example models 8 servers as state machines serving a queue of jobs:
+
+```julia
 using DiscreteEvents, Printf, Random, Distributions
 
 const p = 0.3
@@ -66,3 +66,20 @@ for i ∈ shuffle(1:8)
 end
 event!(c, fun(arrive, c, 1), after, rand(ex))
 run!(c, 10)
+```
+
+```
+0.12: server 4 took job 1
+0.41: server 6 took job 2
+0.60: server 4 finished job 1
+0.68: server 6 finished job 2
+1.68: server 1 took job 3
+...
+9.13: server 2 took job 5
+9.28: server 3 finished job 3
+9.92: server 5 took job 9
+9.95: server 2 finished job 5
+"run! finished with 58 clock events, 1001 sample steps, simulation time: 10.0"
+```
+
+Note that we modeled the arrivals "event-based" (without considering any state).

@@ -6,7 +6,7 @@ Often in discrete event systems (DES) we find typical sequences of events ``\,S_
 2. process it for a service time,
 3. release the job and put it into an output queue.
 
-Those typical event sequences are called *processes* [^1]. If they *interact*, they generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the entire DES.
+Those typical event sequences are called *processes* in simulation literature [^1]. If they *interact*, they generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the entire DES.
 
 [Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) in `DiscreteEvents`
 
@@ -69,51 +69,13 @@ end
 process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
 ```
 
-Now the `server` processes run their function body in an infinite loop (default) while the `arrivals` process runs it only once and then terminates. The `server` processes wait for jobs in their input channels and the `arrivals` process waits for the clock to tick. If we start the clock, the processes begin to interact: customers are produced by the arrivals process, the servers then serve …
+The `server` processes run their function body in an infinite loop (default) while the `arrivals` process runs it only once and then terminates. The `server` processes wait for jobs in their input channels and the `arrivals` process waits for the clock to tick. If we start the clock, the processes begin to interact: customers are produced by the arrivals process, the servers then serve them …
 
-## Diagnosis
+## Limitations
 
-We can see that the processes have been registered to the clock:
+The process-interaction scheme describes typical event sequences ``S_i``. If those typical event sequences are altered by stochastic events, the scheme is in trouble and we must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle those alterations. This is a severe limitation of "processes" as used in simulations.
 
-```julia
-julia> clock.processes
-Dict{Any,Prc} with 3 entries:
-  0 => Prc(0, Task (runnable) @0x000000010fc82ad0, Clock 0, thrd 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:3…
-  2 => Prc(2, Task (runnable) @0x000000010d13db10, Clock 0, thrd 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:3…
-  1 => Prc(1, Task (runnable) @0x000000013a183190, Clock 0, thrd 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:3…
-```
+Actors are a way to overcome the limitations of processes and still to maintain their conveniences.
 
-We can check the `arrivals` process 0 with
-
-```julia
-julia> clock.processes[0].task
-Task (runnable) @0x000000010fc82ad0
-```
-
-If the task had failed, we would get the stacktrace with that command.
-
-## Run and speedup
-
-If we then run the clock (e.g. `run!(clock, 20)`), it increments time, the `arrivals` process puts the first item into the queue, the first `server` process can take it and so on. The three processes run and are handled by the Julia scheduler asynchronously to the main task (where the `clock` runs in).
-
-If we don't want to compete our processes against other background tasks handled also by the Julia scheduler on thread 1, we can speed up things significantly by executing them on another processor core:
-
-```julia
-onthread(2) do
-    clock = Clock()
-    input = Channel{Int}(Inf)
-    output = Channel{Int}(Inf)
-    for i in 1:num_servers
-        process!(clock, Prc(i, server, i, input, output, service_dist))
-    end
-    process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
-    run!(clock, t)
-end
-```
-
-!!! note
-
-    For that to work, [`JULIA_NUM_TREADS`](https://docs.julialang.org/en/v1/manual/environment-variables/#JULIA_NUM_THREADS-1) must be set accordingly.
-
-[^1]: Maybe, it would be more appropriate to call them [actors](https://en.wikipedia.org/wiki/Actor_model#Actor_libraries_and_frameworks), but we follow here classical simulation literature, see: Banks, Carson, Nelson, Nicol: Discrete-Event System Simulation, 4th ed, 2005, p. 74-77
+[^1]: see: Banks, Carson, Nelson, Nicol: Discrete-Event System Simulation, 4th ed, 2005, p. 74-77
 [^2]: If you want to use `take!` or `put!` on channels inside the main program, make sure that they are available (with `isready(ch)` or `length(ch.data) < ch.sz_max`) before calling them in order to avoid blocking.

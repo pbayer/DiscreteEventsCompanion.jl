@@ -53,34 +53,5 @@ We can schedule events to real time clocks as to virtual clocks and they will ex
 
 ## Clock commands
 
-## Diagnosis
-
-As usual in Julia you can access clock parameters by `clock.parameter`:
-
-```julia
-julia> clk                  # normally pretty printing is enabled
-Clock 0, thread 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:0
-  scheduled ev:0, cev:0, sampl:0
-
-
-julia> clk.                 # with clk. + tab + tab you get the parameters
-ac        end_time   evcount    id         processes  sc         scount     state      tev        time       tn         unit       Δt
-julia> clk.time             # then you can select one of them
-0.0
-```
-
-You can switch off pretty printing and then get the Julia `Base.show_default` display:
-
-```julia
-julia> DiscreteEvents.prettyClock(false)
-
-julia> clk
-Clock(0, DiscreteEvents.Undefined(), 0.0, , 0.01, DiscreteEvents.ClockChannel[], DiscreteEvents.Schedule(DataStructures.PriorityQueue{DiscreteEvents.DiscreteEvent,Float64,Base.Order.ForwardOrdering}(), DiscreteEvents.DiscreteCond[], DiscreteEvents.Sample[]), Dict{Any,Prc}(), 0.01, 0.0, 0.0, 0, 0)
-```
-
-In [Juno](http://docs.junolab.org/)'s workspace then you can access a `Clock` variable's structure and dig deeper into it:
-
-![atom workspace](img/clock.png)
-
 
 [^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … Sure enough our measurement methods have advanced.
