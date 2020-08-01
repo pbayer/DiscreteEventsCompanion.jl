@@ -1,19 +1,19 @@
 # Event Scheduling
 
-Scheduling registers events ``\,(e_i,t_i): e_i \in \mathcal{E}\,`` to the clock and thus introduces a time delay between the definition of an event and its execution.
+In order to represent an event ``\,(e_i,t_i): e_i \in \mathcal{E}\,`` we schedule an appropriate action ``γ`` to clock at a given time or under a condition. Thereby we introduce a time delay between the creation of an event and its execution.
 
 - *Timed events* are actions scheduled to execute at a given time,
 - *Conditional events* are actions scheduled to execute when a given condition becomes true.
 
-Events can be scheduled to a clock before or during it is running. But they are checked and executed at their due time only by a running clock.
+Events can be scheduled to a clock before or during it is running. But they are executed at their due time only by a running clock.
 
 ## Timed events
 
 With a clock ``C``, an action ``\gamma`` and a known event time ``t`` we can schedule timed events:
 
-- `event!(C, γ, t)` or `event!(C, γ, at, t)`: ``\hspace{3pt}C`` executes ``γ`` **at** time ``t``,
-- `event!(C, γ, after, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **after** a time interval ``Δt``,
-- `event!(C, γ, every, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **every** time interval ``Δt``.
+- `event!(C, 𝜸, t)` or `event!(C, 𝜸, at, t)`: ``\hspace{3pt}C`` executes ``γ`` **at** time ``t``,
+- `event!(C, 𝜸, after, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **after** a time interval ``Δt``,
+- `event!(C, 𝜸, every, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **every** time interval ``Δt``.
 
 ```julia
 using DiscreteEvents, Plots
@@ -54,6 +54,5 @@ plot!(x, yb, label="b")
 ![conditional event](img/cev.png)
 
 A conditional event introduces a time uncertainty ``\,η < Δt\,`` into simulations caused by the clock sample rate ``Δt``.
-
 
 see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1)

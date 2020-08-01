@@ -6,7 +6,7 @@ In DES usually a lot of events happen, but not all of them cause state transitio
 \{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
 ```
 
-are not predictable and can change stochastically, the system behavior can be expressed as a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine). In our [stochastic timed automaton](DES.md) ``\,(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)\,`` the feasible event function ``\,\Gamma(x) : x \in \mathcal{X},\,\Gamma(x) \subseteq \mathcal{E}\,`` is the set of all events ``e`` for which a transition function ``\mathcal{f}(x,e)`` is defined. Given the current state of the system other events can happen, but are unfeasible.
+are not predictable and can change stochastically, the system behavior can be expressed as a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine). In our [stochastic timed automaton](DES.md) ``\,(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)\,`` the feasible event function ``\,\Gamma(x) : x \in \mathcal{X},\,\Gamma(x) \subseteq \mathcal{E}\,`` is the set of all events ``e`` for which a transition function ``\mathcal{f}(x,e)`` is defined. Given the current state of the system other events can happen, but are unfeasible and are ignored.
 
 ## The transition function
 

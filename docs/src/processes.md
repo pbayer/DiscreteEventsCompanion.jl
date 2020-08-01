@@ -6,7 +6,7 @@ Often in discrete event systems (DES) we find typical sequences of events ``\,S_
 2. process it for a service time,
 3. release the job and put it into an output queue.
 
-Those typical event sequences are called *processes* in simulation literature [^1]. If they *interact*, they generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the entire DES.
+Those typical event sequences are called *processes* [^1]. If processes *interact*, their event sequences overlap and generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the entire system.
 
 [Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) in `DiscreteEvents`
 
@@ -73,9 +73,9 @@ The `server` processes run their function body in an infinite loop (default) whi
 
 ## Limitations
 
- Communicating sequential processes fundamentally involve "a rendezvous between the processes involved in sending and receiving the message, i.e. the sender cannot transmit a message until the receiver is ready to accept it". [^3]
+Interacting sequential processes depend on "a rendezvous between the processes involved in sending and receiving the message, i.e. the sender cannot transmit a message until the receiver is ready to accept it". [^3]
 
-If typical event sequences ``S_i`` (e.g. waiting for a resource or time delays) are interrupted by stochastic events, the processes are not ready and must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle them. This means that we have to treat natural occurrences in a stochastic DES as *errors* in our program. 
+If typical event sequences ``S_i`` (e.g. waiting for a resource or time delays) are interrupted by stochastic events (e.g. server breakdowns, customers reneging …), the processes are not ready and must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle them. This means that we have to treat natural occurrences in a stochastic DES as *errors* in our program.
 
 This a severe limitation of "processes" as used in simulations. If we have to handle a lot of such interrupting events, things are getting  complicated. This is a barrier to represent more complex systems with sequential processes.
 

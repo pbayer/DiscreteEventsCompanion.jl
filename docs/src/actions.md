@@ -1,23 +1,21 @@
 # Actions
 
-We consider time as given or measured by a clock ``C``. Furthermore we characterise a discrete event system (DES) by
+We consider time as given or measured by a clock ``C``. Furthermore we characterize a discrete event system (DES) by
 
 ```math
 \begin{array}{lll}
   \mathcal{X}&=\{x_i, x_j, ..., x_n\} & \textrm{a discrete set of states}, \\
-  \mathcal{E}&=\{\alpha, \beta, \gamma, ...\} & \textrm{a countable set of events or state transitions}
+  \mathcal{E}&=\{\alpha, \beta, \gamma, ...\} & \textrm{a countable set of events eventually causing state transitions}
 \end{array}
 ```
 
-Each event ``\;e_i \in \mathcal{E}\;`` [^1] in an observed event sequence ``\,\{e_1, e_2, e_3, ...\}\,`` is associated with a time ``\,t_i``. We can write it as a sequence of tuples:
+In an observed event sequence ``\,\{e_1, e_2, e_3, ...\}\,`` each event ``\;e_i \in \mathcal{E}\;`` [^1] is associated with a time ``\,t_i`` [^2]. We can write that as a sequence of tuples:
 
 ```math
 \{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
 ```
 
-Likewise `DiscreteEvents` represents an event as an *action* ``\,e_i\,`` at a time ``\,t_i``.
-
-An [`Action`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Action) is a Julia [expression](https://docs.julialang.org/en/v1/manual/metaprogramming/#Expressions-and-evaluation-1), a [function](https://docs.julialang.org/en/v1/manual/functions/) object or a [tuple](https://docs.julialang.org/en/v1/manual/functions/#Tuples-1) of them, which will be executed at a given time:
+In `DiscreteEvents` we want to represent an event always as that tuple ``\,(e_i,t_i)\,``. For representing ``\,e_i\,`` computationally, we introduce the term *action* [^2]. An [`Action`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Action) is a Julia [expression](https://docs.julialang.org/en/v1/manual/metaprogramming/#Expressions-and-evaluation-1), a [function](https://docs.julialang.org/en/v1/manual/functions/) object or a [tuple](https://docs.julialang.org/en/v1/manual/functions/#Tuples-1) of them, which will be executed at a given time:
 
 ```julia
 julia> using DiscreteEvents
@@ -42,7 +40,7 @@ Simple expressions like `a+1` or function calls like `println()` are not `Action
 
 !!! note
 
-    It is preferable to use functions instead of expressions because it is so much faster. If you use expressions you will get a one-time warning.
+    It is preferable to use functions instead of expressions because it is so much faster. If you use expressions, you will get a one-time warning.
 
 ## Data
 
@@ -102,10 +100,9 @@ julia> ff()
 
 Note that you got a warning because this is slow and not recommended.
 
-
 ## Modifying data
 
-The best way to reference data is to have your actions work with mutable values (like `Array`s)[^2]. Then you can also modify your data at event time, which is what you often want:
+The best way to reference data, is to have your actions work with mutable values (like `Array`s)[^3]. Then you can also modify your data in an action, which is what you often want:
 
 ```julia
 julia> mutable struct Counter       # define a counter type
@@ -128,5 +125,6 @@ julia> cc                             # the counter variable has increased
 Counter(1)
 ```
 
-[^1]: Here we follow roughly Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and causing transitions from one state value to another."
-[^2]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).
+[^1]: Here we follow roughly Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another."
+[^2]: This means simply a computational action. It does not have to be a state transition of the represented system. It could be also a check if an event is feasible.
+[^3]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).

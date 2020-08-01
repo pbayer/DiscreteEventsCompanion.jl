@@ -1,8 +1,8 @@
 # Clocks
 
-In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock ``C`` [^1]. An event sequence ``\;S = \{e_1, e_2, ..., e_n\}\;`` has measured times ``\;t_1 < t_2 < ... < t_n``. From that we draw inferences about causality and dependencies.
+In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock ``C`` [^1]. An event sequence ``\;S = \{e_1, e_2, ..., e_n\}\;`` has measured times ``\;t_1 < t_2 < ... < t_n``. From that order we draw inferences about causality and dependencies.
 
-A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` registers events and triggers them at given times or under given conditions. It doesn't measure time, it "owns" time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
+A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` schedules events and triggers them at given times or under given conditions. It doesn't measure time, it "owns" time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
 
 ## Virtual clocks
 
@@ -37,7 +37,7 @@ Real time clock 99 on thread 8: state=DiscreteEvents.Idle(), t=0.0001193 s, T=0.
    scheduled ev:0, cev:0, sampl:0
 ```
 
-Here we have created a real time clock with id=99 on thread 8. It has a clock period of T=0.01 s and synchronizes at that resolution with the system clock running in ns. When the start message was created, the clock had just advanced 0.0001193 s. When we query its time thereafter, it returns the time in seconds passed since startup:
+Here we have created a real time clock with id=99 on thread 8. It has a clock period of T=0.01 s and synchronizes at that resolution with the system clock running in nano-seconds. When the start message was created, the clock had just advanced 0.0001193 s. When we query its time thereafter, it returns the time in seconds passed since startup:
 
 ```julia
 julia> tau(rtc)         # query time
@@ -52,6 +52,5 @@ We can schedule events to real time clocks as to virtual clocks and they will ex
 ## Parallel clocks
 
 ## Clock commands
-
 
 [^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … Sure enough our measurement methods have advanced.

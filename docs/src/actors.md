@@ -1,11 +1,11 @@
 # Actors
 
+Investigated DES, models and simulations tend to get bigger and more complex. Likewise we want to use the available computing power of parallel and distributed systems. Actors are a way to model larger and more complex systems and at the same time to use the available computing power.
+
 > Actors are a more powerful computational agent than sequential
 > processes ...
 >
 > ...  in the context of parallel systems, the degree to which a computation can be *distributed* over its lifetime is an important consideration. Creation of new actors provides the ability to abstractly increase the distributivity of the computation as it evolves. [^1]
-
-Like in all of scientific computing, models and simulations tend to get bigger and to cover more complex cases of DES. Likewise we try to use the available computing power of parallel and distributed systems.
 
 !!! note
 

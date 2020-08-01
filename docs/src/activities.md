@@ -10,7 +10,7 @@ Usually there are different entities in a DES. In a timed sequence of events
 \{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
 ```
 
-an activity may extend over two or more events. E.g. a server starts to serve a customer at a given time. This activity stretches a certain interval in time. Within that interval other customers may arrive or leave or other servers may proceed in their work.
+an activity may span two or more events in a system. E.g. a server starts to serve a customer at a given time. This activity takes a certain interval in time. Within that interval other customers may arrive or leave or other servers may proceed in their work.
 
 For certain problems it is useful to describe a DES as a sequence of activities. The activity based approach models a DES as sequences of activities of multiple entities overlapping each other in time. For practical purposes an activity is a function combining
 
