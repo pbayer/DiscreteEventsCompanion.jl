@@ -73,9 +73,12 @@ The `server` processes run their function body in an infinite loop (default) whi
 
 ## Limitations
 
-The process-interaction scheme describes typical event sequences ``S_i``. If those typical event sequences are altered by stochastic events, the scheme is in trouble and we must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle those alterations. This is a severe limitation of "processes" as used in simulations.
+ Communicating sequential processes fundamentally involve "a rendezvous between the processes involved in sending and receiving the message, i.e. the sender cannot transmit a message until the receiver is ready to accept it". [^3]
 
-Actors are a way to overcome the limitations of processes and still to maintain their conveniences.
+If typical event sequences ``S_i`` (e.g. waiting for a resource or time delays) are interrupted by stochastic events, the processes are not ready and must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle them. This means that we have to treat natural occurrences in a stochastic DES as *errors* in our program. 
+
+This a severe limitation of "processes" as used in simulations. If we have to handle a lot of such interrupting events, things are getting  complicated. This is a barrier to represent more complex systems with sequential processes.
 
 [^1]: see: Banks, Carson, Nelson, Nicol: Discrete-Event System Simulation, 4th ed, 2005, p. 74-77
 [^2]: If you want to use `take!` or `put!` on channels inside the main program, make sure that they are available (with `isready(ch)` or `length(ch.data) < ch.sz_max`) before calling them in order to avoid blocking.
+[^3]: see: [Communicating Sequential Processes](https://en.wikipedia.org/wiki/Communicating_sequential_processes) (CSP) on Wikipedia.
