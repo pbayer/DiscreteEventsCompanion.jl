@@ -13,7 +13,7 @@ mutable struct Server
     dist::Distribution
     job::Int
 end
-````
+```
 
 Then we implement the server activities `load`, `serve` and `finish` calling each other in sequence:
 
