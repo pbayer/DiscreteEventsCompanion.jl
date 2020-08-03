@@ -1,6 +1,6 @@
 # Actors
 
-DES under investigation, models and simulations tend to get bigger and more complex. Likewise we want to use the available computing power of parallel and distributed systems. Actors are a way to model larger and more complex systems and at the same time to use the available computing power.
+DES under investigation, models and simulations tend to get bigger and more complex. Likewise we want to use the available computing power of parallel and distributed systems. Actors are a way to model larger and more complex systems and to use the available computing power.
 
 > Actors are a more powerful computational agent than sequential
 > processes ...
@@ -11,12 +11,12 @@ DES under investigation, models and simulations tend to get bigger and more comp
 
 > Actor systems and actors have the following basic characteristics:
 >
-> - *Communication via direct asynchronous messaging*: ...
-> - *State machines*: Actor support finite state machines. When an actor transitions to some expected state, it can modify its behavior in preparation for future messages. By *becoming* another kind of message handler, the actor implements a finite state machine.
-> - *Share nothing*: Actors do not share their mutable state ...
-> - *Lock-free concurrency*: ... actors never need to attempt to lock their state before reacting to a message. ...
-> - *Parallelism*: ... Parallelism with the Actor model tends to fit well when one higher-level actor can dispatch tasks across several subordinate actors, perhaps even in a complex task processing hierarchy.
-> - *Actors come in systems*: ... [^2]
+> - *Communication via direct asynchronous messaging:* ...
+> - *State machines:* Actor support finite state machines. When an actor transitions to some expected state, it can modify its behavior in preparation for future messages. By *becoming* another kind of message handler, the actor implements a finite state machine.
+> - *Share nothing:* Actors do not share their mutable state ...
+> - *Lock-free concurrency:* ... actors never need to attempt to lock their state before reacting to a message. ...
+> - *Parallelism:* ... Parallelism with the Actor model tends to fit well when one higher-level actor can dispatch tasks across several subordinate actors, perhaps even in a complex task processing hierarchy.
+> - *Actors come in systems:* ... [^2]
 
 Actor systems allow to represent and compose DES in a new way. They can
 

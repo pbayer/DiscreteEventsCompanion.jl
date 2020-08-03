@@ -1,5 +1,5 @@
 #
-# actor implementation
+# simple actor implementation (without YAActL)
 #
 using DiscreteEvents, Printf, Distributions, Random
 
@@ -23,19 +23,19 @@ mutable struct Server  # state machine body
 end
 
 Random.seed!(8710)   # set random number seed for reproducibility
-num_customers = 10   # total number of customers generated
-num_servers = 2      # number of servers
-μ = 1.0 / 2          # service rate
-λ = 0.9              # arrival rate
-arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-service_dist = Exponential(1/μ); # service time distribution
+const num_customers = 10   # total number of customers generated
+const num_servers = 2      # number of servers
+const μ = 1.0 / 2          # service rate
+const λ = 0.9              # arrival rate
+const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
+const service_dist = Exponential(1/μ); # service time distribution
 
 act!(::Server, ::𝑋, ::𝐸) = nothing
 function act!(s::Server, ::Idle, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
         s.state = Busy()
-        event!(s.clk, fun(put!, s.com, Finish()), after, rand(s.d))
+        event!(s.clk, (fun(put!, s.com, Finish()), yield), after, rand(s.d))
         now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
