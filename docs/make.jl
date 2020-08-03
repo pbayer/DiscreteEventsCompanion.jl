@@ -21,6 +21,7 @@ const PAGES = Any[
         "Table Tennis" => "examples/tabletennis.md",
         "M/M/c Activities" => "examples/queue_mmc_act.md",
         "M/M/c Processes" => "examples/queue_mmc_srv.md",
+        "M/M/c State Machines" => "examples/queue_mmc_sm.md",
         "M/M/c Actors" => "examples/queue_mmc_actor.md",
         "House Heating" => "examples/house_heating/house_heating.md",
         "Post Office" => "examples/postoffice/postoffice.md",

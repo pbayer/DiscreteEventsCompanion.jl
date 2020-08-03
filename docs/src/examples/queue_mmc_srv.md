@@ -1,4 +1,4 @@
-# Process flow
+# M/M/c Process based
 
 In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then to undergo a transformation (e.g. transport, treatment or service) taking some time.
 

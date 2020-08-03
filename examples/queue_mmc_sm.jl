@@ -1,16 +1,23 @@
 #
-# actor implementation 
+# simple actor implementation (without YAActL)
 #
-using DiscreteEvents, Printf, Distributions, Random, YAActL
+using DiscreteEvents, Printf, Distributions, Random
 
-struct Arrive <: Message end
-struct Finish <: Message end
+abstract type 𝑋 end    # define states
+struct Idle <: 𝑋 end
+struct Busy <: 𝑋 end
+
+abstract type 𝐸 end    # events
+struct Arrive <: 𝐸 end
+struct Finish <: 𝐸 end
 
 mutable struct Server  # state machine body
     id::Int
     clk::Clock
+    com::Channel
     input::Channel
     output::Channel
+    state::𝑋
     job::Int
     d::Distribution
 end
@@ -23,31 +30,33 @@ const λ = 0.9              # arrival rate
 const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
 const service_dist = Exponential(1/μ); # service time distribution
 
-Base.get(c::Clock, m::Message, after, Δt::Number) =
-    event!(c, (fun(send!, self(), m), yield), after, Δt)
-
-function idle(s::Server, ::Arrive)
+act!(::Server, ::𝑋, ::𝐸) = nothing
+function act!(s::Server, ::Idle, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
-        become(busy, s)
-        get(s.clk, Finish(), after, rand(s.d))
+        s.state = Busy()
+        event!(s.clk, (fun(put!, s.com, Finish()), yield), after, rand(s.d))
         now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
-busy(s::Server, ::Message) = nothing
-function busy(s::Server, ::Finish)
-    become(idle, s)
+function act!(s::Server, ::Busy, ::Finish)
+    s.state = Idle()
     put!(s.output, s.job)
     now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
+function act!(s::Server)  # actor loop
+    while true
+        act!(s, s.state, take!(s.com))
+    end
+end
 
 # model arrivals
-function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, num_customers::Int, arrival_dist::Distribution)
+function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, num_customers::Int, arrival_dist::Distribution)
     for i = 1:num_customers # initialize customers
         delay!(clk, rand(arrival_dist))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(l->send!(l, Arrive()), lnk) # notify the servers
+        map(s->put!(s.com,Arrive()), srv) # notify the servers
     end
 end
 
@@ -55,10 +64,12 @@ end
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-lnk = Link[]
+srv = Server[]
+t = Task[]
 for i in 1:num_servers   # start actors
-    s = Server(i, clock, input, output, 0, service_dist)
-    push!(lnk, Actor(idle, s))
+    push!(srv, Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, service_dist))
+    push!(t, @task act!(srv[i]))
+    yield(t[i])
 end
-process!(clock, Prc(0, arrivals, input, lnk, num_customers, arrival_dist), 1)
+process!(clock, Prc(0, arrivals, input, srv, num_customers, arrival_dist), 1)
 run!(clock, 20)

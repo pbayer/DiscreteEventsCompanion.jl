@@ -1,59 +1,68 @@
-# M/M/c with Actors
+# M/M/c with State Machines
 
-Very similar to the last implementation we can implement the servers as actors. Therefore we use [`YAActL`](https://github.com/pbayer/YAActL.jl). First we have to define the actor messages, the server body and a convenience function, which we will use for sending a delayed message to ourselves.
+Here we implement simple state machine as actors. As seen before we define first the states and events and a state machine body:
 
 ```julia
-using DiscreteEvents, Printf, Distributions, Random, YAActL
+using DiscreteEvents, Printf, Distributions, Random
 
-struct Arrive <: Message end
-struct Finish <: Message end
+abstract type 𝑋 end    # define states
+struct Idle <: 𝑋 end
+struct Busy <: 𝑋 end
+
+abstract type 𝐸 end    # events
+struct Arrive <: 𝐸 end
+struct Finish <: 𝐸 end
 
 mutable struct Server  # state machine body
     id::Int
     clk::Clock
+    com::Channel       # this is the actor's communication channel
     input::Channel
     output::Channel
+    state::𝑋
     job::Int
     d::Distribution
 end
-
-Base.get(c::Clock, m::Message, after, Δt::Number) =
-    event!(c, (fun(send!, self(), m), yield), after, Δt)
 ```
 
-The actor realizes the same finite state machine as before by implementing and changing behaviors.
+Then we implement the state transition function and the actor loop running it:
 
 ```julia
-function idle(s::Server, ::Arrive)
+act!(::Server, ::𝑋, ::𝐸) = nothing   # a default transition
+function act!(s::Server, ::Idle, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
-        become(busy, s)
-        get(s.clk, Finish(), after, rand(s.d))
+        s.state = Busy()       # note that we must yield↓↓ to the actor here
+        event!(s.clk, (fun(put!, s.com, Finish()), yield), after, rand(s.d))
         now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
-busy(s::Server, ::Message) = nothing  # this is a default transition
-function busy(s::Server, ::Finish)
-    become(idle, s)
+function act!(s::Server, ::Busy, ::Finish)
+    s.state = Idle()
     put!(s.output, s.job)
     now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
+function act!(s::Server)  # actor loop, take something
+    while true            # from the com channel and act! on it
+        act!(s, s.state, take!(s.com))
+    end
+end
 ```
 
-As seen before we have our arrival function:
+We need also our arrival process. It communicates arrivals over the servers' com channels.
 
 ```julia
-function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, num_customers::Int, arrival_dist::Distribution)
+function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, num_customers::Int, arrival_dist::Distribution)
     for i = 1:num_customers # initialize customers
         delay!(clk, rand(arrival_dist))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(l->send!(l, Arrive()), lnk) # notify the actors
+        map(s->put!(s.com,Arrive()), srv) # notify the servers
     end
 end
 ```
 
-We setup our environment, the actors and the arrivals process:
+Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:
 
 ```julia
 Random.seed!(8710)   # set random number seed for reproducibility
@@ -68,15 +77,17 @@ const service_dist = Exponential(1/μ); # service time distribution
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-lnk = Link[]
 for i in 1:num_servers   # start actors
-    s = Server(i, clock, input, output, 0, service_dist)
-    push!(lnk, Actor(idle, s))
+    s = Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, service_dist)
+    yield(@task act!(s)) # we yield immediately to the actor task
 end
-process!(clock, Prc(0, arrivals, input, lnk, num_customers, arrival_dist), 1)
+process!(clock, Prc(0, arrivals, input, srv, num_customers, arrival_dist), 1)
+
 run!(clock, 20)
 ```
-... and we get our expected output:
+
+Then we get our usual output:
+
 ```julia
 0.123: customer 1 arrived
 0.123: server 1 serving customer 1
@@ -86,7 +97,6 @@ run!(clock, 20)
 0.667: server 2 finished serving 2
 2.135: customer 3 arrived
 ....
-9.475: server 2 serving customer 9
 10.027: server 1 finished serving 8
 10.257: customer 10 arrived
 10.257: server 1 serving customer 10

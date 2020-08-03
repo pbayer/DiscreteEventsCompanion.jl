@@ -1,4 +1,4 @@
-# Activity based approach
+# M/M/c Activities
 
 Here we take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^1] and implement it as a sequence of server activities:
 
