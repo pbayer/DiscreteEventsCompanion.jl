@@ -1,17 +1,31 @@
 # Actors
 
-Investigated DES, models and simulations tend to get bigger and more complex. Likewise we want to use the available computing power of parallel and distributed systems. Actors are a way to model larger and more complex systems and at the same time to use the available computing power.
+DES under investigation, models and simulations tend to get bigger and more complex. Likewise we want to use the available computing power of parallel and distributed systems. Actors are a way to model larger and more complex systems and at the same time to use the available computing power.
 
 > Actors are a more powerful computational agent than sequential
 > processes ...
 >
 > ...  in the context of parallel systems, the degree to which a computation can be *distributed* over its lifetime is an important consideration. Creation of new actors provides the ability to abstractly increase the distributivity of the computation as it evolves. [^1]
 
+`DiscreteEvents` introduces [actors](https://en.wikipedia.org/wiki/Actor_model) to represent entities in DES and to distribute those entities over parallel cores of modern computers.
+
+> Actor systems and actors have the following basic characteristics:
+>
+> - *Communication via direct asynchronous messaging*: ...
+> - *State machines*: Actor support finite state machines. When an actor transitions to some expected state, it can modify its behavior in preparation for future messages. By *becoming* another kind of message handler, the actor implements a finite state machine.
+> - *Share nothing*: Actors do not share their mutable state ...
+> - *Lock-free concurrency*: ... actors never need to attempt to lock their state before reacting to a message. ...
+> - *Parallelism*: ... Parallelism with the Actor model tends to fit well when one higher-level actor can dispatch tasks across several subordinate actors, perhaps even in a complex task processing hierarchy.
+> - *Actors come in systems*: ... [^2]
+
+Actor systems allow to represent and compose DES in a new way. They can
+
+- represent hierarchy (e.g. UML state machines, different system levels ...),
+- model structural changes in systems (e.g. making more servers available if load gets too high),
+
 !!! note
 
-    `DiscreteEvents` has no builtin support for actors yet. Therefore I want to mention and show some of the possibilities right now. But this has to be explored further.
-
-For explorations into actors I have written a basic actor library: [`YAActL`](https://github.com/pbayer/YAActL.jl).
+    `DiscreteEvents` has no builtin support for actors yet. For explorations into actors we use [`YAActL`](https://github.com/pbayer/YAActL.jl).
 
 ## Dynamical state machines
 
@@ -21,9 +35,10 @@ Most computers now come with parallel cores that can be used for computation. Th
 
 > The concept of a unique global clock is not meaningful in the context of a distributed system of self-contained parallel agents. ...
 >
-> ... a *unique (linear) global time* is not definable. Instead, each computational agent has a local time which linearly orders the events as they occur at that agent, or alternately, orders the local states of that agent. These local orderings of events are related to each other by the activation ordering. The activation ordering represents the causal relationships between events happening at different agents. [^2]
+> ... a *unique (linear) global time* is not definable. Instead, each computational agent has a local time which linearly orders the events as they occur at that agent, or alternately, orders the local states of that agent. These local orderings of events are related to each other by the activation ordering. The activation ordering represents the causal relationships between events happening at different agents. [^3]
 
 Following this reasoning `DiscreteEvents` works with local times on each thread. In the parallel case the main clock is on thread one and operates as a global synchronizer for the local clocks on each thread. For its operation an actor gets from the main clock a reference to its local clock and thereby can access local time.
 
 [^1]: Gul Agha: Actors, A Model of Concurrent Computation in Distributed Systems.- 1986, MIT Press, 9
-[^2]: Ibid. 9f
+[^2]: Vaughn Vernon, Reactive Messaging Patterns with the Actor Model.- 2016, Pearson, 14f
+[^3]: Gul Agha: 9f
