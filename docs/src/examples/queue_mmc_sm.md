@@ -1,6 +1,6 @@
 # M/M/c with State Machines
 
-Here we implement simple state machine as actors. As seen before we define first the states and events and a state machine body:
+Here we implement a simple state machine as an actor. As  before we define first states and events and a state machine body:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -25,7 +25,7 @@ mutable struct Server  # state machine body
 end
 ```
 
-Then we implement the state transition function and the actor loop running it:
+Then we implement the transition function and the actor loop running it:
 
 ```julia
 act!(::Server, ::𝑋, ::𝐸) = nothing   # a default transition
@@ -65,7 +65,7 @@ end
 Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:
 
 ```julia
-Random.seed!(8710)   # set random number seed for reproducibility
+Random.seed!(8710)         # set random number seed for reproducibility
 const num_customers = 10   # total number of customers generated
 const num_servers = 2      # number of servers
 const μ = 1.0 / 2          # service rate

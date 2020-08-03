@@ -1,6 +1,6 @@
 # M/M/c Activities
 
-Here we take the [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^1] and implement it as a sequence of server activities:
+Here we take the toy [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^1] and implement it as a sequence of server activities. We first need a server body:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -13,17 +13,11 @@ mutable struct Server
     dist::Distribution
     job::Int
 end
+````
 
-Random.seed!(8710)   # set random number seed for reproducibility
-num_customers = 10   # total number of customers generated
-c = 2                # number of servers
-μ = 1.0 / 2          # service rate
-λ = 0.9              # arrival rate
-arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-service_dist = Exponential(1/μ); # service time distribution
-const jobno = [1]    # job counter
+Then we implement the server activities `load`, `serve` and `finish` calling each other in sequence:
 
-# activities are functions calling each other directly or as events
+```julia
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
     # we check the availability of the input channel explicitly ↑
     # since we don't want to block.
@@ -40,8 +34,11 @@ function finish(S::Server)
     S.job=0
     load(S)
 end
+```
 
-# model the arrivals
+We model the arrivals as a function calling itself repeatedly with a time delay:
+
+```julia
 function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
     @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
     put!(input, jobno[1])
@@ -52,12 +49,24 @@ function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
         event!(c, fun(stop!, c), after, 2/μ)
     end
 end
+```
+
+Then we setup our constants and a simulation environment with clock, channels, servers and arrivals and run:
+
+```julia
+Random.seed!(8710)         # set random number seed for reproducibility
+const num_customers = 10   # total number of customers generated
+const c = 2                # number of servers
+const μ = 1.0 / 2          # service rate
+const λ = 0.9              # arrival rate
+const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
+const service_dist = Exponential(1/μ); # service time distribution
+const jobno = [1]          # job counter
 
 # setup the simulation environment
 clk = Clock()
 input = Channel{Int}(32)  # create two channels
 output = Channel{Int}(32)
-jobno[1] = 1              # reset job counter
 
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
@@ -66,7 +75,10 @@ event!(clk, fun(arrive, clk, input, num_customers, arrival_dist), after, rand(ar
 
 run!(clk, 20)  # run the simulation
 ```
-```
+
+We get the following output:
+
+```julia
 0.123: customer 1 arrived
 0.130: server 1 took job 1
 0.226: customer 2 arrived
@@ -84,6 +96,7 @@ run!(clk, 20)  # run the simulation
 ```
 
 Note that
+
 - the checking of the input channel in `load ...` switches on sampling implicitly (1426 sample steps),
 - the `arrive` function stops the clock
 

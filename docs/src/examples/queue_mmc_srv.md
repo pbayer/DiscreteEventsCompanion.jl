@@ -2,20 +2,11 @@
 
 In yet another view we look at **entities** (e.g. messages, customers, jobs, goods) undergoing a *process* as they flow through a DES. A process can be viewed as a sequence of events separated by time intervals. Often entities or processes share limited resources. Thus they have to wait for them to become available and then to undergo a transformation (e.g. transport, treatment or service) taking some time.
 
-This view can be expressed as [processes](../processes.md) waiting and delaying on a clock or implicitly blocking until they can `take!` something from a `Channel` or `put!` it back. An implementation of the M/M/c queue goes like this:
+This view can be expressed as [processes](../processes.md) waiting and delaying on a clock or implicitly blocking until they can `take!` something from a `Channel` or `put!` it back. To implement the M/M/c we start right with describing the `server` and `arrivals` processes:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
 
-Random.seed!(8710)   # set random number seed for reproducibility
-num_customers = 10   # total number of customers generated
-num_servers = 2      # number of servers
-μ = 1.0 / 2          # service rate
-λ = 0.9              # arrival rate
-arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-service_dist = Exponential(1/μ); # service time distribution
-
-# describe the server process
 function server(clk::Clock, id::Int, input::Channel, output::Channel, service_dist::Distribution)
     job = take!(input)
     now!(clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
@@ -24,7 +15,6 @@ function server(clk::Clock, id::Int, input::Channel, output::Channel, service_di
     put!(output, job)
 end
 
-# model arrivals
 function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
     for i = 1:num_customers # initialize customers
         delay!(clk, rand(arrival_dist))
@@ -32,6 +22,18 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
 end
+```
+
+Then we setup our constants, the simulation environment with clock, channels and processes and run:
+
+```julia
+Random.seed!(8710)         # set random number seed for reproducibility
+const num_customers = 10   # total number of customers generated
+const num_servers = 2      # number of servers
+const μ = 1.0 / 2          # service rate
+const λ = 0.9              # arrival rate
+const arrival_dist = Exponential(1/λ)  # interarrival time distribution
+const service_dist = Exponential(1/μ); # service time distribution
 
 # initialize the simulation environment and run
 clock = Clock()
@@ -44,7 +46,9 @@ process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
 run!(clock, 20)
 ```
 
-```
+We get the following output:
+
+```julia
 0.123: customer 1 arrived
 0.123: server 1 serving customer 1
 0.226: customer 2 arrived

@@ -29,7 +29,7 @@ Actor systems allow to represent and compose DES in a new way. They can
 
 ## Dynamical state machines
 
-Actors have functions describing their behaviors. They can change those functions with `become`. Thus they assume another dynamical state and implement a state machine:
+Actors have functions describing their [behaviors](https://pbayer.github.io/YAActL.jl/dev/usage/#Behaviors). They can change those functions with `become`. Thus they assume a new state and act as state machines:
 
 ```julia
 function idle(s::Server, ::Arrive)
@@ -37,28 +37,28 @@ function idle(s::Server, ::Arrive)
         s.job = take!(s.input)
         become(busy, s)
         get(s.clk, Finish(), after, rand(s.d))
-        now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
+        ...
     end
 end
 busy(s::Server, ::Message) = nothing  # this is a default transition
 function busy(s::Server, ::Finish)
     become(idle, s)
     put!(s.output, s.job)
-    now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
+    ...
 end
 ```
 
-If an actor starts, it assumes his initial behavior `idle`. It delivers a link (a message channel) for sending messages to it:
+If the actor starts, it assumes his initial `idle` behavior. It delivers a link (a message channel) for sending messages to it. When it gets an `Arrive()` message, it checks for a job and eventually takes it and becomes `busy` ...
 
 ```julia
 lnk = Link[]
-for i in 1:num_servers 
+for i in 1:num_servers          # setup servers
     s = Server(i, clock, input, output, 0, service_dist)
     push!(lnk, Actor(idle, s))  # start actors
 end
 ```
 
-Now we can command the actors over the `lnk`. For the full example see [M/M/c queue with Actors](examples/queue_mmc_actor.md).
+We can command the actors over the `lnk` array. For the full example see [M/M/c queue with Actors](examples/queue_mmc_actor.md).
 
 ## Actors in parallel
 

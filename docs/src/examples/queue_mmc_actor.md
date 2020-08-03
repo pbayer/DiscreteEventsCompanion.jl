@@ -1,6 +1,6 @@
 # M/M/c with Actors
 
-Very similar to the last implementation we can implement the servers as actors. Therefore we use [`YAActL`](https://github.com/pbayer/YAActL.jl). First we have to define the actor messages, the server body and a convenience function, which we will use for sending a delayed message to ourselves.
+Very similar to the last implementation we can implement the servers as [`YAActL`](https://github.com/pbayer/YAActL.jl) actors. First we have to define the actor messages, the server body and a convenience function for sending a delayed message to ourselves.
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random, YAActL
@@ -21,7 +21,7 @@ Base.get(c::Clock, m::Message, after, Δt::Number) =
     event!(c, (fun(send!, self(), m), yield), after, Δt)
 ```
 
-The actor realizes the same finite state machine as before by implementing and changing behaviors.
+The actor realizes the same finite state machine as before by switching between two behaviors: `idle` and `busy`:
 
 ```julia
 function idle(s::Server, ::Arrive)
@@ -34,13 +34,15 @@ function idle(s::Server, ::Arrive)
 end
 busy(s::Server, ::Message) = nothing  # this is a default transition
 function busy(s::Server, ::Finish)
-    become(idle, s)
     put!(s.output, s.job)
+    become(idle, s)
     now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
 ```
 
-As seen before we have our arrival function:
+When an idle server gets an `Arrive()` message, it checks its input and if there is one, it takes it and becomes busy. It schedules a `Finish()` message for itself after a random service time. When it arrives, it puts its job into the output and becomes idle. As you see, the code is almost plain text.
+
+As before we need an arrival function:
 
 ```julia
 function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, num_customers::Int, arrival_dist::Distribution)
@@ -76,7 +78,9 @@ end
 process!(clock, Prc(0, arrivals, input, lnk, num_customers, arrival_dist), 1)
 run!(clock, 20)
 ```
-... and we get our expected output:
+
+... and get our expected output:
+
 ```julia
 0.123: customer 1 arrived
 0.123: server 1 serving customer 1

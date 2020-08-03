@@ -11,7 +11,7 @@ const PAGES = Any[
         "Activities" => "activities.md",
         "Processes" => "processes.md",
         "Randomness" => "random.md",
-        "Automata" => "automata.md",
+        "State Machines" => "automata.md",
         "Actors" => "actors.md",
         "Models" => "models.md",
     ],
