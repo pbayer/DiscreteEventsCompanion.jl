@@ -17,8 +17,8 @@ mutable struct Server  # state machine body
     d::Distribution
 end
 
-Base.get(c::Clock, m::Message, after, Δt::Number) =
-    event!(c, (fun(send!, self(), m), yield), after, Δt)
+Base.get(clk::Clock, m::Message, after, Δt::Number) =
+    event!(clk, (fun(send!, self(), m), yield), after, Δt)
 ```
 
 The actor realizes the same finite state machine as before by switching between two behaviors: `idle` and `busy`:
@@ -45,12 +45,12 @@ When an idle server gets an `Arrive()` message, it checks its input and if there
 As before we need an arrival function:
 
 ```julia
-function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, num_customers::Int, arrival_dist::Distribution)
-    for i = 1:num_customers # initialize customers
-        delay!(clk, rand(arrival_dist))
+function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, N::Int, A::Distribution)
+    for i = 1:N # initialize customers
+        delay!(clk, rand(A))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(l->send!(l, Arrive()), lnk) # notify the actors
+        map(l->send!(l, Arrive()), lnk) # notify the servers
     end
 end
 ```
@@ -58,24 +58,25 @@ end
 We setup our environment, the actors and the arrivals process:
 
 ```julia
-Random.seed!(8710)   # set random number seed for reproducibility
-const num_customers = 10   # total number of customers generated
-const num_servers = 2      # number of servers
-const μ = 1.0 / 2          # service rate
-const λ = 0.9              # arrival rate
-const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-const service_dist = Exponential(1/μ); # service time distribution
+Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
 
 # initialize simulation environment
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
 lnk = Link[]
-for i in 1:num_servers   # start actors
-    s = Server(i, clock, input, output, 0, service_dist)
+for i in 1:c   # start actors
+    s = Server(i, clock, input, output, 0, M₂)
     push!(lnk, Actor(idle, s))
+    register!(clock, lnk[end]) # register them to the clock
 end
-process!(clock, Prc(0, arrivals, input, lnk, num_customers, arrival_dist), 1)
+process!(clock, Prc(0, arrivals, input, lnk, N, M₁), 1)
 run!(clock, 20)
 ```
 

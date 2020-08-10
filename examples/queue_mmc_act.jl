@@ -14,13 +14,13 @@ mutable struct Server
 end
 
 Random.seed!(8710)   # set random number seed for reproducibility
-num_customers = 10   # total number of customers generated
-c = 2                # number of servers
-μ = 1.0 / 2          # service rate
-λ = 0.9              # arrival rate
-arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-service_dist = Exponential(1/μ); # service time distribution
-const jobno = [1]    # job counter
+const N = 10                # total number of customers generated
+const c = 2                 # number of servers
+const μ = 1.0 / 2           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
+const jobno = [1]           # job counter
 
 # activities are functions calling each other directly or as events
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
@@ -57,8 +57,8 @@ output = Channel{Int}(32)
 jobno[1] = 1              # reset job counter
 
 # create and start the servers and the arrival process
-srv = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input, num_customers, arrival_dist), after, rand(arrival_dist))
+event!(clk, fun(arrive, clk, input, N, M₁), after, rand(M₁))
 
 run!(clk, 20)  # run the simulation

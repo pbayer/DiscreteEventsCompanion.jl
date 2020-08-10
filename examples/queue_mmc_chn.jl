@@ -5,13 +5,13 @@
 using DiscreteEvents, Printf, Distributions, Random
 
 # Define Constants
-Random.seed!(8710)   # set random number seed for reproducibility
-num_customers = 10   # total number of customers generated
-num_servers = 2      # number of servers
-μ = 1.0 / 2          # service rate
-λ = 0.9              # arrival rate
-arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-service_dist = Exponential(1/μ); # service time distribution
+Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
 
 # Define Customer Behavior
 function customer(clk::Clock, server::Channel, id::Int, ta::Float64, ds::Distribution)
@@ -26,13 +26,13 @@ end
 
 # Setup and Run Simulation
 clk = Clock() # initialize simulation environment
-server = Channel{Int}(num_servers)  # initialize servers
-for i in 1:num_servers
+server = Channel{Int}(c)  # initialize servers
+for i in 1:c
     put!(server, i)
 end
 arrival_time = 0.0
-for i = 1:num_customers # initialize customers
-    global arrival_time += rand(arrival_dist)
-    process!(clk, Prc(i, customer, server, i, arrival_time, service_dist), 1)
+for i = 1:N # initialize customers
+    global arrival_time += rand(M₁)
+    process!(clk, Prc(i, customer, server, i, arrival_time, M₂), 1)
 end
 run!(clk, 20) # run simulation

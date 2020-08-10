@@ -18,7 +18,7 @@ DES under investigation, models and simulations tend to get bigger and more comp
 > - *Parallelism:* ... Parallelism with the Actor model tends to fit well when one higher-level actor can dispatch tasks across several subordinate actors, perhaps even in a complex task processing hierarchy.
 > - *Actors come in systems:* ... [^2]
 
-Actor systems allow to represent and compose DES in a new way. They can
+Actors integrate so well into an event framework because they are message driven. Messages are built on events since they signal that an event has happened. Therefore actors are more reactive to events than sequential processes. Furthermore actor systems allow to represent and compose DES in a new way. They can
 
 - represent hierarchy (e.g. UML state machines, different system levels ...),
 - model structural changes in systems (e.g. making more servers available if load gets too high),
@@ -29,7 +29,7 @@ Actor systems allow to represent and compose DES in a new way. They can
 
 ## Dynamical state machines
 
-Actors have functions describing their [behaviors](https://pbayer.github.io/YAActL.jl/dev/usage/#Behaviors). They can change those functions with `become`. Thus they assume a new state and act as state machines:
+Actors have their [behaviors](https://pbayer.github.io/YAActL.jl/dev/usage/#Behaviors) described by functions. They can change those functions with `become`. Thus they assume a new state and act as state machines:
 
 ```julia
 function idle(s::Server, ::Arrive)
@@ -60,15 +60,9 @@ end
 
 We can command the actors over the `lnk` array. For the full example see [M/M/c queue with Actors](examples/queue_mmc_actor.md).
 
+## Composition
+
 ## Actors in parallel
-
-Most computers now come with parallel cores that can be used for computation. The problem with parallel simulations is the synchronization of parallel event sequences in time:
-
-> The concept of a unique global clock is not meaningful in the context of a distributed system of self-contained parallel agents. ...
->
-> ... a *unique (linear) global time* is not definable. Instead, each computational agent has a local time which linearly orders the events as they occur at that agent, or alternately, orders the local states of that agent. These local orderings of events are related to each other by the activation ordering. The activation ordering represents the causal relationships between events happening at different agents. [^3]
-
-Following this reasoning `DiscreteEvents` works with local times on each thread. In the parallel case the main clock is on thread one and operates as a global synchronizer for the local clocks on each thread. For its operation an actor gets from the main clock a reference to its local clock and thereby can access local time.
 
 [^1]: Gul Agha: Actors, A Model of Concurrent Computation in Distributed Systems.- 1986, MIT Press, 9
 [^2]: Vaughn Vernon, Reactive Messaging Patterns with the Actor Model.- 2016, Pearson, 14f

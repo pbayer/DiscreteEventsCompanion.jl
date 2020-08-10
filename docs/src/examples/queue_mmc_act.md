@@ -54,14 +54,14 @@ end
 Then we setup our constants and a simulation environment with clock, channels, servers and arrivals and run:
 
 ```julia
-Random.seed!(8710)         # set random number seed for reproducibility
-const num_customers = 10   # total number of customers generated
-const c = 2                # number of servers
-const μ = 1.0 / 2          # service rate
-const λ = 0.9              # arrival rate
-const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-const service_dist = Exponential(1/μ); # service time distribution
-const jobno = [1]          # job counter
+Random.seed!(8710)   # set random number seed for reproducibility
+const N = 10                # total number of customers generated
+const c = 2                 # number of servers
+const μ = 1.0 / 2           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
+const jobno = [1]           # job counter
 
 # setup the simulation environment
 clk = Clock()
@@ -69,9 +69,9 @@ input = Channel{Int}(32)  # create two channels
 output = Channel{Int}(32)
 
 # create and start the servers and the arrival process
-srv = [Server(clk,i,input,output,service_dist,0) for i ∈ 1:c]
+srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input, num_customers, arrival_dist), after, rand(arrival_dist))
+event!(clk, fun(arrive, clk, input, N, M₁), after, rand(M₁))
 
 run!(clk, 20)  # run the simulation
 ```

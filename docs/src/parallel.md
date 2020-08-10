@@ -4,42 +4,29 @@ Currently `DiscreteEvents.jl` enables two approaches to parallel simulations.
 
 ## Simulations in parallel
 
-Multiple simulations can be executed on parallel threads using the `@threads`-
-macro. Such simulations have different clocks with different times. One example of
-this is given in the [dice game example](examples/dicegame/dicegame.md). This
-approach is useful if you do multiple simulations to investigate their response
-to parameter variation. Basically you write a function, accepting parameters and doing a simulation on them. You then can invoke multiple simulations in a for loop:
+Multiple simulations can be executed on parallel to each other using the `@threads`- macro. They have different clocks with different times. This approach is useful if you do multiple simulations to investigate their response to parameter variation. Basically you write a function, accepting parameters and doing a simulation on them. You then can invoke multiple simulations in a for loop:
 
 ```julia
 ```
+See the [dice game example](examples/dicegame/dicegame.md). 
 
-## Multithreading of events and processes  
+## Distributed simulations
 
-!!! compat "Julia 1.3"
+An other way is to distribute a simulation over multiple cores of one machine. But this breaks the concept of a universally uniform time in a simulation:
 
-    Multithreading requires Julia ≥ 1.3.
+> The concept of a unique global clock is not meaningful in the context of a distributed system of self-contained parallel agents. ...
+> 
+> ... a unique (linear) global time is not definable. ...
+>
+> This is not to imply that it is impossible to construct a distributed system whose behavior is such that the elements of the system can be abstractly construed as acting synchronously. ... Assume one element, called the global master, controls when each of the elements in the system may continue; ...
+> 
+> The important point to be made is that any such global synchronization creates a bottleneck which can be extremely inefficient in the context of a distributed environment. [^1]
 
-!!! warning "Not user-ready !!!"
+In a distributed system we must find a compromise between maintaining a global order of events and being able to do efficient local computations. The key insight is that not all events in a system have causal relations with each other and therefore not all events need to be synchronized.
 
-    Multithreading is still experimental and in active development.
+`DiscreteEvents` introduces parallel clocks with *thread local time*. Thus it maintains *partial orderings of events* on each thread. By synchronizing the parallel clocks each given time interval ``ϵ`` it ensures that for all parallel clocks ``C_i, C_j: |t_i - t_j| < ϵ``.
 
-Simulations consist of multiple events, sampling functions and asynchronous
-processes. The clock executes them sequentially on one thread. But modern computers have multiple cores, each being able to execute at least one distinct thread of operations. In order to speed things up, you may want to use the other cores (threads) as well:
-
-### Uncertainty of event sequence
-
-Multithreading introduces an **uncertainty** into simulations: If an event ``e_x`` has a scheduling time before event ``e_y`` on another thread both lying inside the same time interval ``t_x + Δt``, maybe – depending on differing thread loads – ``e_y`` gets executed before ``e_x``. There are several techniques to reduce this uncertainty:
-
-1. If there is a causal connection between two events such that ``e_y`` depends on ``e_x``, the first one can be scheduled as [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.event!) with `sync=true` to *force* its execution before the second. But such dependencies are not always known beforehand in simulations.
-2. You can choose to *group* causally connected events on one thread by scheduling them together on a specific parallel clock, such that they are executed in sequence. Consider a factory simulation: in real factories shops are often decoupled by buffers. You can allocate processes, events and samples of each shop  together on a thread. See [grouping](@ref grouping) below.
-3. You can generally reduce the synchronization cycle Δt such that clocks get synchronized more often.
-
-There is a tradeoff between parallel efficiency and uncertainty: if threads must be synchronized more often, there is more cost of synchronization relative to execution. You have to choose the uncertainty you are willing to pay to gain parallel efficiency. Often in simulations as in life fluctuations in event sequence cancel out statistically and can be neglected.
-
-### [Grouping of events and processes](@id grouping)
-
-- explicit grouping of events, processes and samples to parallel clocks,
-- grouping them with the `@threads` macro,
+It is then up to the user to take care that associated events or entities in a DES get grouped together to run on a thread. Thus causal relations get maintained. In reality subsystems of DES are often decoupled by buffers or queues. Those decouplings are the natural interfaces between subsystems to be used to divide a model over multiple threads.
 
 ### Parallel efficiency
 - number of threads to use,
@@ -49,3 +36,5 @@ see the chapter in performance
 ### Thread safety
 - using random numbers on parallel threads,
 - synchronizing write access to shared variables,
+
+[^1]: Gul Agha: Actors, A Model of Concurrent Computation in Distributed Systems.- 1986, MIT Press, 9ff

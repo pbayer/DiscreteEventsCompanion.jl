@@ -1,12 +1,12 @@
 # Clocks
 
-In physics and most of life we [measure time](https://en.wikipedia.org/wiki/Time_in_physics) with a clock ``C`` [^1]. An event sequence ``\;S = \{e_1, e_2, ..., e_n\}\;`` has measured times ``\;t_1 < t_2 < ... < t_n``. From that order we draw inferences about causality and dependencies.
+We think of a clock as a device to [measure time](https://en.wikipedia.org/wiki/Time_in_physics)   [^1]. An event sequence ``\;S = \{e_1, e_2, ..., e_n\}\;`` has measured times ``\;t_1 < t_2 < ... < t_n``. From that order we draw inferences about causality.
 
-A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` schedules events and triggers them at given times or under given conditions. It doesn't measure time, it "owns" time. We can create clocks, run them for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
+A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` schedules events and triggers them at given times or under given conditions. It doesn't measure time, it "owns" time. We can create a clock, run it for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
 
 ## Virtual clocks
 
-Virtual clocks are not constrained by physical time. They don't have to wait an hour for the next event to occur, but can right jump to it. Time is only a number and the computer executes an event sequence as fast as possible.
+A virtual clocks is not constrained by physical time. It doesn't have to wait a physical time period for the next event to occur, but can right jump to it. For it time is only a number and it executes an event sequence as fast as possible.
 
 ```julia
 julia> using DiscreteEvents
@@ -16,20 +16,20 @@ Clock 0, thread 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 ,
   scheduled ev:0, cev:0, sampl:0
 ```
 
-We created a new clock, running on thread 1, having time t=0.0, a sampling rate of Δt=0.01, no registered processes, no scheduled events, conditional events or sampling actions.
+We created a new clock, running on thread 1, having time ``t=0.0``, a sampling rate of ``Δt=0.01``, no registered processes, no scheduled events, conditional events or sampling actions.
 
 ```julia
 julia> run!(clk, 10)
 "run! finished with 0 clock events, 0 sample steps, simulation time: 10.0"
 ```
 
-If we run the clock for Δt=10, it jumps immediately ahead since it has nothing to do.
+If we run the clock for a duration ``Δt=10``, it jumps immediately ahead since it has nothing to do.
 
 ### Time units
 
 ## Real time clocks
 
-A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's physical clock and measures time in seconds [s]. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
+A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's physical clock and measures time in seconds ``[s]``. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
 
 ```julia
 julia> rtc = createRTClock(0.01, 99)
@@ -49,8 +49,32 @@ julia> rtc.time         # synonymous way to get time
 
 We can schedule events to real time clocks as to virtual clocks and they will execute at their due time.
 
+## Clock concurrency
+
+`DiscreteEvents` can represent entities in DES as processes or actors running as asynchronous tasks. Those then run concurrently to the clock. If a task after activation by the clock gives control back to the Julia scheduler (e.g. by reading from a channel), it enqueues for its next schedule behind the clock. The clock may then increment time to ``t_{i+1}`` before the task can finish its job at current event time ``t_i``.
+
+There are two ways to solve this problem:
+
+1. The clock does a 2ⁿᵈ `yield()` after invoking a task and enqueues again at the end of the scheduling queue. This is implemented for `delay!` and `wait!` of processes and should be enough for most cases. A user can implement this easily for other tasks [^2].
+2. Actors can `register!` their message channel to the clock and the clock will only proceed to the next event if all registered channels are empty.
+
 ## Parallel clocks
+
+The situation gets worse with multithreading and tasks running in parallel. To maintain the order of cause and effect we want to avoid than an event scheduled for a time ``t_{i+1}`` executes on a parallel thread *before* an event scheduled for ``t_i`` completes.
+
+In short we take at least four steps to distribute simulations of DES over multiple threads in order to introduce not too much skew into the ordering of events:
+
+1. By introducing parallel clocks we maintain a local order of events on each thread and
+2. synchronize the parallel clocks often.
+3. A user keeps associated entities and events (subsystems) together on a thread and
+4. takes care that distributed DES subsystems are sufficiently decoupled.
+
+This is described at greater length in [distributed simulations](parallel.md). Here we illustrate how to create parallel clocks:
+
+```julia
+```
 
 ## Clock commands
 
 [^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … Sure enough our measurement methods have advanced.
+[^2]: An example of a user implementation of this strategy is the `Base.get()` function in [Actors](actors.md). If this is not enough (an actor does more yields between timed events), you can go with the 2ⁿᵈ strategy.

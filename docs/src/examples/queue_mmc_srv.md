@@ -15,9 +15,9 @@ function server(clk::Clock, id::Int, input::Channel, output::Channel, service_di
     put!(output, job)
 end
 
-function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
-    for i = 1:num_customers # initialize customers
-        delay!(clk, rand(arrival_dist))
+function arrivals(clk::Clock, queue::Channel, N::Int, M₁::Distribution)
+    for i = 1:N # initialize customers
+        delay!(clk, rand(M₁))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
@@ -27,22 +27,22 @@ end
 Then we setup our constants, the simulation environment with clock, channels and processes and run:
 
 ```julia
-Random.seed!(8710)         # set random number seed for reproducibility
-const num_customers = 10   # total number of customers generated
-const num_servers = 2      # number of servers
-const μ = 1.0 / 2          # service rate
-const λ = 0.9              # arrival rate
-const arrival_dist = Exponential(1/λ)  # interarrival time distribution
-const service_dist = Exponential(1/μ); # service time distribution
+Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
 
 # initialize the simulation environment and run
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-for i in 1:num_servers
-    process!(clock, Prc(i, server, i, input, output, service_dist))
+for i in 1:c
+    process!(clock, Prc(i, server, i, input, output, M₂))
 end
-process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
+process!(clock, Prc(0, arrivals, input, N, M₁), 1)
 run!(clock, 20)
 ```
 

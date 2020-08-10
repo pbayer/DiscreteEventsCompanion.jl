@@ -52,9 +52,9 @@ end
 We need also our arrival process. It communicates arrivals over the servers' com channels.
 
 ```julia
-function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, num_customers::Int, arrival_dist::Distribution)
-    for i = 1:num_customers # initialize customers
-        delay!(clk, rand(arrival_dist))
+function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, N::Int, M₁::Distribution)
+    for i = 1:N # initialize customers
+        delay!(clk, rand(M₁))
         put!(queue, i)
         now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
         map(s->put!(s.com,Arrive()), srv) # notify the servers
@@ -65,21 +65,22 @@ end
 Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:
 
 ```julia
-Random.seed!(8710)         # set random number seed for reproducibility
-const num_customers = 10   # total number of customers generated
-const num_servers = 2      # number of servers
-const μ = 1.0 / 2          # service rate
-const λ = 0.9              # arrival rate
-const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-const service_dist = Exponential(1/μ); # service time distribution
+Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
 
 # initialize simulation environment
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-for i in 1:num_servers   # start actors
-    s = Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, service_dist)
-    yield(@task act!(s)) # we yield immediately to the actor task
+for i in 1:c   # start actors
+    push!(srv, Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, M₂))
+    push!(t, @task act!(srv[i]))
+    yield(t[i])
 end
 process!(clock, Prc(0, arrivals, input, srv, num_customers, arrival_dist), 1)
 
