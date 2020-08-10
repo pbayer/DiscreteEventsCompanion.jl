@@ -36,28 +36,29 @@ function act!(s::Server)  # actor loop, take something
     while true            # from the com channel and act! on it
         act!(s, s.state, take!(s.com))
     end
-end</code></pre><p>We need also our arrival process. It communicates arrivals over the servers&#39; com channels.</p><pre><code class="language-julia">function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, num_customers::Int, arrival_dist::Distribution)
-    for i = 1:num_customers # initialize customers
-        delay!(clk, rand(arrival_dist))
+end</code></pre><p>We need also our arrival process. It communicates arrivals over the servers&#39; com channels.</p><pre><code class="language-julia">function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, N::Int, M₁::Distribution)
+    for i = 1:N # initialize customers
+        delay!(clk, rand(M₁))
         put!(queue, i)
         now!(clk, ()-&gt;@printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(clk), i))
         map(s-&gt;put!(s.com,Arrive()), srv) # notify the servers
     end
-end</code></pre><p>Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:</p><pre><code class="language-julia">Random.seed!(8710)         # set random number seed for reproducibility
-const num_customers = 10   # total number of customers generated
-const num_servers = 2      # number of servers
-const μ = 1.0 / 2          # service rate
-const λ = 0.9              # arrival rate
-const arrival_dist = Exponential(1/λ)  # interarrival time distriubtion
-const service_dist = Exponential(1/μ); # service time distribution
+end</code></pre><p>Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:</p><pre><code class="language-julia">Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # interarrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
 
 # initialize simulation environment
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-for i in 1:num_servers   # start actors
-    s = Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, service_dist)
-    yield(@task act!(s)) # we yield immediately to the actor task
+for i in 1:c   # start actors
+    push!(srv, Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, M₂))
+    push!(t, @task act!(srv[i]))
+    yield(t[i])
 end
 process!(clock, Prc(0, arrivals, input, srv, num_customers, arrival_dist), 1)
 
@@ -74,4 +75,4 @@ run!(clock, 20)</code></pre><p>Then we get our usual output:</p><pre><code class
 10.257: server 1 serving customer 10
 10.624: server 1 finished serving 10
 10.734: server 2 finished serving 9
-&quot;run! finished with 50 clock events, 0 sample steps, simulation time: 20.0&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../queue_mmc_srv/">« M/M/c Processes</a><a class="docs-footer-nextpage" href="../queue_mmc_actor/">M/M/c Actors »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 3 August 2020 19:02">Monday 3 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+&quot;run! finished with 50 clock events, 0 sample steps, simulation time: 20.0&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../queue_mmc_srv/">« M/M/c Processes</a><a class="docs-footer-nextpage" href="../queue_mmc_actor/">M/M/c Actors »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 10 August 2020 07:07">Monday 10 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
