@@ -19,19 +19,19 @@ Base.get(clk::Clock, m::Message, after, Δt::Number) =
         s.job = take!(s.input)
         become(busy, s)
         get(s.clk, Finish(), after, rand(s.d))
-        now!(s.clk, ()-&gt;@printf(&quot;%5.3f: server %d serving customer %d\n&quot;, tau(s.clk), s.id, s.job))
+        print(s.clk, @sprintf(&quot;%5.3f: server %d serving customer %d\n&quot;, tau(s.clk), s.id, s.job))
     end
 end
 busy(s::Server, ::Message) = nothing  # this is a default transition
 function busy(s::Server, ::Finish)
     put!(s.output, s.job)
     become(idle, s)
-    now!(s.clk, ()-&gt;@printf(&quot;%5.3f: server %d finished serving %d\n&quot;, tau(s.clk), s.id, s.job))
+    print(s.clk, @sprintf(&quot;%5.3f: server %d finished serving %d\n&quot;, tau(s.clk), s.id, s.job))
 end</code></pre><p>When an idle server gets an <code>Arrive()</code> message, it checks its input and if there is one, it takes it and becomes busy. It schedules a <code>Finish()</code> message for itself after a random service time. When it arrives, it puts its job into the output and becomes idle. As you see, the code is almost plain text.</p><p>As before we need an arrival function:</p><pre><code class="language-julia">function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, N::Int, A::Distribution)
     for i = 1:N # initialize customers
         delay!(clk, rand(A))
         put!(queue, i)
-        now!(clk, ()-&gt;@printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(clk), i))
+        print(clk, @sprintf(&quot;%5.3f: customer %d arrived\n&quot;, tau(clk), i))
         map(l-&gt;send!(l, Arrive()), lnk) # notify the servers
     end
 end</code></pre><p>We setup our environment, the actors and the arrivals process:</p><pre><code class="language-julia">Random.seed!(8710)          # set random number seed for reproducibility
@@ -50,7 +50,7 @@ lnk = Link[]
 for i in 1:c   # start actors
     s = Server(i, clock, input, output, 0, M₂)
     push!(lnk, Actor(idle, s))
-    register!(clock, lnk[end]) # register them to the clock
+    register!(clock.channels, lnk[end]) # register them to the clock
 end
 process!(clock, Prc(0, arrivals, input, lnk, N, M₁), 1)
 run!(clock, 20)</code></pre><p>... and get our expected output:</p><pre><code class="language-julia">0.123: customer 1 arrived
@@ -67,4 +67,4 @@ run!(clock, 20)</code></pre><p>... and get our expected output:</p><pre><code cl
 10.257: server 1 serving customer 10
 10.624: server 1 finished serving 10
 10.734: server 2 finished serving 9
-&quot;run! finished with 50 clock events, 0 sample steps, simulation time: 20.0&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../queue_mmc_sm/">« M/M/c State Machines</a><a class="docs-footer-nextpage" href="../house_heating/house_heating/">House Heating »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 12 August 2020 08:37">Wednesday 12 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+&quot;run! finished with 50 clock events, 0 sample steps, simulation time: 20.0&quot;</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../queue_mmc_sm/">« M/M/c State Machines</a><a class="docs-footer-nextpage" href="../house_heating/house_heating/">House Heating »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 12 August 2020 08:38">Wednesday 12 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
