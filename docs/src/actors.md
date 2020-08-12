@@ -23,15 +23,17 @@ Actors integrate so well into an event framework because they are message driven
 - represent hierarchy (e.g. UML state machines, different system levels ...),
 - model structural changes in systems (e.g. making more servers available if load gets too high),
 
-!!! note
+!!! note "Minimal actor support"
 
-    `DiscreteEvents` has no builtin support for actors yet. For explorations into actors we use [`YAActL`](https://github.com/pbayer/YAActL.jl).
+    `DiscreteEvents` now has minimal actor support. For explorations into actors we use [`YAActL`](https://github.com/pbayer/YAActL.jl).
 
 ## Dynamical state machines
 
 Actors have their [behaviors](https://pbayer.github.io/YAActL.jl/dev/usage/#Behaviors) described by functions. They can change those functions with `become`. Thus they assume a new state and act as state machines:
 
 ```julia
+using YAActL
+
 function idle(s::Server, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
@@ -58,7 +60,7 @@ for i in 1:num_servers          # setup servers
 end
 ```
 
-We can command the actors over the `lnk` array. For the full example see [M/M/c queue with Actors](examples/queue_mmc_actor.md).
+We then can command the actors over the `lnk` array. For the full example see [M/M/c queue with Actors](examples/queue_mmc_actor.md).
 
 ## Composition
 
@@ -66,4 +68,3 @@ We can command the actors over the `lnk` array. For the full example see [M/M/c 
 
 [^1]: Gul Agha: Actors, A Model of Concurrent Computation in Distributed Systems.- 1986, MIT Press, 9
 [^2]: Vaughn Vernon, Reactive Messaging Patterns with the Actor Model.- 2016, Pearson, 14f
-[^3]: Gul Agha: 9f

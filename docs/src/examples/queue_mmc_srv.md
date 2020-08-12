@@ -7,11 +7,11 @@ This view can be expressed as [processes](../processes.md) waiting and delaying 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
 
-function server(clk::Clock, id::Int, input::Channel, output::Channel, service_dist::Distribution)
+function server(clk::Clock, id::Int, input::Channel, output::Channel, M₂::Distribution)
     job = take!(input)
-    now!(clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
-    delay!(clk, rand(service_dist))
-    now!(clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
+    print(clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
+    delay!(clk, rand(M₂))
+    print(clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
     put!(output, job)
 end
 
@@ -19,7 +19,7 @@ function arrivals(clk::Clock, queue::Channel, N::Int, M₁::Distribution)
     for i = 1:N # initialize customers
         delay!(clk, rand(M₁))
         put!(queue, i)
-        now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
+        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
 end
 ```

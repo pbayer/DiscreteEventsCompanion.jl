@@ -33,9 +33,9 @@ The following two functions define processes:
 # describe the server process
 function server(clk::Clock, id::Int, input::Channel, output::Channel, service_dist::Distribution)
     job = take!(input)
-    now!(clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
+    print(clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
     delay!(clk, rand(service_dist))
-    now!(clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
+    print(clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
     put!(output, job)
 end
 
@@ -44,12 +44,15 @@ function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::
     for i = 1:num_customers # initialize customers
         delay!(clk, rand(arrival_dist))
         put!(queue, i)
-        now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
+        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
 end
 ```
 
-Note that to run as processes, functions must have a `Clock` variable as their first argument.
+!!! note "Rules for processes"
+
+    1. to run as processes, functions must have a `Clock` variable as their first argument,
+    2. processes (or asynchronous tasks in general) must `print` via the clock in order to avoid [clock concurrency](@ref clock_concurrency).
 
 We can start multiple instances of processes representing e.g. multiple servers and different arrival processes.
 

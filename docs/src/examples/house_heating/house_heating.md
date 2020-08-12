@@ -8,15 +8,16 @@ In a hybrid system we have continuous processes and discrete events interacting 
 - The room temperature ``T_r`` changes proportional to the difference between heating ``\dot{Q_h}`` and cooling ``\dot{Q_c}``.
 
 ```math
-\begin{eqnarray}
-\dot{Q_c} & = & \frac{\left(T_r - T_e\right)}{\eta R} \; & \left[\tfrac{J}{h}\right], & \mathrm{where\; R = thermal\ resistance\; \left[\tfrac{K h}{J}\right],\; \eta = efficiency\  factor \le 1.0}\\
-\dot{Q_h} & = & \alpha \left(T_h - T_r\right) \; & \left[\tfrac{J}{h}\right], & \mathrm{where\; \alpha = proportionality\ factor}\; \left[\tfrac{J}{K h}\right] \\
-\dot{T_h} & = & \beta \left(\dot{Q_h} - \dot{Q_c}\right)\; & \left[\tfrac{K}{h}\right], & \mathrm{where\; \beta = proportionality\ factor}\; \left[\tfrac{K}{J}\right]\\
-\dot{T_c} & = & - \beta\ \dot{Q_c}\; & \left[\tfrac{K}{h}\right], & \mathrm{when\ heating\ is\ switched\ off.}
-\end{eqnarray}
+\begin{array}{rl}
+\dot{Q_c} = \frac{\left(T_r - T_e\right)}{\eta R} \; \left[\tfrac{J}{h}\right] & \mathrm{where\; R = thermal\ resistance\; \left[\tfrac{K h}{J}\right],\; \eta = efficiency\  factor \le 1.0},\\
+\dot{Q_h} = \alpha \left(T_h - T_r\right) \; \left[\tfrac{J}{h}\right] & \mathrm{where\; \alpha = proportionality\ factor}\; \left[\tfrac{J}{K h}\right], \\
+\dot{T_h} = \beta \left(\dot{Q_h} - \dot{Q_c}\right)\; \left[\tfrac{K}{h}\right] & \mathrm{where\; \beta = proportionality\ factor}\; \left[\tfrac{K}{J}\right],\\
+\dot{T_c} = - \beta\ \dot{Q_c}\; \left[\tfrac{K}{h}\right] & \mathrm{when\ heating\ is\ switched\ off.}
+\end{array}
 ```
 
 We assume that
+
 - the thermostat is set to switch heating on if ``T_r`` falls under 20°C and to switch heating off if ``T_r`` rises above 23°C,
 - time units are hours,
 - the temperature ``T_h`` of the heating fluid is 40°C,
@@ -27,7 +28,6 @@ We assume that
 - the heater is off.
 
 First we setup the physical model:
-
 
 ```julia
 using DiscreteEvents, Plots, DataFrames, Random, Distributions, LaTeXStrings
@@ -41,34 +41,30 @@ heating = false
 
 Δte(t, t1, t2) = cos((t-10)*π/12) * (t2-t1)/2  # change of a sinusoidal Te
 
-function Δtr(Tr, Te, heating)                  
+function Δtr(Tr, Te, heating)
     Δqc = (Tr - Te)/(R * η)                    # cooling rate
     Δqh = heating ? α * (Th - Tr) : 0          # heating rate
     return β * (Δqh - Δqc)                     # change in room temperature
 end
 ```
-Δtr (generic function with 1 method)
-
-
 
 We now setup a simulation for 24 hours from 0am to 12am. We update the simulation every virtual minute.
 
-
 ```julia
-reset!(𝐶)                                      # reset the clock
-rng = MersenneTwister(122)                     # seed the random number generator
-Δt = 1//60                                     # update every minute
-Te = 11                                        # start value for environment temperature
-Tr = 20                                        # start value for room temperature
+reset!(𝐶)                     # reset the clock
+rng = MersenneTwister(122)    # seed the random number generator
+Δt = 1//60                    # update every minute
+Te = 11                       # start value for environment temperature
+Tr = 20                       # start value for room temperature
 df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 
-function setTemperatures(t1=8, t2=20)               # change the temperatures
+function setTemperatures(t1=8, t2=20)  # change the temperatures
     global Te += Δte(tau(), t1, t2) * 2π/1440 + rand(rng, Normal(0, 0.1))
     global Tr += Δtr(Tr, Te, heating) * Δt
-    push!(df, (tau(), Tr, Te, Int(heating)) )       # append stats to the table
+    push!(df, (tau(), Tr, Te, Int(heating)) ) # append stats to the table
 end
 
-function switch(t1=20, t2=23)                       # simulate the thermostat
+function switch(t1=20, t2=23)                 # simulate the thermostat
     if Tr ≥ t2
         global heating = false
         event!(SF(switch, t1, t2), @val :Tr :≤ t1)  # setup a conditional event
@@ -78,16 +74,14 @@ function switch(t1=20, t2=23)                       # simulate the thermostat
     end
 end
 
-DiscreteEvents.sample!(SF(setTemperatures), Δt)           # setup sampling
-switch()                                            # start the thermostat
+DiscreteEvents.sample!(SF(setTemperatures), Δt) # setup sampling
+switch()                                       # start the thermostat
 
 @time run!(𝐶, 24)
 ```
+
 0.040105 seconds (89.21 k allocations: 3.435 MiB)\
 "run! finished with 0 clock events, 1440 sample steps, simulation time: 24.0"
-
-
-
 
 ```julia
 plot(df.t, df.tr, legend=:bottomright, label=L"T_r")
@@ -98,15 +92,9 @@ ylabel!("temperature")
 title!("House heating undisturbed")
 ```
 
-
-
-
 ![svg](output_4_0.svg)
 
-
-
 In a living room the thermal resistance is repeatedly diminished if people enter the room or open windows.
-
 
 ```julia
 function people()
@@ -135,11 +123,9 @@ switch()                                     # start the thermostat
 
 @time run!(𝐶, 24)
 ```
+
 0.114938 seconds (72.52 k allocations: 2.320 MiB)\
 "run! finished with 116 clock events, 1440 sample steps, simulation time: 24.0"
-
-
-
 
 ```julia
 plot(df.t, df.tr, legend=:bottomright, label=L"T_r")
@@ -150,11 +136,6 @@ ylabel!("temperature")
 title!("House heating with people")
 ```
 
-
-
-
 ![svg](output_7_0.svg)
-
-
 
 We have now all major schemes: events, continuous sampling and processes combined in one example.

@@ -16,12 +16,12 @@ const M₂ = Exponential(1/μ) # service time distribution
 # Define Customer Behavior
 function customer(clk::Clock, server::Channel, id::Int, ta::Float64, ds::Distribution)
     delay!(clk, ta)       # customer arrives
-    now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), id))
+    print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), id))
     s = take!(server)     # customer starts service
-    now!(clk, ()->@printf("%5.3f: customer %d entered service\n", tau(clk), id))
+    print(clk, @sprintf("%5.3f: customer %d entered service\n", tau(clk), id))
     delay!(clk, rand(ds)) # server is busy
     put!(server, s)       # customer exits service
-    now!(clk, ()->@printf("%5.3f: customer %d exited service\n", tau(clk), id))
+    print(clk, @sprintf("%5.3f: customer %d exited service\n", tau(clk), id))
 end
 
 # Setup and Run Simulation

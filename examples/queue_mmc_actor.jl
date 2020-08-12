@@ -31,14 +31,14 @@ function idle(s::Server, ::Arrive)
         s.job = take!(s.input)
         become(busy, s)
         get(s.clk, Finish(), after, rand(s.S))
-        now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
+        print(s.clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
 busy(s::Server, ::Message) = nothing
 function busy(s::Server, ::Finish)
     become(idle, s)
     put!(s.output, s.job)
-    now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
+    print(s.clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
 
 # model arrivals
@@ -46,7 +46,7 @@ function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, N::Int, A::Dist
     for i = 1:N # initialize customers
         delay!(clk, rand(A))
         put!(queue, i)
-        now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
+        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
         map(l->send!(l, Arrive()), lnk) # notify the servers
     end
 end
@@ -59,7 +59,7 @@ lnk = Link[]
 for i in 1:c   # start actors
     s = Server(i, clock, input, output, 0, M₂)
     push!(lnk, Actor(idle, s))
-    register!(clock, lnk[end])
+    register!(clock.channels, lnk[end])
 end
 process!(clock, Prc(0, arrivals, input, lnk, N, M₁), 1)
 run!(clock, 20)

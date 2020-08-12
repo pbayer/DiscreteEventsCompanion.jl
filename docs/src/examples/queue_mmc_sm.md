@@ -32,15 +32,15 @@ act!(::Server, ::𝑋, ::𝐸) = nothing   # a default transition
 function act!(s::Server, ::Idle, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
-        s.state = Busy()       # note that we must yield↓↓ to the actor here
+        s.state = Busy()
         event!(s.clk, (fun(put!, s.com, Finish()), yield), after, rand(s.d))
-        now!(s.clk, ()->@printf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
+        print(s.clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
 function act!(s::Server, ::Busy, ::Finish)
     s.state = Idle()
     put!(s.output, s.job)
-    now!(s.clk, ()->@printf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
+    print(s.clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
 function act!(s::Server)  # actor loop, take something
     while true            # from the com channel and act! on it
@@ -56,7 +56,7 @@ function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, N::Int, M₁:
     for i = 1:N # initialize customers
         delay!(clk, rand(M₁))
         put!(queue, i)
-        now!(clk, ()->@printf("%5.3f: customer %d arrived\n", tau(clk), i))
+        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
         map(s->put!(s.com,Arrive()), srv) # notify the servers
     end
 end

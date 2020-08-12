@@ -9,7 +9,7 @@ We consider time as given or measured by a clock ``C``. Furthermore we character
 \end{array}
 ```
 
-In an observed event sequence ``\,\{e_1, e_2, e_3, ...\}\,`` each event ``\;e_i \in \mathcal{E}\;`` [^1] is associated with a time ``\,t_i`` [^2]. We can write that as a sequence of tuples:
+In an observed event sequence ``\,\{e_1, e_2, e_3, ...\}\,`` each event ``\;e_i \in \mathcal{E}\;`` is associated with a time ``\,t_i`` [^1]. We can write that as a sequence of tuples:
 
 ```math
 \{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
@@ -38,9 +38,9 @@ true
 
 Simple expressions like `a+1` or function calls like `println()` are not `Action`s since they get executed immediately and cannot be stored for later execution.
 
-!!! note
+!!! note "Use functions!"
 
-    It is preferable to use functions instead of expressions because it is so much faster. If you use expressions, you will get a one-time warning.
+    Use functions instead of expressions because it is much faster. If you use expressions, you will get a one-time warning.
 
 ## Data
 
@@ -125,6 +125,6 @@ julia> cc                             # the counter variable has increased
 Counter(1)
 ```
 
-[^1]: Here we follow roughly Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another."
+[^1]: We follow Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another."
 [^2]: This means simply a computational action. It does not have to be a state transition of the represented system. It could be also a check if an event is feasible.
 [^3]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).
