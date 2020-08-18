@@ -2,10 +2,10 @@
 
 In a hybrid system we have continuous processes and discrete events interacting in one system. A thermostat is a basic example of this:
 
-- Heating changes between two states: On and Off.
-- A room cools ``\dot{Q_c}\; [J/h]`` at a certain rate proportional to the difference between room temperature ``T_r`` and environment temperature ``T_e\; [K]``.
-- It heats ``\dot{Q_h}\; [J/h]`` at a rate proportional to the temperature difference between temperature of the heating fluid ``T_h\; [K]`` and room temperature ``T_r\; [K]``.
-- The room temperature ``T_r`` changes proportional to the difference between heating ``\dot{Q_h}`` and cooling ``\dot{Q_c}``.
+- Heating changes between two states: On and Off,
+- a room cools  at a certain rate ``\dot{Q_c}\; [J/h]`` proportional to the difference between room temperature ``T_r`` and environment temperature ``T_e\; [K]``,
+- it heats at a rate ``\dot{Q_h}\; [J/h]`` proportional to the temperature difference between temperature of the heating fluid ``T_h\; [K]`` and room temperature ``T_r\; [K]``,
+- the room temperature ``T_r`` changes proportionally to the difference between heating ``\dot{Q_h}`` and cooling ``\dot{Q_c}``.
 
 ```math
 \begin{array}{rl}
@@ -48,7 +48,7 @@ function Δtr(Tr, Te, heating)
 end
 ```
 
-We now setup a simulation for 24 hours from 0am to 12am. We update the simulation every virtual minute.
+We now setup a simulation for 24 hours. We update the simulation every virtual minute.
 
 ```julia
 reset!(𝐶)                     # reset the clock

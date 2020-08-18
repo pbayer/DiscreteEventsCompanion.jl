@@ -8,19 +8,15 @@ A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `
 
 A virtual clock is not constrained by physical time. It doesn't wait a physical time period for the next event to occur, but jumps right to it. It executes an event sequence as fast as possible.
 
-```julia
-julia> using DiscreteEvents
-
-julia> clk = Clock()
-Clock 0, thread 1 (+ 0 ac): state=DiscreteEvents.Undefined(), t=0.0 , Δt=0.01 , prc:0
-  scheduled ev:0, cev:0, sampl:0
+```@repl clocks
+using DiscreteEvents
+clk = Clock()
 ```
 
 We created a new clock, running on thread 1, having time ``t=0.0``, a sampling rate of ``Δt=0.01``, no registered processes, no scheduled events, conditional events or sampling actions.
 
-```julia
-julia> run!(clk, 10)
-"run! finished with 0 clock events, 0 sample steps, simulation time: 10.0"
+```@repl clocks
+run!(clk, 10)
 ```
 
 If we run the clock for a duration ``Δt=10``, it jumps immediately ahead since it has nothing to do.
@@ -31,51 +27,53 @@ If we run the clock for a duration ``Δt=10``, it jumps immediately ahead since 
 
 A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's physical clock and measures time in seconds ``[s]``. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
 
-```julia
-julia> rtc = createRTClock(0.01, 99)
-Real time clock 99 on thread 8: state=DiscreteEvents.Idle(), t=0.0001193 s, T=0.01 s, prc:0
-   scheduled ev:0, cev:0, sampl:0
+```@repl clocks
+rtc = createRTClock(0.01, 99)
 ```
 
 Here we have created a real time clock with id=99 on thread 8. It has a clock period of T=0.01 s and synchronizes at that resolution with the system clock running in nano-seconds. When the start message was created, the clock had just advanced 0.0001193 s. When we query its time thereafter, it returns the time in seconds passed since startup:
 
-```julia
-julia> tau(rtc)         # query time
-14.045107885001926
-
-julia> rtc.time         # synonymous way to get time
-17.910258978001366
+```@repl clocks
+sleep(1) # hide
+tau(rtc)         # query time
+sleep(1) # hide
+rtc.time         # synonymous way to get time
 ```
 
 We can schedule events to real time clocks as to virtual clocks and they will execute at their due physical time.
 
 ## [Clock concurrency](@id clock_concurrency)
 
-`DiscreteEvents` can represent entities in DES as processes or actors running as asynchronous tasks. Those tasks run concurrently to the clock. If a task after activation by the clock gives control back to the Julia scheduler (e.g. by reading from a channel or by doing an IO-operation), it enqueues for its next schedule behind the clock. The clock may then increment time to ``t_{i+1}`` before the task can finish its job at current event time ``t_i``.
+`DiscreteEvents` can represent entities in DES as tasks (e.g. processes, actors) running concurrently to the clock. We want them to coordinate with the clock and not to go out of time.
 
-There are several ways to solve this problem:
+The user must take two precautions:
 
-1. The clock does a 2ⁿᵈ `yield()` after invoking a task and enqueues again at the end of the scheduling queue. This is implemented for `delay!` and `wait!` of processes and should be enough for most those cases.
-2. Actors `push!` their message channel to the `clock.channels` vector and the clock will only proceed to the next event if all registered channels are empty [^2].
-3. Asynchronous tasks use `now!` to let the clock do IO-operations for them. They can also `print` via the clock.
+1. Actors must register (`push!`) their message channels to the clock and the clock will only proceed to the next event if all registered channels are empty.
+2. Tasks use `now!` for IO-operations or `print` via the clock.
 
 ## Parallel clocks
 
-The situation gets worse with multithreading and tasks running in parallel. To maintain the order of cause and effect we want to avoid than an event scheduled for a time ``t_{i+1}`` executes on a parallel thread *before* an event scheduled for ``t_i`` completes.
+With multithreading and tasks running in parallel we want to maintain the order of cause and effect and to avoid than an event scheduled for a time ``t_{i+1}`` executes on a parallel thread *before* an event scheduled for ``t_i`` completes.
 
-In short we take at least four steps to distribute simulations of DES over multiple threads in order to introduce not too much skew into the ordering of events:
+In parallel simulations we take at least four steps in order to limit time skew and event disorder:
 
-1. By introducing parallel clocks we maintain a local order of events on each thread and
-2. synchronize the parallel clocks often.
-3. A user keeps associated entities and events (subsystems) together on a thread and
-4. takes care that distributed DES subsystems are sufficiently decoupled.
+1. With thread local clocks we maintain a local order of events on each thread and
+2. synchronize the local clocks often with the global clock on thread 1.
+3. Users keep associated entities and events (subsystems) together on threads and
+4. take care that distributed DES subsystems are sufficiently decoupled.
 
-This is described at greater length in [distributed simulations](@ref distributed_simulations). Here we illustrate how to create parallel clocks:
+This is described at greater length in [distributed simulations](@ref distributed_simulations). Here we illustrate how to create and access parallel clocks:
 
-```julia
+```@repl
+pc = PClock()           # create a master clock with parallel clocks
+pc2 = pclock(pc, 2)     # access the active clock on thread 2
+pc2.clock               # access the parallel clock on thread 2
+pc2.clock.ac[]          # back to the active clock 2
+pc2.clock.ac[].master[] # back to master on thread 1
 ```
+
+Note that the master clock is a shared variable of active clock 2. This is an intermediate solution and will change soon. Otherwise the interaction between the global (master) clock on thread 1 and the parallel local clocks is happening via message channels. Parallel clocks have message channels to master but not to each other.
 
 ## Clock commands
 
 [^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … or more advanced measurement methods.
-[^2]: In [`YAActL`](https://github.com/pbayer/YAActL.jl) you can  `register!` to a `Vector{Channel}`. To register actors is also useful for diagnosis.
