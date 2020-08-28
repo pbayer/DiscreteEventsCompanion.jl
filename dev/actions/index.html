@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Actions · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../DES/">Overview</a></li><li><a class="tocitem" href="../clocks/">Clocks</a></li><li class="is-active"><a class="tocitem" href>Actions</a><ul class="internal"><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#Current-data"><span>Current data</span></a></li><li><a class="tocitem" href="#Modifying-data"><span>Modifying data</span></a></li></ul></li><li><a class="tocitem" href="../sampling/">Sampling</a></li><li><a class="tocitem" href="../events/">Events</a></li><li><a class="tocitem" href="../activities/">Activities</a></li><li><a class="tocitem" href="../processes/">Processes</a></li><li><a class="tocitem" href="../random/">Randomness</a></li><li><a class="tocitem" href="../automata/">State Machines</a></li><li><a class="tocitem" href="../actors/">Actors</a></li><li><a class="tocitem" href="../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/examples/">Overview</a></li><li><a class="tocitem" href="../examples/singleserver/">Single Server</a></li><li><a class="tocitem" href="../examples/tabletennis/">Table Tennis</a></li><li><a class="tocitem" href="../examples/queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../examples/queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../examples/queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../examples/queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../examples/house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../examples/postoffice/postoffice/">Post Office</a></li><li><a class="tocitem" href="../examples/dicegame/dicegame/">Goldratt&#39;s Dice Game</a></li></ul></li><li><a class="tocitem" href="../performance/">Performance</a></li><li><a class="tocitem" href="../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../diag/">Diagnosis</a></li><li><a class="tocitem" href="../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Actions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Actions</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/actions.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Actions"><a class="docs-heading-anchor" href="#Actions">Actions</a><a id="Actions-1"></a><a class="docs-heading-anchor-permalink" href="#Actions" title="Permalink"></a></h1><p>We consider time as given or measured by a clock <span>$C$</span>. Furthermore we characterize a discrete event system (DES) by</p><div>\[\begin{array}{lll}
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Actions · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../DES/">Overview</a></li><li><a class="tocitem" href="../clocks/">Clocks</a></li><li class="is-active"><a class="tocitem" href>Actions</a><ul class="internal"><li><a class="tocitem" href="#Fun-with-functions"><span>Fun with functions</span></a></li><li><a class="tocitem" href="#Access-data"><span>Access data</span></a></li><li><a class="tocitem" href="#Global-variables"><span>Global variables</span></a></li></ul></li><li><a class="tocitem" href="../sampling/">Sampling</a></li><li><a class="tocitem" href="../events/">Events</a></li><li><a class="tocitem" href="../activities/">Activities</a></li><li><a class="tocitem" href="../processes/">Processes</a></li><li><a class="tocitem" href="../random/">Randomness</a></li><li><a class="tocitem" href="../automata/">State Machines</a></li><li><a class="tocitem" href="../actors/">Actors</a></li><li><a class="tocitem" href="../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/examples/">Overview</a></li><li><a class="tocitem" href="../examples/singleserver/">Single Server</a></li><li><a class="tocitem" href="../examples/tabletennis/">Table Tennis</a></li><li><a class="tocitem" href="../examples/queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../examples/queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../examples/queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../examples/queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../examples/house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../examples/postoffice/postoffice/">Post Office</a></li><li><a class="tocitem" href="../examples/dicegame/dicegame/">Goldratt&#39;s Dice Game</a></li></ul></li><li><a class="tocitem" href="../performance/">Performance</a></li><li><a class="tocitem" href="../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../diag/">Diagnosis</a></li><li><a class="tocitem" href="../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Manual</a></li><li class="is-active"><a href>Actions</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Actions</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/actions.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Actions"><a class="docs-heading-anchor" href="#Actions">Actions</a><a id="Actions-1"></a><a class="docs-heading-anchor-permalink" href="#Actions" title="Permalink"></a></h1><p>We consider time as given or measured by a clock <span>$C$</span>. Furthermore we characterize a discrete event system (DES) by</p><div>\[\begin{array}{lll}
   \mathcal{X}&amp;=\{x_i, x_j, ..., x_n\} &amp; \textrm{a discrete set of states}, \\
   \mathcal{E}&amp;=\{\alpha, \beta, \gamma, ...\} &amp; \textrm{a countable set of events eventually causing state transitions}
 \end{array}\]</div><p>In an observed event sequence <span>$\,\{e_1, e_2, e_3, ...\}\,$</span> each event <span>$\;e_i \in \mathcal{E}\;$</span> is associated with a time <span>$\,t_i$</span> <sup class="footnote-reference"><a id="citeref-1" href="#footnote-1">[1]</a></sup>. We can write that as a sequence of tuples:</p><div>\[\{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}\]</div><p>In <code>DiscreteEvents</code> we want to represent an event always as that tuple <span>$\,(e_i,t_i)\,$</span>. For representing <span>$\,e_i\,$</span> computationally, we introduce the term <em>action</em> <sup class="footnote-reference"><a id="citeref-2" href="#footnote-2">[2]</a></sup>. An <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.Action"><code>Action</code></a> is a Julia <a href="https://docs.julialang.org/en/v1/manual/metaprogramming/#Expressions-and-evaluation-1">expression</a>, a <a href="https://docs.julialang.org/en/v1/manual/functions/">function</a> object or a <a href="https://docs.julialang.org/en/v1/manual/functions/#Tuples-1">tuple</a> of them, which will be executed at a given time:</p><pre><code class="language-julia">julia&gt; using DiscreteEvents
@@ -11,47 +11,53 @@ julia&gt; println isa Action    # a function object can be called later
 true
 
 julia&gt; ()-&gt;println()         # we create an anyonymous function
-#23 (generic function with 1 method)
+#9 (generic function with 1 method)
 
 julia&gt; ans isa Action        # this too is an action
 true
 
 julia&gt; (:(a+1), println) isa Action  # a tuple of actions too is an action
-true</code></pre><p>Simple expressions like <code>a+1</code> or function calls like <code>println()</code> are not <code>Action</code>s since they get executed immediately and cannot be stored for later execution.</p><div class="admonition is-info"><header class="admonition-header">Use functions!</header><div class="admonition-body"><p>Use functions instead of expressions because it is much faster. If you use expressions, you will get a one-time warning.</p></div></div><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>Actions (expressions and functions) have access to data within their scope, but often we want to pass the data to functions as arguments. We can use <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun"><code>fun</code></a> to create an executable closure object, containing the function with its arguments:</p><pre><code class="language-julia">julia&gt; a = 1; b = 2; c = 3;         # create some global data
-
-julia&gt; f(x, y, z) = x^y + z         # define a function
+true</code></pre><p>Simple expressions like <code>a+1</code> or function calls like <code>println()</code> are not <code>Action</code>s since they get executed immediately and cannot be stored for later execution.</p><div class="admonition is-info"><header class="admonition-header">Use functions!</header><div class="admonition-body"><p>Use functions instead of expressions because it is much faster. If you use expressions, you will get a one-time warning.</p></div></div><h2 id="Fun-with-functions"><a class="docs-heading-anchor" href="#Fun-with-functions">Fun with functions</a><a id="Fun-with-functions-1"></a><a class="docs-heading-anchor-permalink" href="#Fun-with-functions" title="Permalink"></a></h2><p>To use or modify data we call a function <code>f</code> on parameters <code>x</code>, <code>y</code> and <code>z</code> as <code>f(x,y,z)</code>. But this executes it immediately. If we want to execute <code>f(x,y,z)</code> later, we can wrap it now in a function, an anonymous function or in a <a href="https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun"><code>fun</code></a> function closure.</p><pre><code class="language-julia">julia&gt; f(x,y,z) = x+y+z            # define a function
 f (generic function with 1 method)
 
-julia&gt; ff = fun(f, a, b, c)         # create a function closure with captured data
-#8 (generic function with 1 method)
+julia&gt; x=1; y=1; z=1;              # define variables
 
-julia&gt; ff isa Action                # this is an action
-true
+julia&gt; f(x,y,z) isa Action         # f(x,y,z) is not an Action
+false
 
-julia&gt; ff()                         # which we can execute later
-4</code></pre><h2 id="Current-data"><a class="docs-heading-anchor" href="#Current-data">Current data</a><a id="Current-data-1"></a><a class="docs-heading-anchor-permalink" href="#Current-data" title="Permalink"></a></h2><p>In simulations most often we want our actions at execution time to get the current data. To achieve this, we change our <code>ff</code> closure:</p><pre><code class="language-julia">julia&gt; ff = fun(f, ()-&gt;a, ()-&gt;b, ()-&gt;c)  # capture the data at execution time
-#8 (generic function with 1 method)
-
-julia&gt; ff()                         # execute the closure
-4
-
-julia&gt; a = 2                        # change one of the data values
-2
-
-julia&gt; ff()                         # ff now captures the changed data
-7</code></pre><p>Another way is to pass the data symbolically to the function closure:</p><pre><code class="language-julia">julia&gt; ff = fun(f, :a, :b, :c)
-#8 (generic function with 1 method)
-
-julia&gt; ff()
-┌ Warning: Evaluating expressions is slow, use functions instead
-└ @ DiscreteEvents ~/.julia/packages/DiscreteEvents/vyBMT/src/fclosure.jl:37
-7
-
-julia&gt; a = 3
+julia&gt; f(x,y,z)
 3
 
-julia&gt; ff()
-12</code></pre><p>Note that you got a warning because this is slow and not recommended.</p><h2 id="Modifying-data"><a class="docs-heading-anchor" href="#Modifying-data">Modifying data</a><a id="Modifying-data-1"></a><a class="docs-heading-anchor-permalink" href="#Modifying-data" title="Permalink"></a></h2><p>The best way to reference data, is to have your actions work with mutable values (like <code>Array</code>s)<sup class="footnote-reference"><a id="citeref-3" href="#footnote-3">[3]</a></sup>. Then you can also modify your data in an action, which is what you often want:</p><pre><code class="language-julia">julia&gt; mutable struct Counter       # define a counter type
+julia&gt; f isa Action                # this is an Action, but looses the parameters
+true
+
+julia&gt; g() = f(x,y,z)              # capture f(x,y,z) in g
+g (generic function with 1 method)
+
+julia&gt; g isa Action
+true
+
+julia&gt; g()
+3
+
+julia&gt; h = (()-&gt;f(x,y,z))          # use an anonymous function
+#11 (generic function with 1 method)
+
+julia&gt; h()
+3
+
+julia&gt; i = fun(f,x,y,z)            # use a fun
+#7 (generic function with 1 method)
+
+julia&gt; i()
+3
+
+julia&gt; i isa Action
+true
+
+julia&gt; fun(f,x,y, fun(f,x,y,z))()
+5
+</code></pre><p><code>fun</code>s are executable and can be nested. Thus they provide a structure to store functions and their variables for later execution.</p><h2 id="Access-data"><a class="docs-heading-anchor" href="#Access-data">Access data</a><a id="Access-data-1"></a><a class="docs-heading-anchor-permalink" href="#Access-data" title="Permalink"></a></h2><p>If you want to change data in an Action, the simplest way is to work with mutable values (like <code>Array</code>s):</p><pre><code class="language-julia">julia&gt; mutable struct Counter       # define a counter type
            x::Int
        end
 
@@ -61,11 +67,39 @@ Counter(0)
 julia&gt; g(ctr::Counter) = ctr.x += 1   # a function to increment a counter
 g (generic function with 1 method)
 
-julia&gt; gg = fun(g, cc)                # put it in a closure with a counter variable
+julia&gt; gg = fun(g, cc)                # put it in a fun closure with a counter variable
 #8 (generic function with 1 method)
 
 julia&gt; gg()                           # execute it
 1
 
 julia&gt; cc                             # the counter variable has increased
-Counter(1)</code></pre><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>We follow Cassandras: Discrete Event Systems, 2008, p. 27 and don&#39;t attempt to define what an &quot;event&quot; is. &quot;We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another.&quot;</li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>This means simply a computational action. It does not have to be a state transition of the represented system. It could be also a check if an event is feasible.</li><li class="footnote" id="footnote-3"><a class="tag is-link" href="#citeref-3">3</a>This is faster because you avoid type instabilities associated with <a href="https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1">global variables</a>.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../clocks/">« Clocks</a><a class="docs-footer-nextpage" href="../sampling/">Sampling »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 18 August 2020 18:05">Tuesday 18 August 2020</span>. Using Julia version 1.5.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+Counter(1)</code></pre><h2 id="Global-variables"><a class="docs-heading-anchor" href="#Global-variables">Global variables</a><a id="Global-variables-1"></a><a class="docs-heading-anchor-permalink" href="#Global-variables" title="Permalink"></a></h2><p>To make Actions <a href="https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables">work with global variables</a>, you must be careful to access their current value and use the <code>global</code> keyword to change them.</p><pre><code class="language-julia">julia&gt; a = 1; b = 2; c = 3;         # create some global data
+
+julia&gt; f1(x, y, z) = x^y + z        # define a function
+f (generic function with 1 method)
+
+julia&gt; ff = fun(f1, a, b, c)        # create a function closure with captured data
+#8 (generic function with 1 method)</code></pre><p><code>ff</code> captures the values of <code>a</code>, <code>b</code> and <code>c</code> when it is created. But those may change until execution. You can as well capture the current values at execution time:</p><pre><code class="language-julia">julia&gt; gg = fun(f1, ()-&gt;a, ()-&gt;b, ()-&gt;c)  # capture the data at execution time
+#8 (generic function with 1 method)
+
+julia&gt; gg()                         # execute the closure
+4
+
+julia&gt; a = 2                        # change one of the data values
+2
+
+julia&gt; gg()                         # ff now captures the changed data
+7</code></pre><p>Also if you pass a function call as argument to a <code>fun</code>, it gets executed immediately and you must hide it from immediate execution if you want to have it executed at event time.</p><p>You can also pass the data symbolically to the <code>fun</code> closure:</p><pre><code class="language-julia">julia&gt; hh = fun(f1, :a, :b, :c)
+#8 (generic function with 1 method)
+
+julia&gt; hh()
+┌ Warning: Evaluating expressions is slow, use functions instead
+└ @ DiscreteEvents ~/.julia/packages/DiscreteEvents/vyBMT/src/fclosure.jl:37
+7
+
+julia&gt; a = 3
+3
+
+julia&gt; hh()
+12</code></pre><p>Note that you got a warning because this is slow and thus not recommended.</p><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>We follow Cassandras: Discrete Event Systems, 2008, p. 27 and don&#39;t attempt to define what an &quot;event&quot; is. &quot;We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another.&quot;</li><li class="footnote" id="footnote-2"><a class="tag is-link" href="#citeref-2">2</a>This means simply a computational action. It does not have to be a state transition of the represented system. It could be also a check if an event is feasible.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../clocks/">« Clocks</a><a class="docs-footer-nextpage" href="../sampling/">Sampling »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 28 August 2020 14:26">Friday 28 August 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
