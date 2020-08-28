@@ -76,4 +76,8 @@ Note that the master clock is a shared variable of active clock 2. This is an in
 
 ## Clock commands
 
+----
+
+see also: [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/clocks/)s
+
 [^1]: In essence we count the number of naturally occurring periodic events to measure time: the revolutions of a moon or planet, our heart beats, the swings of a pendulum … or more advanced measurement methods.
