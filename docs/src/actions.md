@@ -27,7 +27,7 @@ julia> println isa Action    # a function object can be called later
 true
 
 julia> ()->println()         # we create an anyonymous function
-#23 (generic function with 1 method)
+#9 (generic function with 1 method)
 
 julia> ans isa Action        # this too is an action
 true
@@ -42,67 +42,59 @@ Simple expressions like `a+1` or function calls like `println()` are not `Action
 
     Use functions instead of expressions because it is much faster. If you use expressions, you will get a one-time warning.
 
-## Data
+## Fun with functions
 
-Actions (expressions and functions) have access to data within their scope, but often we want to pass the data to functions as arguments. We can use [`fun`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun) to create an executable closure object, containing the function with its arguments:
+To use or modify data we call a function `f` on parameters `x`, `y` and `z` as `f(x,y,z)`. But this executes it immediately. If we want to execute `f(x,y,z)` later, we can wrap it now in a function, an anonymous function or in a [`fun`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.fun) function closure.
 
 ```julia
-julia> a = 1; b = 2; c = 3;         # create some global data
-
-julia> f(x, y, z) = x^y + z         # define a function
+julia> f(x,y,z) = x+y+z            # define a function
 f (generic function with 1 method)
 
-julia> ff = fun(f, a, b, c)         # create a function closure with captured data
-#8 (generic function with 1 method)
+julia> x=1; y=1; z=1;              # define variables
 
-julia> ff isa Action                # this is an action
-true
+julia> f(x,y,z) isa Action         # f(x,y,z) is not an Action
+false
 
-julia> ff()                         # which we can execute later
-4
-```  
-
-## Current data
-
-In simulations most often we want our actions at execution time to get the current data. To achieve this, we change our `ff` closure:
-
-```julia
-julia> ff = fun(f, ()->a, ()->b, ()->c)  # capture the data at execution time
-#8 (generic function with 1 method)
-
-julia> ff()                         # execute the closure
-4
-
-julia> a = 2                        # change one of the data values
-2
-
-julia> ff()                         # ff now captures the changed data
-7
-```
-
-Another way is to pass the data symbolically to the function closure:
-
-```julia
-julia> ff = fun(f, :a, :b, :c)
-#8 (generic function with 1 method)
-
-julia> ff()
-┌ Warning: Evaluating expressions is slow, use functions instead
-└ @ DiscreteEvents ~/.julia/packages/DiscreteEvents/vyBMT/src/fclosure.jl:37
-7
-
-julia> a = 3
+julia> f(x,y,z)
 3
 
-julia> ff()
-12
+julia> f isa Action                # this is an Action, but looses the parameters
+true
+
+julia> g() = f(x,y,z)              # capture f(x,y,z) in g
+g (generic function with 1 method)
+
+julia> g isa Action
+true
+
+julia> g()
+3
+
+julia> h = (()->f(x,y,z))          # use an anonymous function
+#11 (generic function with 1 method)
+
+julia> h()
+3
+
+julia> i = fun(f,x,y,z)            # use a fun
+#7 (generic function with 1 method)
+
+julia> i()
+3
+
+julia> i isa Action
+true
+
+julia> fun(f,x,y, fun(f,x,y,z))()
+5
+
 ```
 
-Note that you got a warning because this is slow and not recommended.
+`fun`s are executable and can be nested. Thus they provide a structure to store functions and their variables for later execution.
 
-## Modifying data
+## Access data
 
-The best way to reference data, is to have your actions work with mutable values (like `Array`s)[^3]. Then you can also modify your data in an action, which is what you often want:
+If you want to change data in an Action, the simplest way is to work with mutable values (like `Array`s):
 
 ```julia
 julia> mutable struct Counter       # define a counter type
@@ -115,7 +107,7 @@ Counter(0)
 julia> g(ctr::Counter) = ctr.x += 1   # a function to increment a counter
 g (generic function with 1 method)
 
-julia> gg = fun(g, cc)                # put it in a closure with a counter variable
+julia> gg = fun(g, cc)                # put it in a fun closure with a counter variable
 #8 (generic function with 1 method)
 
 julia> gg()                           # execute it
@@ -125,6 +117,57 @@ julia> cc                             # the counter variable has increased
 Counter(1)
 ```
 
+## Global variables
+
+To make Actions [work with global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables), you must be careful to access their current value and use the `global` keyword to change them.
+
+```julia
+julia> a = 1; b = 2; c = 3;         # create some global data
+
+julia> f1(x, y, z) = x^y + z        # define a function
+f (generic function with 1 method)
+
+julia> ff = fun(f1, a, b, c)        # create a function closure with captured data
+#8 (generic function with 1 method)
+```  
+
+`ff` captures the values of `a`, `b` and `c` when it is created. But those may change until execution. You can as well capture the current values at execution time:
+
+```julia
+julia> gg = fun(f1, ()->a, ()->b, ()->c)  # capture the data at execution time
+#8 (generic function with 1 method)
+
+julia> gg()                         # execute the closure
+4
+
+julia> a = 2                        # change one of the data values
+2
+
+julia> gg()                         # ff now captures the changed data
+7
+```
+
+Also if you pass a function call as argument to a `fun`, it gets executed immediately and you must hide it from immediate execution if you want to have it executed at event time.
+
+You can also pass the data symbolically to the `fun` closure:
+
+```julia
+julia> hh = fun(f1, :a, :b, :c)
+#8 (generic function with 1 method)
+
+julia> hh()
+┌ Warning: Evaluating expressions is slow, use functions instead
+└ @ DiscreteEvents ~/.julia/packages/DiscreteEvents/vyBMT/src/fclosure.jl:37
+7
+
+julia> a = 3
+3
+
+julia> hh()
+12
+```
+
+Note that you got a warning because this is slow and thus not recommended.
+
 [^1]: We follow Cassandras: Discrete Event Systems, 2008, p. 27 and don't attempt to define what an "event" is. "We only wish to emphasize that an event should be thought of as occurring instantaneously and eventually causing transitions from one state value to another."
 [^2]: This means simply a computational action. It does not have to be a state transition of the represented system. It could be also a check if an event is feasible.
-[^3]: This is faster because you avoid type instabilities associated with [global variables](https://docs.julialang.org/en/v1/manual/performance-tips/#Avoid-global-variables-1).

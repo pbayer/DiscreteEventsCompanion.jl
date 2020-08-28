@@ -15,6 +15,8 @@ With a clock ``C``, an action ``\gamma`` and a known event time ``t`` we can sch
 - `event!(C, 𝜸, after, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **after** a time interval ``Δt``,
 - `event!(C, 𝜸, every, Δt)`: ``\hspace{3pt}C`` executes ``γ`` **every** time interval ``Δt``.
 
+There ``t`` or ``Δt`` can be numbers or `Distribution`s.
+
 ```julia
 using DiscreteEvents, Plots
 
@@ -55,4 +57,24 @@ plot!(x, yb, label="b")
 
 A conditional event introduces a time uncertainty ``\,η < Δt\,`` into simulations caused by the clock sample rate ``Δt``.
 
-see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Events-1)
+## Stochastic time variables
+
+By using a `Distribution` as time variable for a timed `event!`, you can create stochastic processes easily:
+
+```julia
+using Distributions
+c = Clock()
+λ = 0.5
+a = [0]
+t = Float64[0.0]; y = Float64[0.0]
+incra(c) = (a[1]+=1; push!(t, tau(c)); push!(y, a[1]))
+event!(c, fun(incra, c), every, Exponential(1/λ))
+run!(c, 100)
+plot(t, y, linetype=:steppost, xlabel="t", ylabel="y", title="Poisson Process", legend=false)
+```
+
+![poisson process](img/poiss.png)
+
+----
+
+see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/events/#Timed-events)
