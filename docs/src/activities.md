@@ -12,7 +12,9 @@ Usually there are different entities in a DES. In a timed sequence of events
 
 an activity may span two or more events in a system. E.g. a server starts to serve a customer at a given time. This activity takes a certain interval in time. Within that interval other customers may arrive or leave or other servers may proceed in their work.
 
-For certain problems it is useful to describe a DES as a sequence of activities. The activity based approach models a DES as sequences of activities of multiple entities overlapping each other in time. For practical purposes an activity is a function combining
+## Sequences of Activities
+
+For certain problems it is useful to describe a DES as a sequence of activities. An activity-based approach models a DES as sequences of activities of multiple entities overlapping each other in time. For practical purposes an activity is a function combining
 
 - some operations to describe the activity with
 - an event to call the next activity.
@@ -25,17 +27,29 @@ load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
 function serve(S::Server)
     S.job = take!(S.input)
     @printf("%5.3f: server %d took job %d\n", tau(S.clock), S.id, S.job)
-    event!(S.clock, (fun(finish, S)), after, rand(S.dist))
+    event!(S.clock, (fun(finish, S)), after, S.dist)
 end
 
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job=0
-    load(S)
+    S.job < N ? load(S) : stop!(S.clock)
 end
 ```
 
-If in our example the boss – or another customer or a computer failure ... – interrupts the `serve` activity, we are in trouble - as in life - and would have to implement a mechanism for handling such exceptions.
+The three activities call each other under conditions or after time intervals:
+
+1. The first activity `load` uses a conditional `event!` to check  the input channel [^2]. This switches on clock sampling. If the condition is true, it triggers `serve`.
+2. `serve` `take!`s a job from the input channel and then uses a timed `event!` to call `finish` and
+3. `finish` switches back to `load`.
+
+In a practical example we can create several instances of activity-based `Server`s interacting with each other.
+
+But if in that example the boss – or a customer or a computer failure ... – interrupts those activities, we are in trouble - as in life - and would have to implement a mechanism for handling such exceptions.
+
+----
+
+see also: [`event!`](https://pbayer.github.io/DiscreteEvents.jl/dev/events/#Timed-events), [`fun`](https://pbayer.github.io/DiscreteEvents.jl/dev/events/#DiscreteEvents.fun), [`tau`](https://pbayer.github.io/DiscreteEvents.jl/dev/clocks/#DiscreteEvents.tau), [`stop!`](https://pbayer.github.io/DiscreteEvents.jl/dev/clocks/#DiscreteEvents.stop!)
 
 [^1]: George S. Fishman: Discrete-Event Simulation – Modeling, Programming, and Analysis, Springer, 2001, p 39
+[^2]: It has to check it before `take!` is called because that blocks. Everything here runs in the user process and therefore we must not block. 

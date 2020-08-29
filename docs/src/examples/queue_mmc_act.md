@@ -25,28 +25,24 @@ load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
 function serve(S::Server)
     S.job = take!(S.input)
     @printf("%5.3f: server %d took job %d\n", tau(S.clock), S.id, S.job)
-    event!(S.clock, (fun(finish, S)), after, rand(S.dist))
+    event!(S.clock, (fun(finish, S)), after, S.dist)
 end
 
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job=0
-    load(S)
+    S.job < N ? load(S) : stop!(S.clock)
 end
 ```
 
 We model the arrivals as a function calling itself repeatedly with a time delay:
 
 ```julia
-function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
-    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
-    put!(input, jobno[1])
-    jobno[1] += 1
-    if jobno[1] ≤ num
-        event!(c, fun(arrive, c, input, num, dist), after, rand(dist))
-      else
-        event!(c, fun(stop!, c), after, 2/μ)
+function arrive(c::Clock, input::Channel)
+    if jobno[1] ≤ N
+        @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+        put!(input, jobno[1])
+        jobno[1] += 1
     end
 end
 ```
@@ -71,7 +67,7 @@ output = Channel{Int}(32)
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input, N, M₁), after, rand(M₁))
+event!(clk, fun(arrive, clk, input), every, M₁)
 
 run!(clk, 20)  # run the simulation
 ```
@@ -84,20 +80,23 @@ We get the following output:
 0.226: customer 2 arrived
 0.230: server 2 took job 2
 0.546: server 1 finished job 1
+0.671: server 2 finished job 2
+2.135: customer 3 arrived
+2.140: server 1 took job 3
 ...
 9.475: customer 9 arrived
-9.530: server 2 took job 9
-10.066: server 1 finished job 8
+9.480: server 2 took job 9
+10.036: server 1 finished job 8
 10.257: customer 10 arrived
 10.260: server 1 took job 10
-10.626: server 1 finished job 10
 10.739: server 2 finished job 9
-"run! halted with 21 clock events, 1426 sample steps, simulation time: 14.26"
+15.303: server 1 finished job 10
+"run! halted with 23 clock events, 1531 sample steps, simulation time: 15.3"
 ```
 
 Note that
 
-- the checking of the input channel in `load ...` switches on sampling implicitly (1426 sample steps),
-- the `arrive` function stops the clock
+- the checking of the input channel in `load ...` switches on sampling implicitly (1531 sample steps),
+- the `finish` function stops the clock if `N` is reached.
 
 [^1]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).

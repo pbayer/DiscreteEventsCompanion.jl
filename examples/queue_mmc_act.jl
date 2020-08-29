@@ -28,25 +28,21 @@ load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
 function serve(S::Server)
     S.job = take!(S.input)
     @printf("%5.3f: server %d took job %d\n", tau(S.clock), S.id, S.job)
-    event!(S.clock, (fun(finish, S)), after, rand(S.dist))
+    event!(S.clock, (fun(finish, S)), after, S.dist)
 end
 
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job=0
-    load(S)
+    S.job < N ? load(S) : stop!(S.clock)
 end
 
 # model the arrivals
-function arrive(c::Clock, input::Channel, num::Int, dist::Distribution)
-    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
-    put!(input, jobno[1])
-    jobno[1] += 1
-    if jobno[1] ≤ num
-        event!(c, fun(arrive, c, input, num, dist), after, rand(dist))
-    else
-        event!(c, fun(stop!, c), after, 2/μ) # stop the clock
+function arrive(c::Clock, input::Channel)
+    if jobno[1] ≤ N
+        @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+        put!(input, jobno[1])
+        jobno[1] += 1
     end
 end
 
@@ -59,6 +55,6 @@ jobno[1] = 1              # reset job counter
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input, N, M₁), after, rand(M₁))
+event!(clk, fun(arrive, clk, input), every, M₁)
 
 run!(clk, 20)  # run the simulation
