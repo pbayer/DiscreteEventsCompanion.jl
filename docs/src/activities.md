@@ -33,7 +33,7 @@ end
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job < N ? load(S) : stop!(S.clock)
+    S.job < N && load(S)
 end
 ```
 

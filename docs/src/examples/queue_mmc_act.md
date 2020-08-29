@@ -1,6 +1,8 @@
 # M/M/c Activities
 
-Here we take the toy [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^1] and implement it as a sequence of server activities. We first need a server body:
+Here we take the toy [example of a multi-server M/M/c queue](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb) [^1] and implement it as a sequence of server activities. 
+
+We first need a server body:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -15,15 +17,14 @@ mutable struct Server
 end
 ```
 
-Then we implement the server activities `load`, `serve` and `finish` calling each other in sequence:
+The server activities `load`, `serve` and `finish` call each other in sequence:
 
 ```julia
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
-    # we check the availability of the input channel explicitly ↑
-    # since we don't want to block.
+# we check the availability of the input channel ↑ since we don't want to block
 
 function serve(S::Server)
-    S.job = take!(S.input)
+    S.job = take!(S.input)  # this would block on an empty channel
     @printf("%5.3f: server %d took job %d\n", tau(S.clock), S.id, S.job)
     event!(S.clock, (fun(finish, S)), after, S.dist)
 end
@@ -31,21 +32,21 @@ end
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job < N ? load(S) : stop!(S.clock)
+    S.job < N && load(S)
 end
 ```
 
-We model the arrivals as a function calling itself repeatedly with a time delay:
+A simple function (triggered by a repeating event) models the arrivals:
 
 ```julia
-function arrive(c::Clock, input::Channel)
+function arrive(c::Clock, input::Channel, jobno::Vector{Int})
     jobno[1] += 1
     @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
     put!(input, jobno[1])
 end
 ```
 
-Then we setup our constants and a simulation environment with clock, channels, two servers an arrival process and run:
+We setup our constants and a simulation environment with a clock, two channels, two servers and an arrival process and then run:
 
 ```julia
 Random.seed!(8710)   # set random number seed for reproducibility
@@ -65,7 +66,7 @@ output = Channel{Int}(32)
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input), every, M₁, n=N)
+event!(clk, fun(arrive, clk, input, jobno), every, M₁, n=N)
 
 run!(clk, 20)  # run the simulation
 ```
@@ -88,13 +89,13 @@ We get the following output:
 10.257: customer 10 arrived
 10.260: server 1 took job 10
 10.626: server 1 finished job 10
-"run! halted with 19 clock events, 1027 sample steps, simulation time: 10.63"
+10.739: server 2 finished job 9
+"run! finished with 20 clock events, 1027 sample steps, simulation time: 20.0"
 ```
 
 Note that:
 
-- we must check the input channel in `load` since everything runs in the user process and a `take!` on the input channel would block if it was empty. So we setup a conditional `event!` to call `serve` if the channel is ready.
-- The checking of the input channel in `load ...` switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.
-- The `finish` function `stop!`s the clock if `N` is reached.
+- we must check the input channel in `load` since everything runs in the user process and a `take!` on an empty input channel would block. So we setup a conditional `event!` to call `serve` when the channel is ready.
+- The checking of the input channel in `load` switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.
 
 [^1]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).

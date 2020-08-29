@@ -34,11 +34,11 @@ end
 function finish(S::Server)
     put!(S.output, S.job)
     @printf("%5.3f: server %d finished job %d\n", tau(S.clock), S.id, S.job)
-    S.job < N ? load(S) : stop!(S.clock)
+    S.job < N && load(S)
 end
 
 # model the arrivals
-function arrive(c::Clock, input::Channel)
+function arrive(c::Clock, input::Channel, jobno::Vector{Int})
     jobno[1] += 1
     @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
     put!(input, jobno[1])
@@ -52,6 +52,6 @@ output = Channel{Int}(32)
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input), every, M₁, n=N)
+event!(clk, fun(arrive, clk, input, jobno), every, M₁, n=N)
 
 run!(clk, 20)  # run the simulation
