@@ -20,7 +20,7 @@ const μ = 1.0 / 2           # service rate
 const λ = 0.9               # arrival rate
 const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
-const jobno = [1]           # job counter
+const jobno = [0]           # job counter
 
 # activities are functions calling each other directly or as events
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
@@ -39,22 +39,19 @@ end
 
 # model the arrivals
 function arrive(c::Clock, input::Channel)
-    if jobno[1] ≤ N
-        @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
-        put!(input, jobno[1])
-        jobno[1] += 1
-    end
+    jobno[1] += 1
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
 end
 
 # setup the simulation environment
 clk = Clock()
 input = Channel{Int}(32)  # create two channels
 output = Channel{Int}(32)
-jobno[1] = 1              # reset job counter
 
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input), every, M₁)
+event!(clk, fun(arrive, clk, input), every, M₁, n=N)
 
 run!(clk, 20)  # run the simulation

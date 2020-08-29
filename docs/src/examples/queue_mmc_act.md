@@ -39,15 +39,13 @@ We model the arrivals as a function calling itself repeatedly with a time delay:
 
 ```julia
 function arrive(c::Clock, input::Channel)
-    if jobno[1] ≤ N
-        @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
-        put!(input, jobno[1])
-        jobno[1] += 1
-    end
+    jobno[1] += 1
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
 end
 ```
 
-Then we setup our constants and a simulation environment with clock, channels, servers and arrivals and run:
+Then we setup our constants and a simulation environment with clock, channels, two servers an arrival process and run:
 
 ```julia
 Random.seed!(8710)   # set random number seed for reproducibility
@@ -57,7 +55,7 @@ const μ = 1.0 / 2           # service rate
 const λ = 0.9               # arrival rate
 const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
-const jobno = [1]           # job counter
+const jobno = [0]           # job counter
 
 # setup the simulation environment
 clk = Clock()
@@ -67,7 +65,7 @@ output = Channel{Int}(32)
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s->load(s), srv)
-event!(clk, fun(arrive, clk, input), every, M₁)
+event!(clk, fun(arrive, clk, input), every, M₁, n=N)
 
 run!(clk, 20)  # run the simulation
 ```
@@ -89,14 +87,14 @@ We get the following output:
 10.036: server 1 finished job 8
 10.257: customer 10 arrived
 10.260: server 1 took job 10
-10.739: server 2 finished job 9
-15.303: server 1 finished job 10
-"run! halted with 23 clock events, 1531 sample steps, simulation time: 15.3"
+10.626: server 1 finished job 10
+"run! halted with 19 clock events, 1027 sample steps, simulation time: 10.63"
 ```
 
-Note that
+Note that:
 
-- the checking of the input channel in `load ...` switches on sampling implicitly (1531 sample steps),
-- the `finish` function stops the clock if `N` is reached.
+- we must check the input channel in `load` since everything runs in the user process and a `take!` on the input channel would block if it was empty. So we setup a conditional `event!` to call `serve` if the channel is ready.
+- The checking of the input channel in `load ...` switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.
+- The `finish` function `stop!`s the clock if `N` is reached.
 
 [^1]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).

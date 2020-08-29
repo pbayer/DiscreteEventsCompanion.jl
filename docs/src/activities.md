@@ -45,7 +45,11 @@ The three activities call each other under conditions or after time intervals:
 
 In a practical example we can create several instances of activity-based `Server`s interacting with each other.
 
-But if in that example the boss – or a customer or a computer failure ... – interrupts those activities, we are in trouble - as in life - and would have to implement a mechanism for handling such exceptions.
+## Limitations
+
+If in that example the boss – or a customer or a computer failure ... – interrupts those activities, we are in trouble - as in life - and would have to implement a mechanism for handling such exceptions.
+
+With several such possibilities of disturbing events things would get messy quickly and more code would be needed for exception handling than for the regular activities.
 
 ----
 
