@@ -23,19 +23,17 @@ function finish(S::Server)
     @printf(&quot;%5.3f: server %d finished job %d\n&quot;, tau(S.clock), S.id, S.job)
     S.job &lt; N ? load(S) : stop!(S.clock)
 end</code></pre><p>We model the arrivals as a function calling itself repeatedly with a time delay:</p><pre><code class="language-julia">function arrive(c::Clock, input::Channel)
-    if jobno[1] ≤ N
-        @printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(c), jobno[1])
-        put!(input, jobno[1])
-        jobno[1] += 1
-    end
-end</code></pre><p>Then we setup our constants and a simulation environment with clock, channels, servers and arrivals and run:</p><pre><code class="language-julia">Random.seed!(8710)   # set random number seed for reproducibility
+    jobno[1] += 1
+    @printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(c), jobno[1])
+    put!(input, jobno[1])
+end</code></pre><p>Then we setup our constants and a simulation environment with clock, channels, two servers an arrival process and run:</p><pre><code class="language-julia">Random.seed!(8710)   # set random number seed for reproducibility
 const N = 10                # total number of customers generated
 const c = 2                 # number of servers
 const μ = 1.0 / 2           # service rate
 const λ = 0.9               # arrival rate
 const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
-const jobno = [1]           # job counter
+const jobno = [0]           # job counter
 
 # setup the simulation environment
 clk = Clock()
@@ -45,7 +43,7 @@ output = Channel{Int}(32)
 # create and start the servers and the arrival process
 srv = [Server(clk,i,input,output,M₂,0) for i ∈ 1:c]
 map(s-&gt;load(s), srv)
-event!(clk, fun(arrive, clk, input), every, M₁)
+event!(clk, fun(arrive, clk, input), every, M₁, n=N)
 
 run!(clk, 20)  # run the simulation</code></pre><p>We get the following output:</p><pre><code class="language-julia">0.123: customer 1 arrived
 0.130: server 1 took job 1
@@ -61,6 +59,5 @@ run!(clk, 20)  # run the simulation</code></pre><p>We get the following output:<
 10.036: server 1 finished job 8
 10.257: customer 10 arrived
 10.260: server 1 took job 10
-10.739: server 2 finished job 9
-15.303: server 1 finished job 10
-&quot;run! halted with 23 clock events, 1531 sample steps, simulation time: 15.3&quot;</code></pre><p>Note that</p><ul><li>the checking of the input channel in <code>load ...</code> switches on sampling implicitly (1531 sample steps),</li><li>the <code>finish</code> function stops the clock if <code>N</code> is reached.</li></ul><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>see also: <a href="https://en.wikipedia.org/wiki/M/M/c_queue">M/M/c queue</a> on Wikipedia and an <a href="https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb">implementation in <code>SimJulia</code></a>.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../tabletennis/">« Table Tennis</a><a class="docs-footer-nextpage" href="../queue_mmc_srv/">M/M/c Processes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 29 August 2020 08:29">Saturday 29 August 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+10.626: server 1 finished job 10
+&quot;run! halted with 19 clock events, 1027 sample steps, simulation time: 10.63&quot;</code></pre><p>Note that:</p><ul><li>we must check the input channel in <code>load</code> since everything runs in the user process and a <code>take!</code> on the input channel would block if it was empty. So we setup a conditional <code>event!</code> to call <code>serve</code> if the channel is ready.</li><li>The checking of the input channel in <code>load ...</code> switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.</li><li>The <code>finish</code> function <code>stop!</code>s the clock if <code>N</code> is reached.</li></ul><section class="footnotes is-size-7"><ul><li class="footnote" id="footnote-1"><a class="tag is-link" href="#citeref-1">1</a>see also: <a href="https://en.wikipedia.org/wiki/M/M/c_queue">M/M/c queue</a> on Wikipedia and an <a href="https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb">implementation in <code>SimJulia</code></a>.</li></ul></section></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../tabletennis/">« Table Tennis</a><a class="docs-footer-nextpage" href="../queue_mmc_srv/">M/M/c Processes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Saturday 29 August 2020 10:30">Saturday 29 August 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
