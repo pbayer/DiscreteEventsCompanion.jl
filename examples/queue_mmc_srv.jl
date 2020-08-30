@@ -9,18 +9,18 @@ const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
 
 # describe the server process
-function server(clk::Clock, id::Int, input::Channel, output::Channel, M₂::Distribution)
+function server(clk::Clock, id::Int, input::Channel, output::Channel, X::Distribution)
     job = take!(input)
     print(clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
-    delay!(clk, rand(M₂))
+    delay!(clk, X)
     print(clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
     put!(output, job)
 end
 
 # model arrivals
-function arrivals(clk::Clock, queue::Channel, N::Int, M₁::Distribution)
+function arrivals(clk::Clock, queue::Channel, N::Int, X::Distribution)
     for i = 1:N # initialize customers
-        delay!(clk, rand(M₁))
+        delay!(clk, X)
         put!(queue, i)
         print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
     end

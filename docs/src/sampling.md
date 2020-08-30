@@ -11,7 +11,7 @@ Sampling introduces a time uncertainty into simulations since it triggers change
 
 ## Stochastic Event Sequences
 
-You can have repeating events with fixed or stochastic inter-event times:
+Independent from the clock's sample rate you can have repeating events with fixed or stochastic inter-event times:
 
 - `event!(clk, 𝜸, every, Δt)` where `Δt` is a `Number`,
 - `event!(clk, 𝜸, every, Δt)` where `Δt` is a `Distribution`.

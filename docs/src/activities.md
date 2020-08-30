@@ -47,9 +47,9 @@ In a practical example we can create several instances of activity-based `Server
 
 ## Limitations
 
-If in that example the boss – or a customer or a computer failure ... – interrupts those activities, we are in trouble - as in life - and would have to implement a mechanism for handling such exceptions.
+If in that example the boss – or a customer or a computer failure ... – interrupts those activities, we are in trouble - as in life - and would have to implement a mechanism for handling such anomalies.
 
-With several such possibilities of disturbing events things would get messy quickly and more code would be needed for exception handling than for the regular activities.
+Either we had to delete the next scheduled event to branch into another activity like `handle_interrupt` or we had to introduce a state variable to represent different branches of activities and make activities state dependent. 
 
 ----
 

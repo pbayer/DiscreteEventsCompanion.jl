@@ -7,24 +7,30 @@ This view can be expressed as [processes](../processes.md) waiting and delaying 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
 
-function server(clk::Clock, id::Int, input::Channel, output::Channel, M₂::Distribution)
+function server(clk::Clock, id::Int, input::Channel, output::Channel, X::Distribution)
     job = take!(input)
     print(clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
-    delay!(clk, rand(M₂))
+    delay!(clk, X)
     print(clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
     put!(output, job)
 end
 
-function arrivals(clk::Clock, queue::Channel, N::Int, M₁::Distribution)
+function arrivals(clk::Clock, queue::Channel, N::Int, X::Distribution)
     for i = 1:N # initialize customers
-        delay!(clk, rand(M₁))
+        delay!(clk, X)
         put!(queue, i)
         print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
 end
 ```
 
-Then we setup our constants, the simulation environment with clock, channels and processes and run:
+Note that 
+
+- `take!`, `put!` or `delay!` block the caller until resources are available or till a given simulation time. 
+- Also asynchronous tasks must `print` via the clock to avoid [clock concurrency](@ref clock_concurrency).
+- Therefore functions representing processes need a `Clock` variable as their first argument. 
+
+Next we setup our constants, the simulation environment with clock, channels and processes and run:
 
 ```julia
 Random.seed!(8710)          # set random number seed for reproducibility
@@ -64,9 +70,10 @@ We get the following output:
 "run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
 
-Note that
+Note that:
 
-- the times deviate from the activity based implementation because here we do not use conditional events and therefore have no time divergence due to sampling [^1].
-- Processes must transfer IO-operations with a [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!) call to the clock.
+- the times deviate from the activity based implementation because here we do not use conditional events and therefore have no time divergence due to sampling [^1],
+- the printing via the clock produces additional clock events,
+- here we don't see sampling since no conditional events are involved.
 
-[^1]: the load activity in the activity-based example uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally on the clock.
+[^1]: the `load` activity in the [activity-based example](https://pbayer.github.io/DiscreteEventsCompanion.jl/dev/examples/queue_mmc_act/) uses a conditional event. The condition is then checked periodically with sampling. That introduces a time divergence into the simulation. Instead in the process-based example the blocking on channels is handled by Julia internally and we need not to wait conditionally on the clock.

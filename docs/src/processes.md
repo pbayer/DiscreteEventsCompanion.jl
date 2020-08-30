@@ -6,7 +6,7 @@ Often in discrete event systems (DES) we find typical sequences of events ``\,S_
 2. process it for a service time,
 3. release the job and put it into an output queue.
 
-Those typical event sequences are called *processes* [^1]. If processes *interact*, their event sequences overlap and generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the entire system.
+Those typical event sequences are called *processes* [^1]. If processes *interact*, their event sequences overlap and generate the event sequence ``\,S=\{e_1,e_2,e_3, ..., e_n\}\,`` of the greater system.
 
 [Processes](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Processes-1) in `DiscreteEvents`
 
@@ -17,32 +17,32 @@ They keep their own data, states and code in their function body.
 
 ## Syntax
 
-Processes execute Julia code, wait or delay on the clock and are suspended and reactivated by Julia's scheduler according to available resources. For operations regarding time, IO and resources they use:
+Processes execute Julia code, wait or delay on the clock or wait for available resources. For operations regarding time, IO and resources they use:
 
 - [`delay!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.delay!):  suspend and get reactivated (by the clock) at/after a given time,
 - [`wait!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.wait!):  suspend and get reactivated after a given condition becomes true,
-- [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!):  transfer IO-operations to the clock,
+- [`now!`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.now!):  transfer IO-operations to the clock, or [`print`](https://pbayer.github.io/DiscreteEvents.jl/dev/processes/#Base.print-Tuple{Clock,IO,Any,Any}) via the clock,
 - [`take!`](https://docs.julialang.org/en/v1/base/parallel/#Base.take!-Tuple{Channel}): take an item from a channel or block until it becomes available,
 - [`put!`](https://docs.julialang.org/en/v1/base/parallel/#Base.put!-Tuple{Channel,Any}): put something into a channel or block if it is full until it becomes available.
 
-The first three commands: `delay!`, `wait!` and `now!` create events on the clock's event scheduler, `take!` and `put!` are handled directly by the Julia scheduler. All blocking commands should only be used in processes (asynchronous tasks) and never within the main program or in the Julia REPL [^2].
+The first three commands: `delay!`, `wait!` and `now!` schedule events to the clock, `take!` and `put!` on channels are handled directly by the Julia scheduler. All blocking commands should only be used in processes (asynchronous tasks) and never within the main loop (e.g. event- or activity-based implementations) from the Julia REPL [^2].
 
-The following two functions define processes:
+The [following code snippet](https://pbayer.github.io/DiscreteEventsCompanion.jl/dev/examples/queue_mmc_srv/) the two functions define processes:
 
 ```julia
 # describe the server process
-function server(clk::Clock, id::Int, input::Channel, output::Channel, service_dist::Distribution)
+function server(clk::Clock, id::Int, input::Channel, output::Channel, X::Distribution)
     job = take!(input)
     print(clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(clk), id, job))
-    delay!(clk, rand(service_dist))
+    delay!(clk, X)
     print(clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(clk), id, job))
     put!(output, job)
 end
 
 # describe the arrivals process
-function arrivals(clk::Clock, queue::Channel, num_customers::Int, arrival_dist::Distribution)
-    for i = 1:num_customers # initialize customers
-        delay!(clk, rand(arrival_dist))
+function arrivals(clk::Clock, queue::Channel, N::Int, X::Distribution)
+    for i = 1:N # initialize customers
+        delay!(clk, X)
         put!(queue, i)
         print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
     end
@@ -54,7 +54,7 @@ end
     1. to run as processes, functions must have a `Clock` variable as their first argument,
     2. processes (or asynchronous tasks in general) must `print` via the clock in order to avoid [clock concurrency](@ref clock_concurrency).
 
-We can start multiple instances of processes representing e.g. multiple servers and different arrival processes.
+We can start multiple instances of those processes representing e.g. multiple servers or different arrival processes.
 
 ## Startup
 
@@ -66,17 +66,17 @@ To register functions as processes to the clock and start them we use:
 The following code example starts our processes (we assume the variables to be defined before):
 
 ```julia
-for i in 1:num_servers  # start multiple server processes
-    process!(clock, Prc(i, server, i, input, output, service_dist))
+for i in 1:c
+    process!(clock, Prc(i, server, i, input, output, M₂))
 end
-process!(clock, Prc(0, arrivals, input, num_customers, arrival_dist), 1)
+process!(clock, Prc(0, arrivals, input, N, M₁), 1)
 ```
 
 The `server` processes run their function body in an infinite loop (default) while the `arrivals` process runs it only once and then terminates. The `server` processes wait for jobs in their input channels and the `arrivals` process waits for the clock to tick. If we start the clock, the processes begin to interact: customers are produced by the arrivals process, the servers then serve them …
 
 ## Limitations
 
-Interacting sequential processes depend on "a rendezvous between the processes involved in sending and receiving the message, i.e. the sender cannot transmit a message until the receiver is ready to accept it". [^3]
+Interacting sequential processes depend on "a rendezvous between the processes involved in sending and receiving the message, i.e. the sender cannot transmit a message until the receiver is ready to accept it". [^3] In our case the "message" is a reactivation of a blocked process by the clock or by the Julia scheduler.
 
 If typical event sequences ``S_i`` (e.g. waiting for a resource or time delays) are interrupted by stochastic events (e.g. server breakdowns, customers reneging …), the processes are not ready and must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle them. This means that we have to treat natural occurrences in a stochastic DES as *errors* in our program.
 
