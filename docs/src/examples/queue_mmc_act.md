@@ -17,7 +17,7 @@ mutable struct Server
 end
 ```
 
-The server activities `load`, `serve` and `finish` call each other in sequence:
+The server activities `load`, `serve` and `finish` are functions calling each other in sequence:
 
 ```julia
 load(S::Server) = event!(S.clock, fun(serve, S), fun(isready, S.input))
@@ -35,6 +35,13 @@ function finish(S::Server)
     S.job < N && load(S)
 end
 ```
+
+Note that:
+
+- we must check the input channel in `load` since everything runs in the user process and a `take!` on an empty input channel would block. So we setup a conditional `event!` to call `serve` when the channel is ready.
+- The checking of the input channel in `load` switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.
+- The sampling introduces an uncertainty into a simulation since it causes a time delay between the completion of a condition and its detection at the next sampling step.
+
 
 A simple function (triggered by a repeating event) models the arrivals:
 
@@ -93,9 +100,5 @@ We get the following output:
 "run! finished with 20 clock events, 1027 sample steps, simulation time: 20.0"
 ```
 
-Note that:
-
-- we must check the input channel in `load` since everything runs in the user process and a `take!` on an empty input channel would block. So we setup a conditional `event!` to call `serve` when the channel is ready.
-- The checking of the input channel in `load` switches on sampling implicitly (1027 sample steps). This ensures that the simulation runs and does not block.
 
 [^1]:  see also: [M/M/c queue](https://en.wikipedia.org/wiki/M/M/c_queue) on Wikipedia and an [implementation in `SimJulia`](https://github.com/BenLauwens/SimJulia.jl/blob/master/examples/queue_mmc.ipynb).
