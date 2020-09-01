@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>M/M/c Process-based with Failures · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../DES/">Overview</a></li><li><a class="tocitem" href="../../clocks/">Clocks</a></li><li><a class="tocitem" href="../../actions/">Actions</a></li><li><a class="tocitem" href="../../sampling/">Sampling</a></li><li><a class="tocitem" href="../../events/">Events</a></li><li><a class="tocitem" href="../../activities/">Activities</a></li><li><a class="tocitem" href="../../processes/">Processes</a></li><li><a class="tocitem" href="../../random/">Randomness</a></li><li><a class="tocitem" href="../../automata/">State Machines</a></li><li><a class="tocitem" href="../../actors/">Actors</a></li><li><a class="tocitem" href="../../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/">Overview</a></li><li><a class="tocitem" href="../singleserver/">Single Server</a></li><li><a class="tocitem" href="../tabletennis/">Table Tennis</a></li><li><a class="tocitem" href="../queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../postoffice/postoffice/">Post Office</a></li><li><a class="tocitem" href="../dicegame/dicegame/">Goldratt&#39;s Dice Game</a></li></ul></li><li><a class="tocitem" href="../../performance/">Performance</a></li><li><a class="tocitem" href="../../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../../diag/">Diagnosis</a></li><li><a class="tocitem" href="../../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>M/M/c Process-based with Failures</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>M/M/c Process-based with Failures</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/examples/queue_mmc_srv_fail.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="M/M/c-Process-based-with-Failures"><a class="docs-heading-anchor" href="#M/M/c-Process-based-with-Failures">M/M/c Process-based with Failures</a><a id="M/M/c-Process-based-with-Failures-1"></a><a class="docs-heading-anchor-permalink" href="#M/M/c-Process-based-with-Failures" title="Permalink"></a></h1><p>Processes represent typical event sequences. But if those sequences are altered by &quot;external&quot; events like failures, we have to handle those unusual events as <em>interrupts</em> or exceptions.</p><p>The following example shows how this can be done. We assume here  external streams of failure events (Poisson processes) causing interrupts to our server processes. We also assume that failures and repairs are independent from each other and therefore that a repair can be interrupted by another failure.</p><p>We introduce state variables tracking whether a failure has occurred and whether a job is worked on. Therefore we define a server structure:</p><pre><code class="language-julia">using DiscreteEvents, Printf, Distributions, Random
+
+struct Failure end      # a failure event
+
+mutable struct Server
+    id::Int
+    input::Channel
+    output::Channel
+    Ts::Distribution    # service time distribution
+    Tr::Distribution    # repair time distribution
+    job::Int
+    failed::Bool
+end</code></pre><p>Our <code>serve</code> process then has two branches: one for regular service and another for failure handling. With a <code>try ... catch ... end</code> block we capture any exceptions and let a <code>Failure</code> event switch the process to the failure handling branch. </p><p>The regular service branch also has to be modified: We must <code>take!</code> a job from the input channel only if no other job is present and we must reset the job status variable when a job is finished. We assume here that either service time or repair time are restarted anew after any failure:</p><pre><code class="language-julia"># describe the server process
+function serve(c::Clock, s::Server)
+    try
+        if !s.failed
+            if s.job == 0 
+                s.job = take!(s.input)
+                print(c, @sprintf(&quot;%5.3f: server %d serving customer %d\n&quot;, tau(c), s.id, s.job))
+            end
+            if s.job &gt; 0
+                delay!(c, s.Ts)
+                print(c, @sprintf(&quot;%5.3f: server %d finished serving %d\n&quot;, tau(c), s.id, s.job))
+                put!(s.output, s.job)
+                s.job = 0
+            end
+        else
+            print(c, @sprintf(&quot;%5.3f: server %d fails\n&quot;, tau(c), s.id))
+            delay!(c, s.Tr)
+            print(c, @sprintf(&quot;%5.3f: server %d back to work\n&quot;, tau(c), s.id))
+            s.failed = false
+        end
+    catch exc
+        if exc isa PrcException &amp;&amp; exc.event isa Failure
+            s.failed = true
+        else
+            rethrow(exc)
+        end
+    end
+end</code></pre><p>If you compare the <code>serve</code> process with <a href="../queue_mmc_srv/">the previous one without failures</a>, it certainly has become more complicated.</p><p>Next we need an arrivals function for a repeating event and some constants:</p><pre><code class="language-julia"># model the arrivals
+function arrive(c::Clock, input::Channel, jobno::Vector{Int})
+    jobno[1] += 1
+    @printf(&quot;%5.3f: customer %d arrived\n&quot;, tau(c), jobno[1])
+    put!(input, jobno[1])
+end
+
+Random.seed!(8710)          # set random number seed for reproducibility
+const N = 10                # total number of customers
+const c = 2                 # number of servers
+const μ = 1.0 / c           # service rate
+const λ = 0.9               # arrival rate
+const M₁ = Exponential(1/λ) # inter-arrival time distribution
+const M₂ = Exponential(1/μ) # service time distribution
+const F₁ = Exponential(8)   # inter-failure time distribution
+const F₂ = Exponential(2)   # repair time distribution 
+const jobno = [0]           # job counter</code></pre><p>Parallel to the two servers and their <code>serve</code> processes we start two Poisson processes <code>interrupt!</code>ing them every simulated random inter-failure time.</p><pre><code class="language-julia"># initialize simulation environment
+clock = Clock()
+input = Channel{Int}(Inf)
+output = Channel{Int}(Inf)
+for i in 1:c
+    s = Server(i, input, output, M₂, F₂, 0, false)
+    p = Prc(i, serve, s)
+    process!(clock, p)
+    event!(clock, fun(interrupt!, p, Failure(), nothing), every, F₁)
+end
+event!(clock, fun(arrive, clock, input, jobno), every, M₁, n=N)
+
+run!(clock, 20)</code></pre><p>We get the following output:</p><pre><code class="language-julia">0.231: customer 1 arrived
+0.231: server 1 serving customer 1
+0.672: server 1 finished serving 1
+0.743: server 2 fails
+0.885: server 1 fails
+1.478: server 2 back to work
+2.140: customer 2 arrived
+2.140: server 2 serving customer 2
+2.439: server 1 fails
+3.040: customer 3 arrived
+3.979: server 1 back to work
+3.979: server 1 serving customer 3
+...
+11.035: server 2 back to work
+11.035: server 2 serving customer 8
+11.193: customer 10 arrived
+11.375: server 1 finished serving 4
+11.375: server 1 serving customer 9
+11.658: server 1 finished serving 9
+11.658: server 1 serving customer 10
+12.059: server 2 finished serving 8
+12.526: server 1 finished serving 10
+12.870: server 1 fails
+12.877: server 1 fails
+13.034: server 1 back to work
+&quot;run! finished with 71 clock events, 0 sample steps, simulation time: 20.0&quot;</code></pre><p>As you see we get repeating failures, longer cycle times and more disturbance in job service sequence than in the example without failures.</p></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 1 September 2020 07:15">Tuesday 1 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
