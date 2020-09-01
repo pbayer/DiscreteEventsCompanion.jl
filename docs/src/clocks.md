@@ -4,7 +4,7 @@ We think of a clock as a device to [measure time](https://en.wikipedia.org/wiki/
 
 A [`Clock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#Clocks-1) in `DiscreteEvents` schedules events and triggers them at given times or under given conditions. It doesn't measure, it represents time. We can create a clock, run it for a while, stop time, step through time, skip from event to event, change event sequences … With it we can create, model or simulate discrete event systems (DES).
 
-## Virtual clocks
+## Virtual Clocks
 
 A virtual clock is not constrained by physical time. It doesn't wait a physical time period for the next event to occur, but jumps right to it. It executes an event sequence as fast as possible.
 
@@ -21,9 +21,9 @@ run!(clk, 10)
 
 If we run the clock for a duration ``Δt=10``, it jumps immediately ahead since it has nothing to do.
 
-### Time units
+### Time Units
 
-## Real time clocks
+## Real Time Clocks
 
 A real time clock [`RTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock) is bound to the computer's physical clock and measures time in seconds ``[s]``. We create and start it with [`createRTClock`](https://pbayer.github.io/DiscreteEvents.jl/dev/usage/#DiscreteEvents.RTClock)
 
@@ -42,7 +42,7 @@ rtc.time         # synonymous way to get time
 
 We can schedule events to real time clocks as to virtual clocks and they will execute at their due physical time.
 
-## [Clock concurrency](@id clock_concurrency)
+## [Clock Concurrency](@id clock_concurrency)
 
 `DiscreteEvents` can represent entities in DES as tasks (e.g. processes, actors) running concurrently to the clock. We want them to coordinate with the clock and not to go out of time.
 
@@ -51,7 +51,7 @@ The user must take two precautions:
 1. Actors must register (`push!`) their message channels to the clock and the clock will only proceed to the next event if all registered channels are empty.
 2. Tasks use `now!` for IO-operations or `print` via the clock.
 
-## Parallel clocks
+## Parallel Clocks
 
 With multithreading and tasks running in parallel we want to maintain the order of cause and effect and to avoid than an event scheduled for a time ``t_{i+1}`` executes on a parallel thread *before* an event scheduled for ``t_i`` completes.
 
