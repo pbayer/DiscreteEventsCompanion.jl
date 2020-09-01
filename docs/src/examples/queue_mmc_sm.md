@@ -1,6 +1,8 @@
 # M/M/c with State Machines
 
-Here we implement a simple state machine as an actor. As  before we define first states and events and a state machine body:
+Here we implement a simple state machine as an Actor. An Actor is a task listening to an event channel. It has an internal state and reacts accordingly to the events. Here we did a native Actor implementation without any libraries.
+
+As before we define first states and events and a state machine body:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -25,7 +27,7 @@ mutable struct Server  # state machine body
 end
 ```
 
-Then we implement the transition function and the actor loop running it:
+Then we implement the transition functions and the Actor loop running them:
 
 ```julia
 act!(::Server, ::𝑋, ::𝐸) = nothing   # a default transition
@@ -33,7 +35,7 @@ function act!(s::Server, ::Idle, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
         s.state = Busy()
-        event!(s.clk, (fun(put!, s.com, Finish()), yield), after, rand(s.d))
+        event!(s.clk, fun(put!, s.com, Finish()), after, s.d)
         print(s.clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
@@ -49,20 +51,18 @@ function act!(s::Server)  # actor loop, take something
 end
 ```
 
-We need also our arrival process. It communicates arrivals over the servers' com channels.
+The `arrive` function sends an `Arrive()` event to the server Actors over their `com` channels:
 
 ```julia
-function arrivals(clk::Clock, queue::Channel, srv::Vector{Server}, N::Int, M₁::Distribution)
-    for i = 1:N # initialize customers
-        delay!(clk, rand(M₁))
-        put!(queue, i)
-        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(s->put!(s.com,Arrive()), srv) # notify the servers
-    end
+function arrive(c::Clock, input::Channel, jobno::Vector{Int}, srv::Vector{Server})
+    jobno[1] += 1
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
+    map(s->put!(s.com, Arrive()), srv) # notify the servers
 end
 ```
 
-Then we setup our global constants, the simulation environment, the actors and the arrivals process and run:
+We setup our global constants, the simulation environment, the Actors and the arrivals process and run:
 
 ```julia
 Random.seed!(8710)          # set random number seed for reproducibility
@@ -77,15 +77,17 @@ const M₂ = Exponential(1/μ) # service time distribution
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-for i in 1:c   # start actors
+srv = Server[]
+for i in 1:c   # start servers/actors
     push!(srv, Server(i, clock, Channel{𝐸}(32), input, output, Idle(), 0, M₂))
-    push!(t, @task act!(srv[i]))
-    yield(t[i])
+    push!(clock.channels, srv[i].com)  # register the actor channel to the clock
+    yield(@task act!(srv[i]))          # let the actor task start
 end
-process!(clock, Prc(0, arrivals, input, srv, num_customers, arrival_dist), 1)
-
+event!(clock, fun(arrive, clock, input, jobno, srv), every, M₁, n=N)
 run!(clock, 20)
 ```
+
+Note that we registered the Actor `com` channel to the clock in order to avoid [clock concurrency](@ref clock_concurrency).
 
 Then we get our usual output:
 
@@ -105,3 +107,5 @@ Then we get our usual output:
 10.734: server 2 finished serving 9
 "run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
+
+The state machine setup seems more complicated than for processes but this disadvantage goes away for more complicated situations.

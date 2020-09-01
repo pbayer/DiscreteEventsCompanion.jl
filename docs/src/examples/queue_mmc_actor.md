@@ -1,6 +1,6 @@
 # M/M/c with Actors
 
-Very similar to the last implementation we can implement the servers as [`YAActL`](https://github.com/pbayer/YAActL.jl) actors. First we have to define the actor messages, the server body and a convenience function for sending a delayed message to ourselves.
+Very similar to the last implementation we can implement the servers as [`YAActL`](https://github.com/pbayer/YAActL.jl) Actors. First we have to define the Actor messages, the server body and a convenience function for Actors sending a delayed message to themselves.
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random, YAActL
@@ -17,8 +17,8 @@ mutable struct Server  # state machine body
     d::Distribution
 end
 
-Base.get(clk::Clock, m::Message, after, Δt::Number) =
-    event!(clk, (fun(send!, self(), m), yield), after, Δt)
+Base.get(clk::Clock, m::Message, after, Δt::Distribution) =
+    event!(clk, fun(send!, self(), m), after, Δt)
 ```
 
 The actor realizes the same finite state machine as before by switching between two behaviors: `idle` and `busy`:
@@ -28,7 +28,7 @@ function idle(s::Server, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
         become(busy, s)
-        get(s.clk, Finish(), after, rand(s.d))
+        get(s.clk, Finish(), after, s.S)
         print(s.clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
@@ -40,18 +40,17 @@ function busy(s::Server, ::Finish)
 end
 ```
 
-When an idle server gets an `Arrive()` message, it checks its input and if there is one, it takes it and becomes busy. It schedules a `Finish()` message for itself after a random service time. When it arrives, it puts its job into the output and becomes idle. As you see, the code is almost plain text.
+When an idle server gets an `Arrive()` message, it checks its input and if there is one, it takes it and `become`s `busy`. It schedules a `Finish()` message for itself after a random service time. When it arrives, it puts its job into the output and `become`s `idle`. As you see, the code is almost plain text.
 
 As before we need an arrival function:
 
 ```julia
-function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, N::Int, A::Distribution)
-    for i = 1:N # initialize customers
-        delay!(clk, rand(A))
-        put!(queue, i)
-        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(l->send!(l, Arrive()), lnk) # notify the servers
-    end
+# model arrivals
+function arrive(c::Clock, input::Channel, jobno::Vector{Int}, lnk::Vector{Channel})
+    jobno[1] += 1
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
+    map(l->send!(l, Arrive()), lnk) # notify the servers
 end
 ```
 
@@ -65,18 +64,17 @@ const μ = 1.0 / c           # service rate
 const λ = 0.9               # arrival rate
 const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
+const jobno = [0]           # job counter
 
 # initialize simulation environment
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-lnk = Link[]
 for i in 1:c   # start actors
     s = Server(i, clock, input, output, 0, M₂)
-    push!(lnk, Actor(idle, s))
-    register!(clock.channels, lnk[end]) # register them to the clock
+    register!(clock.channels, Actor(idle, s))
 end
-process!(clock, Prc(0, arrivals, input, lnk, N, M₁), 1)
+event!(clock, fun(arrive, clock, input, jobno, clock.channels), every, M₁, n=N)
 run!(clock, 20)
 ```
 
@@ -99,3 +97,5 @@ run!(clock, 20)
 10.734: server 2 finished serving 9
 "run! finished with 50 clock events, 0 sample steps, simulation time: 20.0"
 ```
+
+This implementation is more readable and straightforward.

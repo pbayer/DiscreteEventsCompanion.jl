@@ -22,15 +22,16 @@ const μ = 1.0 / c           # service rate
 const λ = 0.9               # arrival rate
 const M₁ = Exponential(1/λ) # interarrival time distribution
 const M₂ = Exponential(1/μ) # service time distribution
+const jobno = [0]           # job counter
 
-Base.get(clk::Clock, m::Message, after, Δt::Number) =
-    event!(clk, (fun(send!, self(), m), yield), after, Δt)
+Base.get(clk::Clock, m::Message, after, Δt::Distribution) =
+    event!(clk, fun(send!, self(), m), after, Δt)
 
 function idle(s::Server, ::Arrive)
     if isready(s.input)
         s.job = take!(s.input)
         become(busy, s)
-        get(s.clk, Finish(), after, rand(s.S))
+        get(s.clk, Finish(), after, s.S)
         print(s.clk, @sprintf("%5.3f: server %d serving customer %d\n", tau(s.clk), s.id, s.job))
     end
 end
@@ -42,24 +43,20 @@ function busy(s::Server, ::Finish)
 end
 
 # model arrivals
-function arrivals(clk::Clock, queue::Channel, lnk::Vector{Link}, N::Int, A::Distribution)
-    for i = 1:N # initialize customers
-        delay!(clk, rand(A))
-        put!(queue, i)
-        print(clk, @sprintf("%5.3f: customer %d arrived\n", tau(clk), i))
-        map(l->send!(l, Arrive()), lnk) # notify the servers
-    end
+function arrive(c::Clock, input::Channel, jobno::Vector{Int}, lnk::Vector{Channel})
+    jobno[1] += 1
+    @printf("%5.3f: customer %d arrived\n", tau(c), jobno[1])
+    put!(input, jobno[1])
+    map(l->send!(l, Arrive()), lnk) # notify the servers
 end
 
 # initialize simulation environment
 clock = Clock()
 input = Channel{Int}(Inf)
 output = Channel{Int}(Inf)
-lnk = Link[]
 for i in 1:c   # start actors
     s = Server(i, clock, input, output, 0, M₂)
-    push!(lnk, Actor(idle, s))
-    register!(clock.channels, lnk[end])
+    register!(clock.channels, Actor(idle, s))
 end
-process!(clock, Prc(0, arrivals, input, lnk, N, M₁), 1)
+event!(clock, fun(arrive, clock, input, jobno, clock.channels), every, M₁, n=N)
 run!(clock, 20)
