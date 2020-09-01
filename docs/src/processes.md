@@ -80,7 +80,9 @@ Interacting sequential processes depend on "a rendezvous between the processes i
 
 If typical event sequences ``S_i`` (e.g. waiting for a resource or time delays) are interrupted by stochastic events (e.g. server breakdowns, customers reneging …), the processes are not ready and must use [exception handling](https://docs.julialang.org/en/v1/manual/control-flow/#Exception-Handling-1) to tackle them. This means that we have to treat natural occurrences in a stochastic DES as *errors* in our program.
 
-This a severe limitation of "processes" as used in simulations. If we have to handle a lot of such interrupting events, things are getting  complicated. This is a barrier to represent more complex systems with sequential processes.
+This a severe limitation of "processes" as used in simulations. If we have to handle different interrupting events requiring different responses, things are getting complicated. This is a barrier to represent more complex systems with sequential processes.
+
+There is an [example showing how to handle interrupts to processes](examples/queue_mmc_srv_fail.md).
 
 [^1]: see: Banks, Carson, Nelson, Nicol: Discrete-Event System Simulation, 4th ed, 2005, p. 74-77
 [^2]: If you want to use `take!` or `put!` on channels inside the main program, make sure that they are available (with `isready(ch)` or `length(ch.data) < ch.sz_max`) before calling them in order to avoid blocking.
