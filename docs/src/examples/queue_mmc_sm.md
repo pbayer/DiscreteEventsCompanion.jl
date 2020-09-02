@@ -1,8 +1,8 @@
 # M/M/c with State Machines
 
-Here we implement a simple state machine as an Actor. An Actor is a task listening to an event channel. It has an internal state and reacts accordingly to the events. Here we did a native Actor implementation without any libraries.
+Here we implement a simple state machine as an actor. An *actor* is a task listening to an event channel. It has an internal state and reacts accordingly to the events. Here we did a native actor implementation without any libraries.
 
-As before we define first states and events and a state machine body:
+As before with state machines we define first *states* and *events* and a *state machine body*:
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random
@@ -27,7 +27,7 @@ mutable struct Server  # state machine body
 end
 ```
 
-Then we implement the transition functions and the Actor loop running them:
+Then we implement the transition functions and the actor loop running them:
 
 ```julia
 act!(::Server, ::𝑋, ::𝐸) = nothing   # a default transition
@@ -44,14 +44,14 @@ function act!(s::Server, ::Busy, ::Finish)
     put!(s.output, s.job)
     print(s.clk, @sprintf("%5.3f: server %d finished serving %d\n", tau(s.clk), s.id, s.job))
 end
-function act!(s::Server)  # actor loop, take something
+function act!(s::Server)  # a simple actor loop, take something
     while true            # from the com channel and act! on it
         act!(s, s.state, take!(s.com))
     end
 end
 ```
 
-The `arrive` function sends an `Arrive()` event to the server Actors over their `com` channels:
+The `arrive` function sends an `Arrive()` event to the server actors over their `com` channels:
 
 ```julia
 function arrive(c::Clock, input::Channel, jobno::Vector{Int}, srv::Vector{Server})
@@ -62,7 +62,7 @@ function arrive(c::Clock, input::Channel, jobno::Vector{Int}, srv::Vector{Server
 end
 ```
 
-We setup our global constants, the simulation environment, the Actors and the arrivals process and run:
+We setup our global constants, the simulation environment, the actors and the arrivals process and run:
 
 ```julia
 Random.seed!(8710)          # set random number seed for reproducibility
@@ -87,7 +87,7 @@ event!(clock, fun(arrive, clock, input, jobno, srv), every, M₁, n=N)
 run!(clock, 20)
 ```
 
-Note that we registered the Actor `com` channel to the clock in order to avoid [clock concurrency](@ref clock_concurrency).
+Note that we registered the actor `com` channel to the clock in order to avoid [clock concurrency](@ref clock_concurrency).
 
 Then we get our usual output:
 

@@ -1,6 +1,6 @@
 # M/M/c with Actors
 
-Very similar to the last implementation we can implement the servers as [`YAActL`](https://github.com/pbayer/YAActL.jl) Actors. First we have to define the Actor messages, the server body and a convenience function for Actors sending a delayed message to themselves.
+Very similar to the last implementation we can implement the servers as [`YAActL`](https://github.com/pbayer/YAActL.jl) actors. First we have to define the actor messages, the server body and a convenience function for actors sending a delayed message to themselves.
 
 ```julia
 using DiscreteEvents, Printf, Distributions, Random, YAActL
