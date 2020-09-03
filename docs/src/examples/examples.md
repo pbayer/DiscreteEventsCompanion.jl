@@ -18,7 +18,7 @@ The following examples illustrate different implementations of a simple M/M/2 qu
 
 ## The M/M/c queue with failures
 
-## Parallel Simulations
+## Multithreading
 
 ## Other Examples:
 
