@@ -62,7 +62,7 @@ In parallel simulations we take at least four steps in order to limit time skew 
 3. Users keep associated entities and events (subsystems) together on threads and
 4. take care that distributed DES subsystems are sufficiently decoupled.
 
-This is described at greater length in [distributed simulations](@ref distributed_simulations). Here we illustrate how to create and access parallel clocks:
+This is described at greater length in [Multi-Threading](@ref multi-threading). Here we illustrate how to create and access parallel clocks:
 
 ```@repl
 pc = PClock()           # create a master clock with parallel clocks

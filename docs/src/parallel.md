@@ -1,19 +1,21 @@
-# Parallel simulations
+# Parallel Simulation
 
-Currently `DiscreteEvents.jl` enables two approaches to parallel simulations.
+Currently `DiscreteEvents.jl` supports two approaches to parallel simulations.
 
-## Simulations in parallel
+## Distributed Simulations
 
-Multiple simulations can be executed on parallel to each other using the `@threads`- macro. They have different clocks with different times. This approach is useful if you do multiple simulations to investigate their response to parameter variation. Basically you write a function, accepting parameters and doing a simulation on them. You then can invoke multiple simulations in a for loop:
+Several simulations can be executed in parallel on
 
-```julia
-```
+- multiple cores of one machine using the [`@threads`- macro](https://docs.julialang.org/en/v1/manual/multi-threading/#The-@threads-Macro) or on
+- multiple processes, potentially on different machines using the [`Distributed`](https://docs.julialang.org/en/v1/manual/distributed-computing/) library.
+
+They then have different clocks with different times. This approach is useful if you do multiple simulations to investigate their response to parameter variation or for machine learning.
 
 See the [dice game example](examples/dicegame/dicegame.md).
 
-## [Distributed simulations](@id distributed_simulations)
+## [Multi-Threading](@id multi-threading)
 
-An other way is to distribute a simulation over multiple cores of one machine. But this breaks the concept of a universally uniform time in a simulation:
+Another way is to distribute the computation of one simulation over multiple cores of one machine. This breaks the concept of a universally uniform time in a simulation:
 
 > The concept of a unique global clock is not meaningful in the context of a distributed system of self-contained parallel agents. ...
 >
@@ -23,11 +25,11 @@ An other way is to distribute a simulation over multiple cores of one machine. B
 >
 > The important point to be made is that any such global synchronization creates a bottleneck which can be extremely inefficient in the context of a distributed environment. [^1]
 
-In a distributed system we must find a compromise between maintaining a global order of events and being able to do efficient local computations. The key insight is that not all events in a system have causal relations with each other and therefore not all events need to be synchronized.
+In a distributed system we must find a compromise between maintaining a global order of events and being able to do efficient local computations. The key insight is that not all events in a system have strong causal relations with each other and therefore not all events need to be synchronized.
 
 `DiscreteEvents` introduces parallel clocks with *thread local time*. Thus it maintains *partial orderings of events* on each thread. By synchronizing the parallel clocks each given time interval ``ϵ`` it ensures that for all parallel clocks ``C_i, C_j: |t_i - t_j| < ϵ``.
 
-It is then up to the user to take care that associated events or entities in a DES get grouped together to run on a thread. Thus causal relations get maintained. In reality subsystems of DES are often decoupled by buffers or queues. Those decouplings are the natural interfaces between subsystems to be used to divide a model over multiple threads.
+It is then up to the user to take care that associated events or entities in a DES get grouped together to run on a thread. Thus causal relations get maintained. In reality subsystems of DES are often decoupled by buffers or queues. Those decouplings are natural interfaces between subsystems to be used to distribute a model over multiple threads.
 
 ### Parallel efficiency
 

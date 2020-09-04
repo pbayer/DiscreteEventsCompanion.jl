@@ -17,16 +17,25 @@ const PAGES = Any[
     ],
     "Examples" => [
         "Overview" => "examples/examples.md",
-        "Single Server" => "examples/singleserver.md",
-        "Table Tennis" => "examples/tabletennis.md",
-        "M/M/c Activities" => "examples/queue_mmc_act.md",
-        "M/M/c Processes" => "examples/queue_mmc_srv.md",
-        "M/M/c Interrupted Processes" => "examples/queue_mmc_srv_fail.md",
-        "M/M/c State Machines" => "examples/queue_mmc_sm.md",
-        "M/M/c Actors" => "examples/queue_mmc_actor.md",
-        "House Heating" => "examples/house_heating/house_heating.md",
-        "Post Office" => "examples/postoffice/postoffice.md",
-        "Goldratt's Dice Game" => "examples/dicegame/dicegame.md",
+        "Introductory" => [
+            "Single Server" => "examples/singleserver.md",
+            "Table Tennis" => "examples/tabletennis.md"
+        ],
+        "M/M/c Queue" => [
+            "M/M/c Activities" => "examples/queue_mmc_act.md",
+            "M/M/c Processes" => "examples/queue_mmc_srv.md",
+            "M/M/c State Machines" => "examples/queue_mmc_sm.md",
+            "M/M/c Actors" => "examples/queue_mmc_actor.md",
+            "M/M/c Interrupted Processes" => "examples/queue_mmc_srv_fail.md"
+        ],
+        "Multi-Threading" => [
+            "Assembly Line" => "examples/assy_thrd.md"
+        ],
+        "Other" => [
+            "House Heating" => "examples/house_heating/house_heating.md",
+            "Post Office" => "examples/postoffice/postoffice.md",
+            "Goldratt's Dice Game" => "examples/dicegame/dicegame.md"    
+        ]
     ],
     "Performance" => "performance.md",
     "Parallel Simulation" => "parallel.md",
