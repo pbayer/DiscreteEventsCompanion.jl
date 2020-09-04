@@ -28,7 +28,7 @@ const PAGES = Any[
             "M/M/c Actors" => "examples/queue_mmc_actor.md",
             "M/M/c Interrupted Processes" => "examples/queue_mmc_srv_fail.md"
         ],
-        "Multi-Threading" => [
+        "Multi-Threading (Experimental)" => [
             "Assembly Line" => "examples/assy_thrd.md"
         ],
         "Other" => [

@@ -20,7 +20,7 @@ The following examples simulate server failures:
 
 - [M/M/c process-based + interrupts](queue_mmc_srv_fail.md)
 
-## Multi-Threading
+## Multi-Threading (Experimental)
 
 - An [assembly line of several sections](assy_thrd.md) running on different threads
 
