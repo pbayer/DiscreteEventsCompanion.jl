@@ -38,13 +38,13 @@ The **server model** (`bench_queue_mmc_srv.jl`)
 
 ![the server model](img/bench_queue_mmc_srv.png)
 
-As expected this faster than the modified model and scales well. Can we speed up this further by running it on a separate processor core?
+As expected, this is faster (0.55 s) than the modified model and scales well. Can we speed up this further by running it on a separate processor core?
 
 The **server model on thread 2** (`bench_queue_mmc_srv1.jl`)
 
 ![the server model on thread 2](img/bench_queue_mmc_srv1.png)
 
-Now it takes about 30 ms for 4000 customers.
+Now it takes about 27 ms for 4000 customers.
 
 ## An activity based solution
 
@@ -54,7 +54,7 @@ The **activity based model** (`bench_queue_mmc_act.jl`)
 
 ![the activity based model](img/bench_queue_mmc_act.png)
 
-This takes about 60 ms for 4000 customers. It is slower than the last one since it has to check for conditions with clock sampling.
+This takes about 68 ms for 4000 customers. It is slower than the last one since it has to check for conditions with clock sampling.
 
 ## Conclusion
 
