@@ -1,6 +1,6 @@
 # Event Scheduling
 
-In order to represent an event ``\,(e_i,t_i): e_i \in \mathcal{E}\,`` we schedule an appropriate action ``γ`` to clock at a given time or under a condition. Thereby we introduce a time delay between the creation of an event and its execution.
+In order to represent an event ``\,(e_i,t_i): e_i \in \mathcal{E}\,`` we schedule an appropriate action ``γ`` to a clock at a given time or under a given condition. Thereby we introduce a time delay between the creation of an event and its execution.
 
 - *Timed events* are actions scheduled to execute at a given time,
 - *Conditional events* are actions scheduled to execute when a given condition becomes true.
