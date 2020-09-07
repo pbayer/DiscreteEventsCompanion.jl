@@ -9,22 +9,25 @@ With `DiscreteEvents` you can schedule and run Julia functions and expressions a
 ```julia
 using DiscreteEvents, Distributions, Random
 
-Random.seed!(123)
+Random.seed!(030)
 ex = Exponential()
 
-chit(c) = (print("."), event!(c, fun(chat, c), after, rand(ex)))
-chat(c) = (print(":"), event!(c, fun(chit, c), after, rand(ex)))
+chit() = print(".")
+chat() = print(":")
 
 c = Clock()
-event!(c, fun(chit, c), after, rand(ex))
-event!(c, println, at, 10)
-run!(c, 10)
-```
-```
-.:.:.:.:.:.:.:.:.
-"run! finished with 18 clock events, 0 sample steps, simulation time: 10.0"
+event!(c, chit, every, ex, n=8)
+event!(c, chat, every, ex, n=8)
+event!(c, println, after, 10)
 ```
 
+Now this gives us two independent Poisson processes chitting and chatting on the console:
+
+```julia
+julia> run!(c, 10)
+.:..::.:.:...:::
+"run! finished with 17 clock events, 0 sample steps, simulation time: 10.0"
+```
 
 **Author:** Paul Bayer
 **License:** MIT

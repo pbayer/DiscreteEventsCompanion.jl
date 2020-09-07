@@ -27,7 +27,7 @@ Processes execute Julia code, wait or delay on the clock or wait for available r
 
 The first three commands: `delay!`, `wait!` and `now!` schedule events to the clock, `take!` and `put!` on channels are handled directly by the Julia scheduler. All blocking commands should only be used in processes (asynchronous tasks) and never within the main loop (e.g. event- or activity-based implementations) from the Julia REPL [^2].
 
-The [following code snippet](https://pbayer.github.io/DiscreteEventsCompanion.jl/dev/examples/queue_mmc_srv/) the two functions define processes:
+In the [following code snippet](https://pbayer.github.io/DiscreteEventsCompanion.jl/dev/examples/queue_mmc_srv/) the two functions define processes:
 
 ```julia
 # describe the server process
@@ -73,6 +73,8 @@ process!(clock, Prc(0, arrivals, input, N, M₁), 1)
 ```
 
 The `server` processes run their function body in an infinite loop (default) while the `arrivals` process runs it only once and then terminates. The `server` processes wait for jobs in their input channels and the `arrivals` process waits for the clock to tick. If we start the clock, the processes begin to interact: customers are produced by the arrivals process, the servers then serve them …
+
+Note that the clock variable given to the process function is computed dynamically during process startup. If you start a process on a parallel thread with `cid` or `spawn`, the process runs on a parallel clock. Therefore in `Prc` you don't include the clock variable an an argument.
 
 ## Limitations
 

@@ -6,7 +6,7 @@ In DES usually a lot of events happen, but not all of them cause state transitio
 \{(e_1,t_1),(e_2,t_2),(e_3,t_3),\hspace{1em}...\hspace{1em}, (e_n,t_n)\}
 ```
 
-are not predictable and can change stochastically, the system behavior can be expressed as a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine). In our [stochastic timed automaton](DES.md) ``\,(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)\,`` the feasible event function ``\,\Gamma(x) : x \in \mathcal{X},\,\Gamma(x) \subseteq \mathcal{E}\,`` is the set of all events ``e`` for which a transition function ``\mathcal{f}(x,e)`` is defined. Given the current state of the system other events can happen, but are unfeasible and are ignored.
+are not predictable and can change stochastically, a system behavior can be expressed as a [finite state machine](https://en.wikipedia.org/wiki/Finite-state_machine). In our [stochastic timed automaton](DES.md) ``\,(\mathcal{E},\mathcal{X},\Gamma,p,p_0,G)\,`` the feasible event function ``\,\Gamma(x) : x \in \mathcal{X},\,\Gamma(x) \subseteq \mathcal{E}\,`` is the set of all events ``e`` for which a transition function ``\mathcal{f}(x,e)`` is defined. Given the current state of the system other events can happen, but are unfeasible and are ignored.
 
 ## The transition function
 
@@ -90,6 +90,6 @@ If a `Busy` server gets a `Fail` event, it becomes `Failed` and cannot accept th
 
 By creating several server instances we can represent different entities of state machines in the system. This is shown in the [multi-server example](examples/multiserver.md).
 
-A more elegant and dynamic way is to work with actors: By changing their behavior they can express state machines natively, they can have state machines as behaviors, they can create new actors dynamically ...
+A more elegant and dynamic way is to work with actors: By changing their behavior they can express state machines natively, they can change their behavior even to a new state machine or create new actors dynamically ...
 
 [^1]: Here we include the server `s` as function argument. But then - since we change its state - it is [Julia convention](https://docs.julialang.org/en/v1/base/punctuation/) to add an exclamation mark to the function name `f!`.

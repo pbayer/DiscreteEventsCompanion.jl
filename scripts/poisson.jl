@@ -11,22 +11,21 @@ t = Float64[]         # tracing variables
 y1 = Int[]
 y2 = Int[]
 
-δ(t) = Int(rand() ≤ exp(ρ*t))        # time dependent decay of arrivals
+δ(t) = Int(rand() ≤ exp(ρ*t))  # model time dependent decay of arrivals
 trace(c) = (push!(t, c.time); push!(y1, hpp[1]); push!(y2, nhpp[1]))
 
 # define two arrival functions
-#       |   count             | schedule next arrival
-arr1(c) = (hpp[1] += 1;         event!(c, fun(arr1, c), after, rand(D)))
-arr2(c) = (nhpp[1]+= δ(c.time); event!(c, fun(arr2, c), after, rand(D)))
+arr1() = hpp[1] += 1
+arr2(c) = nhpp[1]+= δ(c.time)
 
 # create clock, schedule events and tracing and run
 c = Clock()
-event!(c, fun(arr1, c), after, rand(D))  # HPP arrivals (grocery store)
-event!(c, fun(arr2, c), after, rand(D))  # NHPP (bakery)
+event!(c, arr1, every, D)          # HPP arrivals (grocery store)
+event!(c, fun(arr2, c), every, D)  # NHPP (bakery)
 periodic!(c, fun(trace, c))
 run!(c, 10)
 
 plot(t, y1, label="grocery", xlabel="hours", ylabel="customers", legend=:topleft)
 plot!(t, y2, label="bakery")
 
-# savefig("img/poisson.png")
+# savefig("poisson.png")

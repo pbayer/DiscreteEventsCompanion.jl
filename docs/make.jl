@@ -3,7 +3,7 @@ using Documenter
 const PAGES = Any[
     "Home" => "index.md",
     "Manual" => [
-        "Overview" => "DES.md",
+        "Discrete Event Systems" => "DES.md",
         "Clocks" => "clocks.md",
         "Actions" => "actions.md",
         "Sampling" => "sampling.md",

@@ -6,13 +6,14 @@
 
 using DiscreteEvents, Distributions, Random
 
-Random.seed!(123)
+Random.seed!(030)
 ex = Exponential()
 
-chit(c) = (print("."), event!(c, fun(chat, c), after, rand(ex)))
-chat(c) = (print(":"), event!(c, fun(chit, c), after, rand(ex)))
+chit() = print(".")
+chat() = print(":")
 
 c = Clock()
-event!(c, fun(chit, c), after, rand(ex))
-event!(c, println, at, 10)
+event!(c, chit, every, ex, n=8)
+event!(c, chat, every, ex, n=8)
+event!(c, println, after, 10)
 run!(c, 10)
