@@ -64,7 +64,7 @@ In parallel simulations we take at least four steps in order to limit time skew 
 
 This is described at greater length in [Multi-Threading](@ref multi-threading). Here we illustrate how to create and access parallel clocks:
 
-```@repl
+```@repl clocks
 pc = PClock()           # create a master clock with parallel clocks
 pc2 = pclock(pc, 2)     # access the active clock on thread 2
 pc2.clock               # access the parallel clock on thread 2
