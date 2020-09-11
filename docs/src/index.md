@@ -10,14 +10,13 @@ With `DiscreteEvents` you can schedule and run Julia functions and expressions a
 using DiscreteEvents, Distributions, Random
 
 Random.seed!(030)
-ex = Exponential()
 
 chit() = print(".")
 chat() = print(":")
 
 c = Clock()
-event!(c, chit, every, ex, n=8)
-event!(c, chat, every, ex, n=8)
+event!(c, chit, every, Exponential(), n=8)
+event!(c, chat, every, Exponential(), n=8)
 event!(c, println, after, 10)
 ```
 
