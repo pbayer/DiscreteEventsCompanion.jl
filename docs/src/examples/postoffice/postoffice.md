@@ -69,15 +69,9 @@ function clerk(clk::Clock, input::Channel)
 end
 ```
 
-
-
-
     clerk (generic function with 1 method)
 
-
-
 Then we have to create out data, register and startup the processes:
-
 
 ```julia
 resetClock!(𝐶)  # for repeated runs it is easier if we reset our central clock here
@@ -89,10 +83,10 @@ df = DataFrame(time=Float64[], cust=Int[], qlen=Int64[], status=String[], wtime=
 process!(Prc(1, people, queue, 3.333)) # register the functions as processes
 process!(Prc(2, clerk, queue))
 ```
+
     2
 
 Then we can simply run the simulation. We assume our time unit being minutes, so we run for 600 units:
-
 
 ```julia
 println(run!(𝐶, 600))
@@ -143,18 +137,10 @@ df
 | 28 | 44.22 | 9 | 1 | leaves | 6.74951 |
 | 29 | 44.22 | 10 | 0 | now being served | 1.96307 |
 | 30 | 45.62 | 11 | 1 | enqueues | 0.0 |
-| &vellip; | &vellip; | &vellip; | &vellip; | &vellip; | &vellip; |
-</tbody></table>
-
-
-
 
 ```julia
 last(df, 5)
 ```
-
-
-
 
 | no | time    | cust  | qlen  | status           | wtime   |
 |----|---------|------:|------:| -----------------|---------|
@@ -163,10 +149,6 @@ last(df, 5)
 | 3 | 595.95 | 177 | 1 | leaves | 6.35064 |
 | 4 | 595.95 | 178 | 0 | now being served | 1.21605 |
 | 5 | 598.03 | 178 | 0 | leaves | 3.29656 |
-</tbody></table>
-
-
-
 
 ```julia
 describe(df[df[!, :wtime] .> 0, :wtime])
@@ -183,16 +165,11 @@ describe(df[df[!, :wtime] .> 0, :wtime])
     Maximum:        23.627103
     Type:           Float64
 
-
 In $600$ minutes simulation time, we registered $178$ customers and $518$ status changes. The mean and median waiting times were around $7$ minutes.
-
 
 ```julia
 by(df, :status, df -> size(df, 1))
 ```
-
-
-
 
 | no | status | x1 |
 |---|-----|---:|
@@ -200,12 +177,8 @@ by(df, :status, df -> size(df, 1))
 | 2 | now being served | 170 |
 | 3 | leaves | 170 |
 | 4 | leaves - queue is full! | 8 |
-</tbody></table>
-
-
 
 Of the $178$ customers, $170$ of them participated in the whole process and were served, but $8$ left beforehand because the queue was full: 
-
 
 ```julia
 df[df.wtime .< 0,:]
@@ -234,9 +207,7 @@ title("Waiting Time in the Post Office")
 legend(["wait_time", "queue_len"]);
 ```
 
-
 ![png](output_17_0.png)
-
 
 Many customers had waiting times of more than 10, 15 up to even more than 20 minutes. The negative waiting times were the 5 customers, which left because the queue was full.
 
@@ -251,8 +222,3 @@ Even for such a simple everyday system, we cannot say beforehand – without rea
 If we had known the situation beforehand, we could have provided standby for our clerk or install an automatic stamp dispenser for cutting the short tasks … 
 
 We should have done a simulation. We should have known `DiscreteEvents` before …  😄
-
-
-```julia
-
-```

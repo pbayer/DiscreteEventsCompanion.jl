@@ -411,9 +411,7 @@ vcat(res[y .== maximum(y), :], res[y .== minimum(y), :])
 | 2 |  5 |  10 |  20 |  0.0 |  0.986 |
 | 3 |  20 |  1 |  2 |  0.1 |  0.638 |
 
-
-The best performance is with the shortest lines, big buffer sizes, small variation in processing times and no variation in performance between workers. But this is just common sense. The worst performance is with a long line, minimum buffers and maximum variation in processing times and in performance between workers. But how big are the effects? 
-
+The best performance is with the shortest lines, big buffer sizes, small variation in processing times and no variation in performance between workers. But this is just common sense. The worst performance is with a long line, minimum buffers and maximum variation in processing times and in performance between workers. But how big are the effects?
 
 ```julia
 @df res dotplot(:n, :y, title="line performance vs line length", xlabel="n", ylabel="y [1/t]",
@@ -421,13 +419,7 @@ The best performance is with the shortest lines, big buffer sizes, small variati
 @df res boxplot!(:n, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))
 ```
 
-
-
-
 ![svg](output_33_0.svg)
-
-
-
 
 ```julia
 @df res dotplot(:b, :y, title="line performance vs buffer size", xlabel="b", ylabel="y [1/t]",
@@ -435,13 +427,7 @@ The best performance is with the shortest lines, big buffer sizes, small variati
 @df res boxplot!(:b, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))
 ```
 
-
-
-
 ![svg](output_34_0.svg)
-
-
-
 
 ```julia
 @df res dotplot(:a, :y, title="line performance vs processing time variation", xlabel="a (bigger a: less variation)", 
@@ -449,13 +435,7 @@ The best performance is with the shortest lines, big buffer sizes, small variati
 @df res boxplot!(:a, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))
 ```
 
-
-
-
 ![svg](output_35_0.svg)
-
-
-
 
 ```julia
 x = Int.(round.(res.σ*40))
@@ -465,12 +445,7 @@ x = Int.(round.(res.σ*40))
 xticks!(collect(0:4), string.(round.(σ, digits=3)))
 ```
 
-
-
-
 ![svg](output_36_0.svg)
-
-
 
 Buffer sizes and variation in processing time clearly have nonlinear effects while line length and performance variation between workers seem to have more linear ones. Small buffers and variation in processing time constrain the line the most and also are responsible for the worst performances. There seems to be also an interaction between those major two factors.
 
@@ -484,10 +459,6 @@ using GLM
 
 ols = lm(@formula(y ~ 1 + n + log(1+b) + log(a) + σ), res)
 ```
-
-
-
-
     StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Array{Float64,1}},GLM.DensePredChol{Float64,LinearAlgebra.Cholesky{Float64,Array{Float64,2}}}},Array{Float64,2}}
     
     y ~ 1 + n + :(log(1 + b)) + :(log(a)) + σ
@@ -503,17 +474,12 @@ ols = lm(@formula(y ~ 1 + n + log(1+b) + log(a) + σ), res)
     σ            -0.509952    0.0133361    -38.24    <1e-99  -0.536099   -0.483804
     ────────────────────────────────────────────────────────────────────────────────
 
-
-
 All parameters are highly significant. We find then - as expected - that the b&a-interaction between buffer size and variation in processing times is highly significant too:
 
 
 ```julia
 ols2 = lm(@formula(y ~ 1 + n + log(1+b)*log(a) + σ), res)
 ```
-
-
-
 
     StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Array{Float64,1}},GLM.DensePredChol{Float64,LinearAlgebra.Cholesky{Float64,Array{Float64,2}}}},Array{Float64,2}}
     
@@ -532,9 +498,7 @@ ols2 = lm(@formula(y ~ 1 + n + log(1+b)*log(a) + σ), res)
     ───────────────────────────────────────────────────────────────────────────────────────
 
 
-
 Then we can analyze the effects of the four parameters on line performance:
-
 
 ```julia
 x = LinRange(1,10,50)
@@ -552,15 +516,10 @@ xlabel!("b (buffer size)")
 ylabel!("y [1/t]")
 ```
 
-
-
-
 ![svg](output_42_0.svg)
 
 
-
 Buffer size and processing time variation have nonlinear effects and may account together for 26% line performance losses. This shows how important it is to increase buffer sizes with larger variation in processing times (smaller a). Only with small variation one can reduce buffers without loosing much performance.
-
 
 ```julia
 x = LinRange(5, 20, 50)
@@ -570,15 +529,9 @@ plot(x, predict(ols2, tmp), title="Effect of line length", xlabel="n (line lengt
     ylabel="y [1/t]", legend=:none)
 ```
 
-
-
-
 ![svg](output_44_0.svg)
 
-
-
 This may account for 3% performance losses.
-
 
 ```julia
 x = LinRange(0,0.1,50)
@@ -588,11 +541,7 @@ plot(x, predict(ols2, tmp), title="Effect of performance variation between worke
     xlabel=L"\sigma", ylabel="y [1/t]", legend=:none)
 ```
 
-
-
-
 ![svg](output_46_0.svg)
-
 
 
 Variation in performance between workers may diminish line throughput by other 5%.
