@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Table Tennis · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../DES/">Discrete Event Systems</a></li><li><a class="tocitem" href="../../clocks/">Clocks</a></li><li><a class="tocitem" href="../../actions/">Actions</a></li><li><a class="tocitem" href="../../sampling/">Sampling</a></li><li><a class="tocitem" href="../../events/">Events</a></li><li><a class="tocitem" href="../../activities/">Activities</a></li><li><a class="tocitem" href="../../processes/">Processes</a></li><li><a class="tocitem" href="../../random/">Randomness</a></li><li><a class="tocitem" href="../../automata/">State Machines</a></li><li><a class="tocitem" href="../../actors/">Actors</a></li><li><a class="tocitem" href="../../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Introductory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../singleserver/">Single Server</a></li><li class="is-active"><a class="tocitem" href>Table Tennis</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">M/M/c Queue</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../queue_mmc_srv_fail/">M/M/c Interrupted Processes</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-4" type="checkbox"/><label class="tocitem" for="menuitem-3-4"><span class="docs-label">Multi-Threading (Experimental)</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../assy_thrd/">Assembly Line</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-5" type="checkbox"/><label class="tocitem" for="menuitem-3-5"><span class="docs-label">Other</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../postoffice/postoffice/">Post Office</a></li><li><a class="tocitem" href="../dicegame/dicegame/">Goldratt&#39;s Dice Game</a></li></ul></li></ul></li><li><a class="tocitem" href="../../performance/">Performance</a></li><li><a class="tocitem" href="../../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../../diag/">Diagnosis</a></li><li><a class="tocitem" href="../../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Introductory</a></li><li class="is-active"><a href>Table Tennis</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Table Tennis</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/examples/tabletennis.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Table-tennis"><a class="docs-heading-anchor" href="#Table-tennis">Table tennis</a><a id="Table-tennis-1"></a><a class="docs-heading-anchor-permalink" href="#Table-tennis" title="Permalink"></a></h1><p>In table tennis we have some physical constraints, standard moves and rules, but uncertainty in execution due to lack of accuray and attentiveness of the players and so on.</p><p>First we need to call the needed modules:</p><pre><code class="language-julia">using DiscreteEvents, Printf
+import DiscreteEvents.init!</code></pre><p>Then we need some definitions for states, events and players:</p><pre><code class="language-julia">abstract type PState end
+struct Idle &lt;: PState end
+struct Wait &lt;: PState end
+struct Unalert &lt;: PState end
+
+abstract type PEvent end
+struct Start &lt;: PEvent end
+struct Serve &lt;: PEvent end
+struct Return &lt;: PEvent end
+struct Miss &lt;: PEvent end
+
+mutable struct Player
+    name::AbstractString
+    opp::Union{Number,Player}
+    state::PState
+    accuracy::Float64
+    attentiveness::Float64
+    score::Int64
+
+    Player(name, acc, att) = new(name, 0, Idle(), acc, att, 0)
+end</code></pre><p>We have to define the physical facts and a function to randomize them:</p><pre><code class="language-julia">const dist = 3 # distance for ball to fly [m]
+const vs   = 10 # serve velocity [m/s]
+const vr   = 20 # return velocity [m/s]
+
+rd(s::Float64) = randn()*s + 1</code></pre><p>Some functions describe the setup of players, serve and return.</p><pre><code class="language-julia">function init!(p::Player, opp::Player)
+    p.opp = opp
+    if rand() ≤ p.attentiveness
+        p.state = Wait()
+    else
+        p.state = Unalert()
+    end
+end
+
+function serve(p::Player)
+    ts = 3 + dist*rd(0.15)/(vs*rd(0.25))
+    if (rand() ≤ p.accuracy) &amp;&amp; (p.state == Wait())
+        event!(𝐶, fun(step!, p.opp, Serve()), after, ts)
+        @printf(&quot;%5.2f: %s serves %s\n&quot;, tau()+ts, p.name, p.opp.name)
+    else
+        event!(𝐶, fun(step!, p.opp, Miss()), after, ts)
+        @printf(&quot;%5.2f: %s serves and misses %s\n&quot;, tau()+ts, p.name, p.opp.name)
+    end
+    if rand() ≥ p.attentiveness
+        p.state = Unalert()
+    end
+end
+
+function ret(p::Player)
+    tr = dist*rd(0.15)/(vr*rd(0.25))
+    if rand() ≤ p.accuracy
+        event!(𝐶, fun(step!, p.opp, Return()), after, tr)
+        @printf(&quot;%5.2f: %s returns %s\n&quot;, tau()+tr, p.name, p.opp.name)
+    else
+        event!(𝐶, fun(step!, p.opp, Miss()), after, tr)
+        @printf(&quot;%5.2f: %s returns and misses %s\n&quot;, tau()+tr, p.name, p.opp.name)
+    end
+    if rand() ≥ p.attentiveness
+        p.state = Unalert()
+    end
+end</code></pre><p>We can model the players as state machines. Their behaviour is described by the following <code>step!</code>-transition functions, leading to some actions and a new state.</p><pre><code class="language-julia">&quot;default transition for players&quot;
+step!(p::Player, q::PState, σ::PEvent) =
+        println(&quot;undefined transition for $(p.name), $q, $σ&quot;)
+
+&quot;player p gets a start command&quot;
+step!(p::Player, ::Union{Wait, Unalert}, ::Start) = serve(p)
+
+&quot;player p is waiting and gets served or returned&quot;
+step!(p::Player, ::Wait, ::Union{Serve, Return}) = ret(p)
+
+&quot;player p is unalert and gets served or returned&quot;
+function step!(p::Player, ::Unalert, ::Union{Serve, Return})
+    @printf(&quot;%5.2f: %s looses ball\n&quot;, τ(), p.name)
+    p.opp.score += 1
+    p.state = Wait()
+    serve(p)
+end
+
+&quot;player p is waiting or unalert and gets missed&quot;
+function step!(p::Player, ::Union{Wait, Unalert}, ::Miss)
+    p.score += 1
+    p.state = Wait()
+    serve(p)
+end
+
+&quot;simplified `step!` call&quot;
+step!(p::Player, σ::PEvent) = step!(p, p.state, σ)</code></pre><p>We define and setup the players and give Ping the <code>Start()</code> command.</p><pre><code class="language-julia">ping = Player(&quot;Ping&quot;, 0.90, 0.90)
+pong = Player(&quot;Pong&quot;, 0.90, 0.90)
+init!(ping, pong)
+init!(pong, ping)
+step!(ping, Start())</code></pre><p>Finally we setup a simulation and analysis of the results:</p><pre><code class="language-julia">Random.seed!(123)
+
+println(run!(𝐶, 30))
+println(&quot;Ping scored $(ping.score)&quot;)
+println(&quot;Pong scored $(pong.score)&quot;)</code></pre><p>If we source this code, the simulation runs:</p><pre><code class="language-julia">julia&gt; include(&quot;docs/examples/tabletennis.jl&quot;)
+3.35: Ping serves Pong
+3.47: Pong returns and misses Ping
+6.82: Ping serves Pong
+6.96: Pong returns Ping
+7.15: Ping returns Pong
+7.28: Pong returns Ping
+7.54: Ping returns Pong
+7.80: Pong returns Ping
+7.80: Ping looses ball
+11.27: Ping serves Pong
+11.45: Pong returns Ping
+11.59: Ping returns Pong
+11.92: Pong returns Ping
+12.08: Ping returns Pong
+12.08: Pong looses ball
+15.59: Pong serves Ping
+15.59: Ping looses ball
+18.75: Ping serves Pong
+18.91: Pong returns Ping
+18.91: Ping looses ball
+22.15: Ping serves Pong
+22.30: Pong returns Ping
+22.30: Ping looses ball
+25.62: Ping serves Pong
+25.83: Pong returns Ping
+26.19: Ping returns and misses Pong
+29.50: Pong serves and misses Ping
+32.75: Ping serves Pong
+run! finished with 47 clock events, 0 sample steps, simulation time: 30.0
+Ping scored 3
+Pong scored 5</code></pre><p>Finally we reset the clock for further simulations:</p><pre><code class="language-julia">julia&gt; reset!(𝐶)
+clock reset to t₀=0, sampling rate Δt=0.</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../singleserver/">« Single Server</a><a class="docs-footer-nextpage" href="../queue_mmc_act/">M/M/c Activities »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 14 September 2020 17:20">Monday 14 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

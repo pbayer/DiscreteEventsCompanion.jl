@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Goldratt&#39;s Dice Game · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../../DES/">Discrete Event Systems</a></li><li><a class="tocitem" href="../../../clocks/">Clocks</a></li><li><a class="tocitem" href="../../../actions/">Actions</a></li><li><a class="tocitem" href="../../../sampling/">Sampling</a></li><li><a class="tocitem" href="../../../events/">Events</a></li><li><a class="tocitem" href="../../../activities/">Activities</a></li><li><a class="tocitem" href="../../../processes/">Processes</a></li><li><a class="tocitem" href="../../../random/">Randomness</a></li><li><a class="tocitem" href="../../../automata/">State Machines</a></li><li><a class="tocitem" href="../../../actors/">Actors</a></li><li><a class="tocitem" href="../../../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../../examples/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox"/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Introductory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../singleserver/">Single Server</a></li><li><a class="tocitem" href="../../tabletennis/">Table Tennis</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">M/M/c Queue</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../../queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../../queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../../queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../../queue_mmc_srv_fail/">M/M/c Interrupted Processes</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-4" type="checkbox"/><label class="tocitem" for="menuitem-3-4"><span class="docs-label">Multi-Threading (Experimental)</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../assy_thrd/">Assembly Line</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-5" type="checkbox" checked/><label class="tocitem" for="menuitem-3-5"><span class="docs-label">Other</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../../postoffice/postoffice/">Post Office</a></li><li class="is-active"><a class="tocitem" href>Goldratt&#39;s Dice Game</a><ul class="internal"><li><a class="tocitem" href="#An-assembly-line"><span>An assembly line</span></a></li><li><a class="tocitem" href="#Parametrizing-the-model"><span>Parametrizing the model</span></a></li><li><a class="tocitem" href="#Kanban-…"><span>Kanban …</span></a></li><li><a class="tocitem" href="#Investigating-assembly-lines"><span>Investigating assembly lines</span></a></li><li><a class="tocitem" href="#Experimental-design"><span>Experimental design</span></a></li><li><a class="tocitem" href="#Data-analysis"><span>Data analysis</span></a></li><li><a class="tocitem" href="#Statistical-model"><span>Statistical model</span></a></li><li><a class="tocitem" href="#Final-remark"><span>Final remark</span></a></li></ul></li></ul></li></ul></li><li><a class="tocitem" href="../../../performance/">Performance</a></li><li><a class="tocitem" href="../../../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../../../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../../../diag/">Diagnosis</a></li><li><a class="tocitem" href="../../../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Other</a></li><li class="is-active"><a href>Goldratt&#39;s Dice Game</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Goldratt&#39;s Dice Game</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/examples/dicegame/dicegame.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Goldratt&#39;s-Dice-Game"><a class="docs-heading-anchor" href="#Goldratt&#39;s-Dice-Game">Goldratt&#39;s Dice Game</a><a id="Goldratt&#39;s-Dice-Game-1"></a><a class="docs-heading-anchor-permalink" href="#Goldratt&#39;s-Dice-Game" title="Permalink"></a></h1><p><em>Paul Bayer, v03, 2020-09-14</em></p><p>Goldratt&#39;s Dice Game from his business novel &quot;The Goal&quot; is a classical illustration that dependencies and statistical fluctuations diminish the throughput through a system.</p><p>Alex Rogo, the hero of the novel plays a game with five boys:</p><blockquote><p><em>While they go get the others, I figure out the details. The system I&#39;ve set up is intended to &quot;process&quot; matches. It does this by moving a quantity of match sticks out of their box, and through each of the bowls in succession. The dice determine how many matches can be moved from one bowl to the next. The dice represent the capacity of each resource, each bowl; the set of bowls are my dependent events, my stages of production. Each has exactly the same capacity as the others, but its actual yield will fluctuate somewhat.</em></p></blockquote><blockquote><p><em>In order to keep those fluctuations minimal, however, I decide to use only one of the dice. This allows the fluctuations to range from one to six. So from the first bowl, I can move to the next bowls in line any quantity of matches ranging from a minimum of one to a maximum of six.</em></p></blockquote><blockquote><p><em>Throughput in this system is the speed at which matches come out of the last bowl, Inventory consists of the total number of matches in all of the bowls at any time. And I&#39;m going to assume that market demand is exactly equal to the average number of matches that the system can process. Production capacity of each resource and market demand are perfectly in balance. So that means I now have a model of a perfectly balanced manufacturing plant.</em></p></blockquote><blockquote><p><em>Five of the boys decide to play. Besides Dave, there are Andy, Ben, Chuck, and Evan. Each of them sits behind one of the bowls. I find some paper and a pencil to record what happens. Then I explain what they&#39;re supposed to do.</em></p></blockquote><blockquote><p><em>&quot;The idea is to move as many matches as you can from your bowl to the bowl on your right. When it&#39;s your turn, you roll the die, and the number that comes up is the number of matches you can move. Got it?&quot;</em></p></blockquote><blockquote><p><em>They all nod. &quot;But you can only move as many matches as you&#39;ve got in your bowl. So if you roll a five and you only have two matches in your bowl, then you can only move two matches. And if it comes to your turn and you don&#39;t have any matches, then naturally you can&#39;t move any.&quot;</em></p></blockquote><blockquote><p><em>Eliyahu M Goldratt: The Goal.– 3rd ed, p. 105</em></p></blockquote><p>Then Rogo explains to the boys that with the die on average they should pass <code>3.5</code> matches through the system, so after twenty cycles they should have got an output of seventy.</p><p><img src="../DiceGame.png" alt="The Dice Game"/></p><h2 id="An-assembly-line"><a class="docs-heading-anchor" href="#An-assembly-line">An assembly line</a><a id="An-assembly-line-1"></a><a class="docs-heading-anchor-permalink" href="#An-assembly-line" title="Permalink"></a></h2><p>As Goldratt described it, the game is done in a fixed cycle – no asynchronism here and no need for a discrete-event-simulation. But more realistically it could be seen as an assembly line with buffers between the five workers:</p><p><img src="../assembly_line.png" alt="assembly line"/></p><p>The workers take on average 3.5 time units for processing an item and they are admonished to work as fast as possible. To implement it, we need some data structure for workers …</p><pre><code class="language-julia">using DiscreteEvents, Distributions, DataFrames, Random
+
+mutable struct Worker
+    nr::Int64              # worker number
+    input::Channel  
+    output::Channel
+    dist::Distribution     # distribution of processing time
+    retard::Float64        # worker retard factor, 1: no retardation, &gt;1: retardation 
+    done::Int64            # number of finished items
+    
+    Worker(nr, input, output, dist, perform) = new(nr, input, output, dist, 1/perform, 0)
+end</code></pre><p>… and a function representing their operation. The buffers are represented by channels. Then we build the system by creating workers and connecting them by channels. We start the work processes with their respective data and run the simulation.</p><pre><code class="language-julia">stats(t::Float64, nr::Int64, len::Int64) = push!(df, (t, nr, len))  ## write buffersize to dataframe
+
+function work(clk::Clock, w::Worker, stat::Bool)
+    job = take!(w.input)
+    stat ? stats(tau(clk), w.nr, length(w.input.data)) : nothing
+    delay!(clk, rand(w.dist) * w.retard)
+    put!(w.output, job)
+    stat ? stats(tau(clk), w.nr+1, length(w.output.data)) : nothing
+    w.done += 1
+end
+
+resetClock!(𝐶)
+Random.seed!(1234)                 # seed random number generator
+df = DataFrame(time=Float64[], channel=Int[], length=Int[])
+
+C = [Channel{Int64}(Inf) for i in 1:6]    # create 6 channels
+j = reverse(Array(1:8))
+for i in 5:-1:2                    # seed channels 2:5 each with 2 inventory items
+    put!(C[i], j[(i-1)*2])
+    put!(C[i], j[(i-1)*2-1])
+end
+for i in 9:1000                    # put other 992 jobs into channel 1
+    put!(C[1], i)
+end
+
+W = [Worker(i, C[i], C[i+1], Uniform(0.5, 6.5), 1.0) for i in 1:5]
+for i in 1:5
+    process!(Prc(i, work, W[i], true))
+end
+run!(𝐶, 1000)</code></pre><pre><code class="language-none">&quot;run! finished with 1390 clock events, 0 sample steps, simulation time: 1000.0&quot;</code></pre><pre><code class="language-julia">length(C[6].data)                    # how much got produced?</code></pre><pre><code class="language-none">272</code></pre><pre><code class="language-julia">1000/272</code></pre><pre><code class="language-none">3.676470588235294</code></pre><p>After running for 1000 time units, we got 272 finished items in channel 6, meaning an average cycle time of 3.68, not 3.5 as expected. The expected throughput would have been 286 units, so the line produced only 95% of that, even under &quot;perfect&quot; conditions like unlimited supply, an in-process inventory to start with, infinite buffer sizes, a perfectly balanced line and equally performing workers without breaks … What happened?</p><pre><code class="language-julia">using Plots
+
+function inventory_plot(n::Int64, title)
+    for i ∈ 2:n
+        d = df[df.channel .== i, :]
+        doplot = i == 2 ? plot : plot! 
+        doplot(d.time, d.length, label=&quot;channel$i&quot;)
+    end
+    title!(title)
+    xlabel!(&quot;time&quot;)
+    ylabel!(&quot;Inventory&quot;)
+end
+inventory_plot(5, &quot;In-Process-Inventory of Dice-Line&quot;)</code></pre><p><img src="../output_7_0.svg" alt="svg"/></p><p>We see that statistical fluctuations in processing times (the dice!) lead to wildly fluctuating buffers, overproduction of worker 1 (look at channel 2) and also to starvation of other workers down the line when their input buffers are empty. Let&#39;s calculate the inventory of unfinished goods in the line at the end of the simulation run:</p><pre><code class="language-julia">1000-length(C[1].data)-length(C[6].data)</code></pre><pre><code class="language-none">26</code></pre><p>This gives an average of 6.5 inventory items in channels 2-5. But as we see in the plot, some channels are often empty, leading to some starvation.</p><h2 id="Parametrizing-the-model"><a class="docs-heading-anchor" href="#Parametrizing-the-model">Parametrizing the model</a><a id="Parametrizing-the-model-1"></a><a class="docs-heading-anchor-permalink" href="#Parametrizing-the-model" title="Permalink"></a></h2><p>For further investigations we parametrize our model. This is not easily done in graphically oriented simulators, but we can do it with <code>DiscreteEvents.jl</code>.</p><p>As parameters we take:</p><ul><li><code>n</code>: the length of the line (number of workers)</li><li><code>mw</code>: max WIP-buffer sizes (WIP is work in progress),</li><li><code>vp</code>: variation in processing times from item to item and,</li><li><code>vw</code>: variation between worker performance,</li><li><code>d</code>: the duration of the simulation run</li></ul><p>We give each simulation its own clock and channels variables so that it can be run in parallel on different threads.</p><pre><code class="language-julia">function dice_line( n::Int64, mw::Int64, 
+                    vp::Distribution, vw::Distribution; 
+                    d=1000, seed=1234, jobs=1000, stat::Bool=true )
+    clk = Clock()
+    Random.seed!(seed)                  # seed random number generator
+    stat ? ( global df = DataFrame(time=Float64[], channel=Int[], length=Int[]) ) : nothing
+    C = [Channel{Int64}(mw) for i in 1:n+1] # create n+1 channels with given buffer sizes
+    C[1] = Channel{Int64}(Inf)                 # unlimited sizes for channels 1 and n+1
+    C[n+1] = Channel{Int64}(Inf)
+    j = reverse(Array(1:(n-1)*2))
+    for i in n:-1:2                     # seed channels 2:(n-1) each with 2 inventory items
+        C[i].sz_max &gt; 0 ? put!(C[i], j[(i-1)*2]) : nothing
+        C[i].sz_max &gt; 1 ? put!(C[i], j[(i-1)*2-1]) : nothing
+    end
+    for i in ((n-1)*2+1):jobs           # put other jobs into channel 1
+        put!(C[1], i)
+    end
+
+    wp = rand(vw, n)                    # calculate worker performance
+    W = [Worker(i, C[i], C[i+1], vp, wp[i]) for i in 1:n]
+    for i in 1:n
+        process!(clk, Prc(i, work, W[i], stat))
+    end
+    info = run!(clk, d)
+    return (info, clk.evcount, length(C[end].data))
+end</code></pre><pre><code class="language-none">dice_line (generic function with 1 method)</code></pre><h2 id="Kanban-…"><a class="docs-heading-anchor" href="#Kanban-…">Kanban …</a><a id="Kanban-…-1"></a><a class="docs-heading-anchor-permalink" href="#Kanban-…" title="Permalink"></a></h2><p>Against too much inventory we have Kanban. So let&#39;s introduce maximum buffer sizes of 5 items. We have yet our five perfect workers without varying performance.</p><pre><code class="language-julia">using Printf
+info, ev, res = dice_line(5, 5, Uniform(0.5, 6.5), Normal(1,0))
+println(info)
+println(res, &quot; items produced!&quot;)
+@printf(&quot;%5.2f%s capacity utilization&quot;, 3.5*res/10, &quot;%&quot;)</code></pre><pre><code class="language-none">run! finished with 1341 clock events, 0 sample steps, simulation time: 1000.0
+266 items produced!
+93.10% capacity utilization</code></pre><p>Uups! We throttled our system further, to an output of 266.</p><pre><code class="language-julia">inventory_plot(5, &quot;In-Process-Inventory of kanbanized Dice-Line&quot;)</code></pre><p><img src="../output_16_0.svg" alt="svg"/></p><p>But we got much less inventory in the system. The throttling occurs because with Kanban in-process-inventories get more often to zero. Seemingly Kanban is no solution for our throughput problem but constrains the system further. With Kanban we have reduced unpredictability and instability in inventory. </p><p>Let&#39;s pause a moment to look at what we have here: we got a small model with which we can simulate and analyze the impact of dependencies (line length and buffer sizes) and statistical fluctuations (in processing time and worker performance) on simple assembly lines like there are thousands in industry. This is no minor achievement.</p><h2 id="Investigating-assembly-lines"><a class="docs-heading-anchor" href="#Investigating-assembly-lines">Investigating assembly lines</a><a id="Investigating-assembly-lines-1"></a><a class="docs-heading-anchor-permalink" href="#Investigating-assembly-lines" title="Permalink"></a></h2><p>With the parametrized model we can do some investigations into the behaviour of assembly lines. </p><p>For that we take first some further simplification steps:</p><ol><li>We normalize the model by assuming a mean processing time of 1. </li><li>We choose a gamma distribution as more realistic for processing times than the uniform distribution, we used until now following Goldratt&#39;s example:</li></ol><pre><code class="language-julia">using StatsPlots, LaTeXStrings
+
+for i in [2,3,5,10,15,20]
+    doplot = i == 2 ? plot : plot!
+    doplot(Gamma(i, 1/i), label=latexstring(&quot;a=$i, \\theta=$(round(1/i, digits=2))&quot;))
+end
+xlabel!(L&quot;\mathsf{processing\, time}&quot;)
+ylabel!(L&quot;\mathsf{probability\, density}&quot;)
+title!(latexstring(&quot;\\mathsf{Gamma\\, distribution,\\,} \\mu=1&quot;))</code></pre><p><img src="../output_19_0.svg" alt="svg"/></p><pre><code class="language-julia">@time info, ev, res = dice_line(5, 5, Gamma(10,1/10), Normal(1,0))
+println(info)
+println(res, &quot; items produced!&quot;)
+@printf(&quot;y = %5.3f [1/t]&quot;, res/1000)</code></pre><pre><code class="language-none">  0.498770 seconds (560.02 k allocations: 25.146 MiB, 2.80% gc time)
+run! finished with 4847 clock events, 0 sample steps, simulation time: 1000.0
+966 items produced!
+y = 0.966 [1/t]</code></pre><pre><code class="language-julia">inventory_plot(5, &quot;In-Process-Inventory of kanbanized Dice-Line&quot;)</code></pre><p><img src="../output_21_0.svg" alt="svg"/></p><p>Before we go deeper into parameters, we have to check how much path dependence and statistical fluctuations vary the outcome. Therefore we repeat the simulation 30 times with different random number seeds and analyze the distribution of the outcome. As outcome we choose the throughput rate y [1/t] which is also an indicator for line performance.</p><pre><code class="language-julia">Random.seed!(1234)
+s = abs.(rand(Int, 30))
+tc = ones(30)
+Threads.@threads for i = 1:30
+    info, ev, res = dice_line(5, 5, Gamma(10,1/10), Normal(1,0), seed=s[i], jobs=1200, stat=false)
+    tc[i] = res*0.001
+end
+ys = (μ=mean(tc), σ=std(tc))
+@printf(&quot;μ: %5.3f, σ: %5.3f, LCL: %5.3f, UCL: %5.3f\n&quot;, ys.μ, ys.σ, ys.μ-3ys.σ, ys.μ+3ys.σ)
+plot(1:30, tc, title=&quot;throughput rate of various runs of dice line&quot;, xlabel=&quot;runs&quot;, 
+    ylabel=&quot;y [1/t]&quot;, legend=:none, lw=2)
+hline!([ys.μ, ys.μ-3ys.σ, ys.μ+3ys.σ], lc=:red)</code></pre><pre><code class="language-none">μ: 0.967, σ: 0.005, LCL: 0.952, UCL: 0.983</code></pre><p><img src="../output_23_1.svg" alt="svg"/></p><h2 id="Experimental-design"><a class="docs-heading-anchor" href="#Experimental-design">Experimental design</a><a id="Experimental-design-1"></a><a class="docs-heading-anchor-permalink" href="#Experimental-design" title="Permalink"></a></h2><p>Our response variable y seems to be under statistical control and its fluctuation is of the same order as the effects we are after. But with an experimental design those fluctuations should cancel out. We setup it up with:</p><ul><li><code>n</code>: number of workers, line length,</li><li><code>b</code>: buffersize between workers,</li><li><code>a</code>: shape parameter of gamma distribution of processing times (bigger a means less variation),</li><li><code>σ</code>: standard deviation of performance variation between workers.</li></ul><pre><code class="language-julia">using StatsModels, ExperimentalDesign
+
+n = vcat(5:10,12:2:20)
+b = 1:10
+a = vcat(2,3,5:5:20)
+σ = LinRange(0,0.1,5)
+
+D = FullFactorial((n=n, b=b, a=a, σ=σ), @formula(y ~ n + b + a + σ), explicit = true)
+size(D.matrix)</code></pre><pre><code class="language-none">(3300, 4)</code></pre><p>We got a design matrix with 3300 rows for 3300 simulations! Let&#39;s do something else while the computer works:</p><pre><code class="language-julia">y = zeros(3300)
+events = 0
+t = @elapsed begin
+    Threads.@threads for i = 1:3300
+        p = Tuple(D.matrix[i, :])
+        info, ev, res = dice_line(p[1], p[2], Gamma(p[3], 1/p[3]), Normal(1, p[4]), jobs=1200, stat=false )
+        y[i] = res*0.001
+        global events += ev
+    end
+end
+@printf(&quot;Time elapsed: %5.2f minutes, %d events on %d threads&quot;, t/60, events, Threads.nthreads())</code></pre><pre><code class="language-none">Time elapsed:  1.42 minutes, 33556453 events on 8 threads</code></pre><p>It takes 1.4 minutes on 8 threads of a 2019 MacBook Pro and over <span>$33\times 10^6$</span> events.</p><h2 id="Data-analysis"><a class="docs-heading-anchor" href="#Data-analysis">Data analysis</a><a id="Data-analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Data-analysis" title="Permalink"></a></h2><p>We put together a results table and do some exploratory data analysis:</p><pre><code class="language-julia">res = D.matrix 
+res.y = y
+describe(y)</code></pre><pre><code class="language-none">Summary Stats:
+Length:         3300
+Missing Count:  0
+Mean:           0.892545
+Minimum:        0.638000
+1st Quartile:   0.864000
+Median:         0.904000
+3rd Quartile:   0.937000
+Maximum:        0.986000
+Type:           Float64</code></pre><p>The performance of our simulated assembly lines varies between 0.637 and 0.986, which is a huge difference: The worst result is 35.8% below the best one!</p><pre><code class="language-julia">vcat(res[y .== maximum(y), :], res[y .== minimum(y), :])</code></pre><table><tr><th style="text-align: right">no</th><th style="text-align: right">n</th><th style="text-align: right">b</th><th style="text-align: right">a</th><th style="text-align: right">σ</th><th style="text-align: right">y</th></tr><tr><td style="text-align: right">1</td><td style="text-align: right">6</td><td style="text-align: right">7</td><td style="text-align: right">20</td><td style="text-align: right">0.0</td><td style="text-align: right">0.986</td></tr><tr><td style="text-align: right">2</td><td style="text-align: right">5</td><td style="text-align: right">10</td><td style="text-align: right">20</td><td style="text-align: right">0.0</td><td style="text-align: right">0.986</td></tr><tr><td style="text-align: right">3</td><td style="text-align: right">20</td><td style="text-align: right">1</td><td style="text-align: right">2</td><td style="text-align: right">0.1</td><td style="text-align: right">0.638</td></tr></table><p>The best performance is with the shortest lines, big buffer sizes, small variation in processing times and no variation in performance between workers. But this is just common sense. The worst performance is with a long line, minimum buffers and maximum variation in processing times and in performance between workers. But how big are the effects?</p><pre><code class="language-julia">@df res dotplot(:n, :y, title=&quot;line performance vs line length&quot;, xlabel=&quot;n&quot;, ylabel=&quot;y [1/t]&quot;,
+    marker=(:circle, 2, 0.3, :none, 1, 0.3, :blue, :solid), legend=:none)
+@df res boxplot!(:n, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))</code></pre><p><img src="../output_33_0.svg" alt="svg"/></p><pre><code class="language-julia">@df res dotplot(:b, :y, title=&quot;line performance vs buffer size&quot;, xlabel=&quot;b&quot;, ylabel=&quot;y [1/t]&quot;,
+    marker=(:circle, 2, 0.3, :none, 1, 0.3, :blue, :solid), legend=:none)
+@df res boxplot!(:b, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))</code></pre><p><img src="../output_34_0.svg" alt="svg"/></p><pre><code class="language-julia">@df res dotplot(:a, :y, title=&quot;line performance vs processing time variation&quot;, xlabel=&quot;a (bigger a: less variation)&quot;, 
+    ylabel=&quot;y [1/t]&quot;, marker=(:circle, 2, 0.3, :none, 1, 0.3, :blue, :solid), legend=:none)
+@df res boxplot!(:a, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))</code></pre><p><img src="../output_35_0.svg" alt="svg"/></p><pre><code class="language-julia">x = Int.(round.(res.σ*40))
+@df res dotplot(x, :y, title=&quot;line performance vs worker performance variation&quot;, xlabel=L&quot;\sigma&quot;, ylabel=&quot;y [1/t]&quot;,
+    marker=(:circle, 2, 0.3, :none, 1, 0.3, :blue, :solid), legend=:none)
+@df res boxplot!(x, :y, marker=(:none, 0.3, 0.3, :blue, 2, 0.3, :blue, :solid), fill=(0, 0.2, :blue))
+xticks!(collect(0:4), string.(round.(σ, digits=3)))</code></pre><p><img src="../output_36_0.svg" alt="svg"/></p><p>Buffer sizes and variation in processing time clearly have nonlinear effects while line length and performance variation between workers seem to have more linear ones. Small buffers and variation in processing time constrain the line the most and also are responsible for the worst performances. There seems to be also an interaction between those major two factors.</p><h2 id="Statistical-model"><a class="docs-heading-anchor" href="#Statistical-model">Statistical model</a><a id="Statistical-model-1"></a><a class="docs-heading-anchor-permalink" href="#Statistical-model" title="Permalink"></a></h2><p>We fit a linear model to the results and account for the nonlinearities with logarithmic terms:</p><pre><code class="language-julia">using GLM
+
+ols = lm(@formula(y ~ 1 + n + log(1+b) + log(a) + σ), res)</code></pre><pre><code class="language-none">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Array{Float64,1}},GLM.DensePredChol{Float64,LinearAlgebra.Cholesky{Float64,Array{Float64,2}}}},Array{Float64,2}}
+
+y ~ 1 + n + :(log(1 + b)) + :(log(a)) + σ
+
+Coefficients:
+────────────────────────────────────────────────────────────────────────────────
+                   Coef.   Std. Error       t  Pr(&gt;|t|)   Lower 95%    Upper 95%
+────────────────────────────────────────────────────────────────────────────────
+(Intercept)   0.738062    0.00234884   314.22    &lt;1e-99   0.733457    0.742667
+n            -0.00155442  9.8016e-5    -15.86    &lt;1e-53  -0.0017466  -0.00136225
+log(1 + b)    0.057606    0.000896342   64.27    &lt;1e-99   0.0558486   0.0593634
+log(a)        0.0509241   0.000563634   90.35    &lt;1e-99   0.049819    0.0520292
+σ            -0.509952    0.0133361    -38.24    &lt;1e-99  -0.536099   -0.483804
+────────────────────────────────────────────────────────────────────────────────</code></pre><p>All parameters are highly significant. We find then - as expected - that the b&amp;a-interaction between buffer size and variation in processing times is highly significant too:</p><pre><code class="language-julia">ols2 = lm(@formula(y ~ 1 + n + log(1+b)*log(a) + σ), res)</code></pre><pre><code class="language-none">StatsModels.TableRegressionModel{LinearModel{GLM.LmResp{Array{Float64,1}},GLM.DensePredChol{Float64,LinearAlgebra.Cholesky{Float64,Array{Float64,2}}}},Array{Float64,2}}
+
+y ~ 1 + n + :(log(1 + b)) + :(log(a)) + σ + :(log(1 + b)) &amp; :(log(a))
+
+Coefficients:
+───────────────────────────────────────────────────────────────────────────────────────
+                           Coef.  Std. Error       t  Pr(&gt;|t|)   Lower 95%    Upper 95%
+───────────────────────────────────────────────────────────────────────────────────────
+(Intercept)           0.599288    0.00313879  190.93    &lt;1e-99   0.593134    0.605442
+n                    -0.00155442  7.20551e-5  -21.57    &lt;1e-95  -0.0016957  -0.00141315
+log(1 + b)            0.136895    0.00163616   83.67    &lt;1e-99   0.133687    0.140103
+log(a)                0.123915    0.00143956   86.08    &lt;1e-99   0.121092    0.126737
+σ                    -0.509952    0.00980384  -52.02    &lt;1e-99  -0.529174   -0.490729
+log(1 + b) &amp; log(a)  -0.0417033   0.00078769  -52.94    &lt;1e-99  -0.0432478  -0.0401589
+───────────────────────────────────────────────────────────────────────────────────────</code></pre><p>Then we can analyze the effects of the four parameters on line performance:</p><pre><code class="language-julia">x = LinRange(1,10,50)
+for i in reverse(a)
+    _n = fill(mean(n), length(x))
+    _a = fill(i, length(x))
+    _σ = fill(mean(σ), length(x))
+    tmp = DataFrame(n=_n, b=x, a=_a, σ=_σ)
+    _y = predict(ols2, tmp)
+    doplot = i == 20 ? plot : plot!
+    doplot(x, _y, label=&quot;a=$i&quot;)
+end
+title!(&quot;Effects of buffer size and processing time variation&quot;, legend=:bottomright)
+xlabel!(&quot;b (buffer size)&quot;)
+ylabel!(&quot;y [1/t]&quot;)</code></pre><p><img src="../output_42_0.svg" alt="svg"/></p><p>Buffer size and processing time variation have nonlinear effects and may account together for 26% line performance losses. This shows how important it is to increase buffer sizes with larger variation in processing times (smaller a). Only with small variation one can reduce buffers without loosing much performance.</p><pre><code class="language-julia">x = LinRange(5, 20, 50)
+tmp = DataFrame(n=x, b=fill(mean(b), length(x)), a=fill(mean(a), length(x)), 
+    σ=fill(mean(σ), length(x)))
+plot(x, predict(ols2, tmp), title=&quot;Effect of line length&quot;, xlabel=&quot;n (line length)&quot;, 
+    ylabel=&quot;y [1/t]&quot;, legend=:none)</code></pre><p><img src="../output_44_0.svg" alt="svg"/></p><p>This may account for 3% performance losses.</p><pre><code class="language-julia">x = LinRange(0,0.1,50)
+tmp = DataFrame(n=fill(mean(n), length(x)), b=fill(mean(b), length(x)), 
+    a=fill(mean(a), length(x)), σ=x)
+plot(x, predict(ols2, tmp), title=&quot;Effect of performance variation between workers&quot;, 
+    xlabel=L&quot;\sigma&quot;, ylabel=&quot;y [1/t]&quot;, legend=:none)</code></pre><p><img src="../output_46_0.svg" alt="svg"/></p><p>Variation in performance between workers may diminish line throughput by other 5%.</p><p>The four effects combined can account for 34% performance losses from best to worst. This is most of the 35.8% we found above. The rest is mostly statistical fluctuations.</p><h2 id="Final-remark"><a class="docs-heading-anchor" href="#Final-remark">Final remark</a><a id="Final-remark-1"></a><a class="docs-heading-anchor-permalink" href="#Final-remark" title="Permalink"></a></h2><p>Starting from a simple game and with only a quite small simulation model we could come to conclusions with a wide applicability for assembly lines. The performance differences in assembly lines are realistic – I have seen them over and over in industry. And we didn&#39;t yet account for failures or supply shortfalls. The unawareness of those simple factors costs manufacturing industry billions. </p><p>The most interesting thing to note here is, that from seemingly quite unpredictable behaviour – look at the inventory chart of the beginning – emerge some quite predictable characteristics out of multiple discrete event simulations with parameter variation combined with some not too sophisticated statistics.</p><p>We could not have done those experiments and analyses with real lines as it is possible with simulations on a modern computer with <code>Julia</code> and <code>DiscreteEvents.jl</code>.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../postoffice/postoffice/">« Post Office</a><a class="docs-footer-nextpage" href="../../../performance/">Performance »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 14 September 2020 17:20">Monday 14 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

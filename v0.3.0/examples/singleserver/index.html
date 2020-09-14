@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Single Server · DiscreteEventsCompanion.jl</title><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit">DiscreteEventsCompanion.jl</span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Manual</span><ul><li><a class="tocitem" href="../../DES/">Discrete Event Systems</a></li><li><a class="tocitem" href="../../clocks/">Clocks</a></li><li><a class="tocitem" href="../../actions/">Actions</a></li><li><a class="tocitem" href="../../sampling/">Sampling</a></li><li><a class="tocitem" href="../../events/">Events</a></li><li><a class="tocitem" href="../../activities/">Activities</a></li><li><a class="tocitem" href="../../processes/">Processes</a></li><li><a class="tocitem" href="../../random/">Randomness</a></li><li><a class="tocitem" href="../../automata/">State Machines</a></li><li><a class="tocitem" href="../../actors/">Actors</a></li><li><a class="tocitem" href="../../models/">Models</a></li></ul></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../examples/">Overview</a></li><li><input class="collapse-toggle" id="menuitem-3-2" type="checkbox" checked/><label class="tocitem" for="menuitem-3-2"><span class="docs-label">Introductory</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Single Server</a></li><li><a class="tocitem" href="../tabletennis/">Table Tennis</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-3" type="checkbox"/><label class="tocitem" for="menuitem-3-3"><span class="docs-label">M/M/c Queue</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../queue_mmc_act/">M/M/c Activities</a></li><li><a class="tocitem" href="../queue_mmc_srv/">M/M/c Processes</a></li><li><a class="tocitem" href="../queue_mmc_sm/">M/M/c State Machines</a></li><li><a class="tocitem" href="../queue_mmc_actor/">M/M/c Actors</a></li><li><a class="tocitem" href="../queue_mmc_srv_fail/">M/M/c Interrupted Processes</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-4" type="checkbox"/><label class="tocitem" for="menuitem-3-4"><span class="docs-label">Multi-Threading (Experimental)</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../assy_thrd/">Assembly Line</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3-5" type="checkbox"/><label class="tocitem" for="menuitem-3-5"><span class="docs-label">Other</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../house_heating/house_heating/">House Heating</a></li><li><a class="tocitem" href="../postoffice/postoffice/">Post Office</a></li><li><a class="tocitem" href="../dicegame/dicegame/">Goldratt&#39;s Dice Game</a></li></ul></li></ul></li><li><a class="tocitem" href="../../performance/">Performance</a></li><li><a class="tocitem" href="../../parallel/">Parallel Simulation</a></li><li><a class="tocitem" href="../../benchmarks/">Benchmarks</a></li><li><a class="tocitem" href="../../diag/">Diagnosis</a></li><li><a class="tocitem" href="../../internals/">Internals</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li><a class="is-disabled">Introductory</a></li><li class="is-active"><a href>Single Server</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Single Server</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/pbayer/DiscreteEventsCompanion.jl/blob/master/docs/src/examples/singleserver.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Single-server"><a class="docs-heading-anchor" href="#Single-server">Single server</a><a id="Single-server-1"></a><a class="docs-heading-anchor-permalink" href="#Single-server" title="Permalink"></a></h1><p>This example is from Choi, Kang: Modeling and Simulation of Discrete-Event Systems, p. 18. It describes a single server system. The event graph given is:</p><p><img src="../../img/sserver.svg" alt="single server"/></p><ol><li>Initially there are no jobs in the queue <span>$Q$</span> and the machine <span>$M$</span> is idle.</li><li>Jobs arrive with an inter-arrival-time <span>$t_a$</span>and are added to <span>$Q$</span>.</li><li>If <span>$M$</span> is idle, it loads a job, changes to busy and executes the job with service time <span>$t_s$</span>.</li><li>After that it changes to idle and, if <span>$Q$</span> is not empty, it loads the next job.</li></ol><h3 id="Implementing-it"><a class="docs-heading-anchor" href="#Implementing-it">Implementing it</a><a id="Implementing-it-1"></a><a class="docs-heading-anchor-permalink" href="#Implementing-it" title="Permalink"></a></h3><p>We use this simple example for illustration of how it can be modeled, simulated and analyzed using <code>DiscreteEvents.jl</code>. First we have to import the necessary modules:</p><pre><code class="language-julia">using DiscreteEvents, Random, Distributions, DataFrames, Plots, LaTeXStrings
+pyplot()</code></pre><p>We have to define some data structures, variables and a function for collecting stats:</p><pre><code class="language-julia">abstract type MState end
+
+struct Idle &lt;: MState end
+struct Busy &lt;: MState end
+
+mutable struct Job
+    no::Int64
+    ts::Float64
+    t1::Float64
+    t2::Float64
+    t3::Float64
+end
+
+mutable struct Machine
+    state::MState
+    job
+end
+
+Q = Job[]   # input queue
+S = Job[]   # stock
+M = Machine(Idle(), 0)
+df = DataFrame(time = Float64[], buffer=Int[], machine=Int[], finished=Int[])
+count = 1
+printing = true
+
+stats() = push!(df, (tau(), length(Q), M.state == Busy() ? 1 : 0, length(S)))</code></pre><p>We can model our system <strong>activity-based</strong> und therefore implement functions for the three main activities (arrive, load, unload), which call each other during simulation.</p><p>We use the arrival-function for modeling arrival rate <span>$t_a$</span> with an Erlang and service time <span>$t_s$</span> with a Normal distribution. We determine the capacity of the server with a <span>$c$</span> variable such that <span>$c &gt; 1$</span> gives us overcapacity and <span>$c = 1$</span> means that mean service time equals mean arrival rate <span>$\bar{t_s} = \bar{t_a}$</span>.</p><pre><code class="language-julia">function arrive(μ, σ, c)
+    @assert μ ≥ 1 &quot;μ must be ≥ 1&quot;
+    ts = rand(Normal(μ, σ))/c
+    job = Job(count, ts, tau(), 0, 0)
+    global count += 1
+    push!(Q, job)
+    ta = rand(Erlang())*μ
+    event!(𝐶, fun(arrive, μ, σ, c), after, ta)  # we schedule the next arrival
+    printing ? println(tau(), &quot;: job $(job.no) has arrived&quot;) : nothing # tau() is the current time
+    if M.state == Idle()
+        load()
+    else
+        stats()
+    end
+end
+
+function load()
+    M.state = Busy()
+    M.job = popfirst!(Q)
+    M.job.t2 = tau()
+    event!(𝐶, fun(unload), after, M.job.ts)  # we schedule the unload
+    printing ? println(tau(), &quot;: job $(M.job.no) has been loaded&quot;) : nothing
+    stats()
+end
+
+function unload()
+    M.state = Idle()
+    M.job.t3 = tau()
+    push!(S, M.job)
+    printing ? println(tau(), &quot;: job $(M.job.no) has been finished&quot;) : nothing
+    stats()
+    M.job = 0
+    if !isempty(Q)
+        load()
+    end
+end</code></pre><p>We want to collect <code>stats()</code> at a sample rate of 0.1:</p><pre><code class="language-julia">sample_time!(𝐶, 0.1)  # we determine the sample rate
+periodic!(𝐶, fun(stats));  # we register stats() as sampling function</code></pre><p>We assume now that the capacity equals the arrivals and provide no overcapacity.  Therefore  we start with one arrival and <span>$\mu = 5$</span>, <span>$\sigma = 1/5$</span> and <span>$c = 1$</span> and let our system run for 30 minutes (let&#39;s assume our time unit be minutes):</p><pre><code class="language-julia">Random.seed!(2019)
+arrive(5, 1/5, 1)  # we schedule the first event
+run!(𝐶, 30)        # and run the simulation</code></pre><p>This will give us as output:</p><pre><code class="language-julia">0: job 1 has arrived
+0: job 1 has been loaded
+4.947453062901819: job 1 has been finished
+8.515206032139384: job 2 has arrived
+8.515206032139384: job 2 has been loaded
+8.56975795472613: job 3 has arrived
+8.666481204359087: job 4 has arrived
+10.338522593089287: job 5 has arrived
+11.021099411385869: job 6 has arrived
+13.267881315092211: job 7 has arrived
+13.703372376147774: job 2 has been finished
+13.703372376147774: job 3 has been loaded
+18.726550601155594: job 3 has been finished
+18.726550601155594: job 4 has been loaded
+19.55941423914075: job 8 has arrived
+19.58302738045451: job 9 has arrived
+20.543366077813385: job 10 has arrived
+22.752994020639125: job 11 has arrived
+23.563550850400553: job 4 has been finished
+23.563550850400553: job 5 has been loaded
+23.960464112286694: job 12 has arrived
+26.84742108339802: job 13 has arrived
+28.18186102251928: job 5 has been finished
+28.18186102251928: job 6 has been loaded
+&quot;run! finished with 17 events, simulation time: 30.0&quot;</code></pre><p>Using our collected data, we can plot the simulation model trajectory:</p><pre><code class="language-julia">function trajectory_plot()
+    p1 = plot(df.time, df.buffer, ylabel=&quot;buffer&quot;, fill=(0,0.1,:blue))
+    p2 = plot(df.time, df.machine, ylabel=&quot;machine&quot;, fill=(0,0.1,:blue))
+    p3 = plot(df.time, df.finished, xlabel=&quot;time [min]&quot;, ylabel=&quot;stock&quot;, fill=(0,0.1,:blue))
+    plot(p1,p2,p3, layout=(3,1), legend=false)
+end
+trajectory_plot()</code></pre><p><img src="../../img/sserver1.png" alt="trajectory plot 1"/></p><p>It seems that the queue increases over time. Thus we are interested in the behaviour of our model over a longer time. Therefore we switch off printing and continue the simulation for further 970 &quot;minutes&quot;.</p><pre><code class="language-julia">printing = false
+run!(𝐶, 970)        # we continue the simulation
+trajectory_plot()</code></pre><p><img src="../../img/sserver2.png" alt="trajectory plot 2"/></p><p>It seems that buffer size is increasing ever more over time. In the plot now machine load and stock aren&#39;t very instructive, so let&#39;s compare lead time <span>$W$</span> and number of jobs in the system <span>$L = \text{buffer_size} + \text{machine_load}$</span>:</p><pre><code class="language-julia">function WvsL() # get more instructive info from simulation run
+    t = [j.t1 for j ∈ S]
+    W = [j.t3 - j.t1 for j ∈ S]
+    ts = [j.t3 - j.t2 for j ∈ S]
+    subs = [i ∈ t for i ∈ df.time]
+    L = (df.buffer + df.machine)[subs]
+    l = df.machine[subs]
+    DataFrame(time=t, load=l, W=W, L=L, ts=ts)
+end
+d = WvsL()
+plot(d.time, d.W, label=&quot;W [min]&quot;, xlabel=&quot;time [min]&quot;, lw=2, legend=:topleft, title=&quot;L and W over time&quot;)
+plot!(d.time, d.L, label=&quot;L [jobs]&quot;, lw=2)</code></pre><p><img src="../../img/sserver3.png" alt="L and W over time"/></p><p>Lead time <span>$W$</span> and unfinished jobs <span>$L$</span> are clearly increasing, the system is not stationary and gets jammed over time. Let&#39;s collect some stats:</p><pre><code class="language-julia">collect_stats() =
+    (Lm = mean(d.L), Wm = mean(d.W), η = mean(df.machine), tsm = mean(d.ts))
+collect_stats()
+(Lm = 16.21105527638191, Wm = 78.8196419189297, η = 0.9778719397363466, tsm = 5.003771234356064)</code></pre><p>Server load of <span>$\overline{η} ≈ 98\%$</span> is great, but the mean queue length <span>$\overline{L}$</span> of <span>$16$</span> and mean lead time <span>$\overline{W} ≈ 79$</span> min are way too long for a service time of <span>$t_s ≈ 5$</span> min. So let&#39;s analyze the dependency of mean queue length <span>$\overline{L}$</span> on server capacity <span>$c$</span>. For that we can manipulate the server capacity in the arrival function and collect the results in a table:</p><pre><code class="language-julia">df1 = DataFrame(c=Float64[], Lm=Float64[], Wm=Float64[], η=Float64[], tsm=Float64[])
+for c ∈ collect(0.97:0.01:1.7)
+    global Q = Job[]   # input queue
+    global S = Job[]   # stock
+    global M = Machine(Idle(), 0)
+    global df = DataFrame(time = Float64[], buffer=Int[], machine=Int[], finished=Int[])
+    global count = 1
+
+    reset!(𝐶)                            # reset 𝐶
+    sample_time!(𝐶, 1)                   # set sample rate to 1
+    periodic!(𝐶, fun(stats))   # register the stats() function for sampling
+
+    Random.seed!(2019)
+    arrive(5, 1/5, c)
+    run!(𝐶, 1000)                        # run another simulation for 1000 &quot;min&quot;
+    global d = WvsL()
+    s = collect_stats()
+    push!(df1, (c, s.Lm, s.Wm, s.η, s.tsm))
+end</code></pre><p>We can look at it in a scatter plot:</p><pre><code class="language-julia">scatter(df1.c, df1.Wm, title=L&quot;\overline{W}&quot;*&quot; and &quot;*L&quot;\overline{L}&quot;*&quot; over server capacity&quot;,
+    xlabel=&quot;server capacity&quot;, marker = (:o, 3, 0.4, :blue), label=L&quot;\overline{W}&quot;*&quot; [min]&quot;)
+scatter!(df1.c, df1.Lm, marker = (:x, 4), label=L&quot;\overline{L}&quot;*&quot; [jobs]&quot;)</code></pre><p><img src="../../img/sserver4.png" alt="W and L over server capacity"/></p><p>We need to increase server capacity much in order to avoid long queues and waiting times.</p><h3 id="How-about-Little&#39;s-law?"><a class="docs-heading-anchor" href="#How-about-Little&#39;s-law?">How about Little&#39;s law?</a><a id="How-about-Little&#39;s-law?-1"></a><a class="docs-heading-anchor-permalink" href="#How-about-Little&#39;s-law?" title="Permalink"></a></h3><p><span>$\overline{W}$</span> and <span>$\overline{L}$</span> seem to be proportional. This is stated by <a href="https://en.wikipedia.org/wiki/Little%27s_law">Little&#39;s law</a>:</p><div>\[\begin{equation}
+L = \lambda\times W
+\end{equation}\]</div><p>for stationary systems with <span>$\lambda$</span> = arrival rate. In our case <span>$\lambda = t_a = 5$</span>. Let&#39;s look at it:</p><pre><code class="language-julia">scatter(df1.Lm, df1.Wm, xlabel=L&quot;\overline{L}&quot;*&quot; [jobs]&quot;, ylabel=L&quot;\overline{W}&quot;*&quot; [min]&quot;,
+    marker = (:o, 4, 0.4, :blue), label=&quot;data&quot;, title=&quot;Little&#39;s law&quot;, legend=:topleft)
+plot!(df1.Lm, df1.Lm*5, label=&quot;theory &quot;*L&quot;(\overline{L}\times 5)&quot;)</code></pre><p><img src="../../img/sserver5.png" alt="Little&#39;s law"/></p><p>Data seems not quite to fit theory. Reason is that the system is not stationary. But for a first approach, Little&#39;s law seems not to be a bad one. In order to analyze stability and <a href="https://en.wikipedia.org/wiki/Stationary_process">stationarity</a> and to improve, we could refine our analysis by taking only the second half of the simulation data or by doing more simulation runs and having some more fun with <code>DiscreteEvents.jl</code> ...</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../examples/">« Overview</a><a class="docs-footer-nextpage" href="../tabletennis/">Table Tennis »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 14 September 2020 17:20">Monday 14 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
