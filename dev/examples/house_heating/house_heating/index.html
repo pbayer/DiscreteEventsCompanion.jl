@@ -6,77 +6,91 @@
 \dot{T_c} = - \beta\ \dot{Q_c}\; \left[\tfrac{K}{h}\right] &amp; \mathrm{when\ heating\ is\ switched\ off.}
 \end{array}\]</div><p>We assume that</p><ul><li>the thermostat is set to switch heating on if <span>$T_r$</span> falls under 20°C and to switch heating off if <span>$T_r$</span> rises above 23°C,</li><li>time units are hours,</li><li>the temperature <span>$T_h$</span> of the heating fluid is 40°C,</li><li>the temperature <span>$T_e$</span> of the environment follows a stochastic process based on a sine function between 8 and 20°C with <span>$T_{e,min}$</span> at 4am and <span>$T_{e,max}$</span> at 4pm,</li><li>the constants have values <span>$R = 1\times10^{-6}\ \left[\frac{K h}{J}\right],\; \alpha = 2\times 10^6\ \left[\frac{J}{K h}\right],\; \beta = 3\times 10^{-7}\; \left[\frac{K}{J}\right]$</span>,</li><li>people entering the room may reduce insulation efficiency by a factor <span>$\eta\le1.0$</span> to <span>$R$</span>,</li><li>the room temperature is initially <span>$T_{r,0} = 20 °C$</span> and</li><li>the heater is off.</li></ul><p>First we setup the physical model:</p><pre><code class="language-julia">using DiscreteEvents, Plots, DataFrames, Random, Distributions, LaTeXStrings
 
-const Th = 40     # temperature of heating fluid
+@assert DiscreteEvents.version ≥ v&quot;0.3.0&quot; &quot;DiscreteEvents version $(DiscreteEvents.version) should be ≥ 0.3.0&quot;
+
+const Th = 40.0   # temperature of heating fluid
 const R = 1e-6    # thermal resistance of room insulation
 const α = 2e6     # represents thermal conductivity and capacity of the air
 const β = 3e-7    # represents mass of the air and heat capacity
-η = 1.0           # efficiency factor reducing R if doors or windows are open
-heating = false
+η = [1.0]         # efficiency factor reducing R if doors or windows are open
+heating = [false]
 
-Δte(t, t1, t2) = cos((t-10)*π/12) * (t2-t1)/2  # change of a sinusoidal Te
+Δte(t, t1, t2) = cos((t-10)*π/12) * (t2-t1)/2  # change rate of a sinusoidal Te
 
 function Δtr(Tr, Te, heating)
-    Δqc = (Tr - Te)/(R * η)                    # cooling rate
-    Δqh = heating ? α * (Th - Tr) : 0          # heating rate
-    return β * (Δqh - Δqc)                     # change in room temperature
-end</code></pre><p>We now setup a simulation for 24 hours. We update the simulation every virtual minute.</p><pre><code class="language-julia">reset!(𝐶)                     # reset the clock
-rng = MersenneTwister(122)    # seed the random number generator
-Δt = 1//60                    # update every minute
-Te = 11                       # start value for environment temperature
-Tr = 20                       # start value for room temperature
+    Δqc = (Tr - Te)/(R * η[1])
+    Δqh = heating[1] ? α * (Th - Tr) : 0.0
+    return β * (Δqh - Δqc)
+end</code></pre><pre><code class="language-none">Δtr (generic function with 1 method)</code></pre><p>We now setup a simulation for 24 hours from 0am to 12am. We update the simulation every virtual minute.</p><pre><code class="language-julia">resetClock!(𝐶)
+rng = MersenneTwister(122)
+Δt = 1//60
+Te = [11.0]
+Tr = [20.0]
 df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 
-function setTemperatures(t1=8, t2=20)  # change the temperatures
-    global Te += Δte(tau(), t1, t2) * 2π/1440 + rand(rng, Normal(0, 0.1))
-    global Tr += Δtr(Tr, Te, heating) * Δt
-    push!(df, (tau(), Tr, Te, Int(heating)) ) # append stats to the table
+function setTemperatures(t1=8.0, t2=20.0)
+    Te[1] += Δte(tau(), t1, t2) * 2π/1440 + rand(rng, Normal(0, 0.1))
+    Tr[1] += Δtr(Tr[1], Te[1], heating[1]) * Δt
+    push!(df, (tau(), Tr[1], Te[1], Int(heating[1])) )
 end
 
-function switch(t1=20, t2=23)                 # simulate the thermostat
-    if Tr ≥ t2
-        global heating = false
-        event!(SF(switch, t1, t2), @val :Tr :≤ t1)  # setup a conditional event
-    elseif Tr ≤ t1
-        global heating = true
-        event!(SF(switch, t1, t2), @val :Tr :≥ t2)  # setup a conditional event
+function switch(t1=20.0, t2=23.0)
+    if Tr[1] ≥ t2 
+        heating[1] = false
+        event!(fun(switch, t1, t2), ()-&gt;Tr[1] ≤ t1)
+    elseif Tr[1] ≤ t1 
+        heating[1] = true
+        event!(fun(switch, t1, t2), ()-&gt;Tr[1] ≥ t2)
     end
 end
 
-DiscreteEvents.sample!(SF(setTemperatures), Δt) # setup sampling
-switch()                                       # start the thermostat
+DiscreteEvents.periodic!(fun(setTemperatures), Δt)
+switch()
 
-@time run!(𝐶, 24)</code></pre><p>0.040105 seconds (89.21 k allocations: 3.435 MiB)<br/>&quot;run! finished with 0 clock events, 1440 sample steps, simulation time: 24.0&quot;</p><pre><code class="language-julia">plot(df.t, df.tr, legend=:bottomright, label=L&quot;T_r&quot;)
+@time run!(𝐶, 24)</code></pre><pre><code class="language-none">  0.177333 seconds (533.36 k allocations: 24.883 MiB)
+
+
+
+
+
+&quot;run! finished with 0 clock events, 2399 sample steps, simulation time: 24.0&quot;</code></pre><pre><code class="language-julia">plot(df.t, df.tr, legend=:bottomright, label=L&quot;T_r&quot;)
 plot!(df.t, df.te, label=L&quot;T_e&quot;)
 plot!(df.t, df.heating, label=&quot;heating&quot;)
 xlabel!(&quot;hours&quot;)
 ylabel!(&quot;temperature&quot;)
-title!(&quot;House heating undisturbed&quot;)</code></pre><p><img src="../output_4_0.svg" alt="svg"/></p><p>In a living room the thermal resistance is repeatedly diminished if people enter the room or open windows.</p><pre><code class="language-julia">function people()
-    delay!(6 + rand(Normal(0, 0.5)))         # sleep until around 6am
-    sleeptime = 22 + rand(Normal(0, 0.5))    # calculate bed time
-    while tau() &lt; sleeptime
-        global η = rand()                    # open door or window
-        delay!(0.1 * rand(Normal(1, 0.3)))   # for some time
-        global η = 1.0                       # close it again
-        delay!(rand())
+title!(&quot;House heating undisturbed&quot;)</code></pre><p><img src="../output_4_0.svg" alt="svg"/></p><p>In a living room the thermal resistance is repeatedly diminished if people enter the room or open windows.</p><pre><code class="language-julia">function people(clk::Clock)
+    delay!(clk, 6 + rand(Normal(0, 0.5)))
+    sleeptime = 22 + rand(Normal(0, 0.5))
+    while tau(clk) &lt; sleeptime
+        η[1] = rand()                        # open door or window
+        delay!(clk, 0.1 * rand(Normal(1, 0.3)))   # for some time
+        η[1] = 1.0                           # close it again
+        delay!(clk, rand())
     end
 end
 
-reset!(𝐶)                                    # reset the clock
+resetClock!(𝐶)
 rng = MersenneTwister(122)
 Random.seed!(1234)
-Te = 11
-Tr = 20
+Te = [11.0]
+Tr = [20.0]
 df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 
 for i in 1:2                                 # put 2 people in the house
-    process!(SP(i, people), 1)               # run process only once
+    process!(Prc(i, people), 1)               # run process only once
 end
-DiscreteEvents.sample!(SF(setTemperatures), Δt)    # set sampling function
-switch()                                     # start the thermostat
+DiscreteEvents.periodic!(fun(setTemperatures), Δt)
+switch()
 
-@time run!(𝐶, 24)</code></pre><p>0.114938 seconds (72.52 k allocations: 2.320 MiB)<br/>&quot;run! finished with 116 clock events, 1440 sample steps, simulation time: 24.0&quot;</p><pre><code class="language-julia">plot(df.t, df.tr, legend=:bottomright, label=L&quot;T_r&quot;)
+@time run!(𝐶, 24)</code></pre><pre><code class="language-none">  0.074617 seconds (169.80 k allocations: 5.740 MiB)
+
+
+
+
+
+&quot;run! finished with 116 clock events, 2399 sample steps, simulation time: 24.0&quot;</code></pre><pre><code class="language-julia">plot(df.t, df.tr, legend=:bottomright, label=L&quot;T_r&quot;)
 plot!(df.t, df.te, label=L&quot;T_e&quot;)
 plot!(df.t, df.heating, label=&quot;heating&quot;)
 xlabel!(&quot;hours&quot;)
 ylabel!(&quot;temperature&quot;)
-title!(&quot;House heating with people&quot;)</code></pre><p><img src="../output_7_0.svg" alt="svg"/></p><p>We have now all major schemes: events, continuous sampling and processes combined in one example.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../assy_thrd/">« Assembly Line</a><a class="docs-footer-nextpage" href="../../postoffice/postoffice/">Post Office »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 11 September 2020 20:44">Friday 11 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+title!(&quot;House heating with people&quot;)</code></pre><p><img src="../output_7_0.svg" alt="svg"/></p><p>We have now all major schemes: events, continuous sampling and processes combined in one example.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../assy_thrd/">« Assembly Line</a><a class="docs-footer-nextpage" href="../../postoffice/postoffice/">Post Office »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 14 September 2020 16:18">Monday 14 September 2020</span>. Using Julia version 1.5.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
