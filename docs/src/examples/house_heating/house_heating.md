@@ -32,56 +32,74 @@ First we setup the physical model:
 ```julia
 using DiscreteEvents, Plots, DataFrames, Random, Distributions, LaTeXStrings
 
-const Th = 40     # temperature of heating fluid
+@assert DiscreteEvents.version ≥ v"0.3.0" "DiscreteEvents version $(DiscreteEvents.version) should be ≥ 0.3.0"
+
+const Th = 40.0   # temperature of heating fluid
 const R = 1e-6    # thermal resistance of room insulation
 const α = 2e6     # represents thermal conductivity and capacity of the air
 const β = 3e-7    # represents mass of the air and heat capacity
-η = 1.0           # efficiency factor reducing R if doors or windows are open
-heating = false
+η = [1.0]         # efficiency factor reducing R if doors or windows are open
+heating = [false]
 
-Δte(t, t1, t2) = cos((t-10)*π/12) * (t2-t1)/2  # change of a sinusoidal Te
+Δte(t, t1, t2) = cos((t-10)*π/12) * (t2-t1)/2  # change rate of a sinusoidal Te
 
 function Δtr(Tr, Te, heating)
-    Δqc = (Tr - Te)/(R * η)                    # cooling rate
-    Δqh = heating ? α * (Th - Tr) : 0          # heating rate
-    return β * (Δqh - Δqc)                     # change in room temperature
+    Δqc = (Tr - Te)/(R * η[1])
+    Δqh = heating[1] ? α * (Th - Tr) : 0.0
+    return β * (Δqh - Δqc)
 end
 ```
 
-We now setup a simulation for 24 hours. We update the simulation every virtual minute.
+
+
+
+    Δtr (generic function with 1 method)
+
+
+
+We now setup a simulation for 24 hours from 0am to 12am. We update the simulation every virtual minute.
+
 
 ```julia
-reset!(𝐶)                     # reset the clock
-rng = MersenneTwister(122)    # seed the random number generator
-Δt = 1//60                    # update every minute
-Te = 11                       # start value for environment temperature
-Tr = 20                       # start value for room temperature
+resetClock!(𝐶)
+rng = MersenneTwister(122)
+Δt = 1//60
+Te = [11.0]
+Tr = [20.0]
 df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 
-function setTemperatures(t1=8, t2=20)  # change the temperatures
-    global Te += Δte(tau(), t1, t2) * 2π/1440 + rand(rng, Normal(0, 0.1))
-    global Tr += Δtr(Tr, Te, heating) * Δt
-    push!(df, (tau(), Tr, Te, Int(heating)) ) # append stats to the table
+function setTemperatures(t1=8.0, t2=20.0)
+    Te[1] += Δte(tau(), t1, t2) * 2π/1440 + rand(rng, Normal(0, 0.1))
+    Tr[1] += Δtr(Tr[1], Te[1], heating[1]) * Δt
+    push!(df, (tau(), Tr[1], Te[1], Int(heating[1])) )
 end
 
-function switch(t1=20, t2=23)                 # simulate the thermostat
-    if Tr ≥ t2
-        global heating = false
-        event!(SF(switch, t1, t2), @val :Tr :≤ t1)  # setup a conditional event
-    elseif Tr ≤ t1
-        global heating = true
-        event!(SF(switch, t1, t2), @val :Tr :≥ t2)  # setup a conditional event
+function switch(t1=20.0, t2=23.0)
+    if Tr[1] ≥ t2 
+        heating[1] = false
+        event!(fun(switch, t1, t2), ()->Tr[1] ≤ t1)
+    elseif Tr[1] ≤ t1 
+        heating[1] = true
+        event!(fun(switch, t1, t2), ()->Tr[1] ≥ t2)
     end
 end
 
-DiscreteEvents.sample!(SF(setTemperatures), Δt) # setup sampling
-switch()                                       # start the thermostat
+DiscreteEvents.periodic!(fun(setTemperatures), Δt)
+switch()
 
 @time run!(𝐶, 24)
 ```
 
-0.040105 seconds (89.21 k allocations: 3.435 MiB)\
-"run! finished with 0 clock events, 1440 sample steps, simulation time: 24.0"
+      0.177333 seconds (533.36 k allocations: 24.883 MiB)
+
+
+
+
+
+    "run! finished with 0 clock events, 2399 sample steps, simulation time: 24.0"
+
+
+
 
 ```julia
 plot(df.t, df.tr, legend=:bottomright, label=L"T_r")
@@ -92,40 +110,54 @@ ylabel!("temperature")
 title!("House heating undisturbed")
 ```
 
+
+
+
 ![svg](output_4_0.svg)
+
+
 
 In a living room the thermal resistance is repeatedly diminished if people enter the room or open windows.
 
+
 ```julia
-function people()
-    delay!(6 + rand(Normal(0, 0.5)))         # sleep until around 6am
-    sleeptime = 22 + rand(Normal(0, 0.5))    # calculate bed time
-    while tau() < sleeptime
-        global η = rand()                    # open door or window
-        delay!(0.1 * rand(Normal(1, 0.3)))   # for some time
-        global η = 1.0                       # close it again
-        delay!(rand())
+function people(clk::Clock)
+    delay!(clk, 6 + rand(Normal(0, 0.5)))
+    sleeptime = 22 + rand(Normal(0, 0.5))
+    while tau(clk) < sleeptime
+        η[1] = rand()                        # open door or window
+        delay!(clk, 0.1 * rand(Normal(1, 0.3)))   # for some time
+        η[1] = 1.0                           # close it again
+        delay!(clk, rand())
     end
 end
 
-reset!(𝐶)                                    # reset the clock
+resetClock!(𝐶)
 rng = MersenneTwister(122)
 Random.seed!(1234)
-Te = 11
-Tr = 20
+Te = [11.0]
+Tr = [20.0]
 df = DataFrame(t=Float64[], tr=Float64[], te=Float64[], heating=Int64[])
 
 for i in 1:2                                 # put 2 people in the house
-    process!(SP(i, people), 1)               # run process only once
+    process!(Prc(i, people), 1)               # run process only once
 end
-DiscreteEvents.sample!(SF(setTemperatures), Δt)    # set sampling function
-switch()                                     # start the thermostat
+DiscreteEvents.periodic!(fun(setTemperatures), Δt)
+switch()
 
 @time run!(𝐶, 24)
 ```
 
-0.114938 seconds (72.52 k allocations: 2.320 MiB)\
-"run! finished with 116 clock events, 1440 sample steps, simulation time: 24.0"
+      0.074617 seconds (169.80 k allocations: 5.740 MiB)
+
+
+
+
+
+    "run! finished with 116 clock events, 2399 sample steps, simulation time: 24.0"
+
+
+
 
 ```julia
 plot(df.t, df.tr, legend=:bottomright, label=L"T_r")
@@ -136,6 +168,11 @@ ylabel!("temperature")
 title!("House heating with people")
 ```
 
+
+
+
 ![svg](output_7_0.svg)
+
+
 
 We have now all major schemes: events, continuous sampling and processes combined in one example.
