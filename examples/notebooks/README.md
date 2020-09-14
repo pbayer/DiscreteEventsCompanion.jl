@@ -18,4 +18,4 @@ The notebooks are intended to show the application of `DiscreteEvents.jl` to mod
 
 ## Performance
 
-- [`performance.ipynb`](https://nbviewer.jupyter.org/github/pbayer/DiscreteEvents.jl/blob/master/docs/notebooks/performance.ipynb): this notebook looks at performance issues.
+- [`performance.ipynb`](https://nbviewer.jupyter.org/github/pbayer/DiscreteEventsCompanion.jl/blob/master/examples/notebooks/performance.ipynb): this notebook looks at performance issues.
