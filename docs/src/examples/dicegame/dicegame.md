@@ -405,11 +405,11 @@ The performance of our simulated assembly lines varies between 0.637 and 0.986, 
 vcat(res[y .== maximum(y), :], res[y .== minimum(y), :])
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>n</th><th>b</th><th>a</th><th>σ</th><th>y</th></tr><tr><th></th><th>Real</th><th>Real</th><th>Real</th><th>Real</th><th>Float64</th></tr></thead><tbody><p>3 rows × 5 columns</p><tr><th>1</th><td>6</td><td>7</td><td>20</td><td>0.0</td><td>0.986</td></tr><tr><th>2</th><td>5</td><td>10</td><td>20</td><td>0.0</td><td>0.986</td></tr><tr><th>3</th><td>20</td><td>1</td><td>2</td><td>0.1</td><td>0.638</td></tr></tbody></table>
-
+| no | n | b | a | σ | y |
+|---|---:|----:|----:|----|----|
+| 1 |  6 |  7 |  20 |  0.0 |  0.986 |
+| 2 |  5 |  10 |  20 |  0.0 |  0.986 |
+| 3 |  20 |  1 |  2 |  0.1 |  0.638 |
 
 
 The best performance is with the shortest lines, big buffer sizes, small variation in processing times and no variation in performance between workers. But this is just common sense. The worst performance is with a long line, minimum buffers and maximum variation in processing times and in performance between workers. But how big are the effects? 

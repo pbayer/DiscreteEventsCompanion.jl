@@ -89,13 +89,7 @@ df = DataFrame(time=Float64[], cust=Int[], qlen=Int64[], status=String[], wtime=
 process!(Prc(1, people, queue, 3.333)) # register the functions as processes
 process!(Prc(2, clerk, queue))
 ```
-
-
-
-
     2
-
-
 
 Then we can simply run the simulation. We assume our time unit being minutes, so we run for 600 units:
 
@@ -115,11 +109,42 @@ Our table has registered it all:
 ```julia
 df
 ```
+518 rows × 5 columns
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>time</th><th>cust</th><th>qlen</th><th>status</th><th>wtime</th></tr><tr><th></th><th>Float64</th><th>Int64</th><th>Int64</th><th>String</th><th>Float64</th></tr></thead><tbody><p>518 rows × 5 columns</p><tr><th>1</th><td>1.2</td><td>1</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>2</th><td>1.2</td><td>1</td><td>0</td><td>now being served</td><td>0.0</td></tr><tr><th>3</th><td>2.42</td><td>1</td><td>0</td><td>leaves</td><td>1.22333</td></tr><tr><th>4</th><td>14.46</td><td>2</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>5</th><td>14.46</td><td>2</td><td>0</td><td>now being served</td><td>0.0</td></tr><tr><th>6</th><td>15.33</td><td>2</td><td>0</td><td>leaves</td><td>0.869507</td></tr><tr><th>7</th><td>15.59</td><td>3</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>8</th><td>15.59</td><td>3</td><td>0</td><td>now being served</td><td>0.0</td></tr><tr><th>9</th><td>16.03</td><td>4</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>10</th><td>17.8</td><td>3</td><td>1</td><td>leaves</td><td>2.20916</td></tr><tr><th>11</th><td>17.8</td><td>4</td><td>0</td><td>now being served</td><td>1.76564</td></tr><tr><th>12</th><td>23.05</td><td>4</td><td>0</td><td>leaves</td><td>7.01425</td></tr><tr><th>13</th><td>27.45</td><td>5</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>14</th><td>27.45</td><td>5</td><td>0</td><td>now being served</td><td>0.0</td></tr><tr><th>15</th><td>27.5</td><td>6</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>16</th><td>30.71</td><td>7</td><td>2</td><td>enqueues</td><td>0.0</td></tr><tr><th>17</th><td>32.32</td><td>5</td><td>2</td><td>leaves</td><td>4.86645</td></tr><tr><th>18</th><td>32.32</td><td>6</td><td>1</td><td>now being served</td><td>4.81794</td></tr><tr><th>19</th><td>35.49</td><td>6</td><td>1</td><td>leaves</td><td>7.99158</td></tr><tr><th>20</th><td>35.49</td><td>7</td><td>0</td><td>now being served</td><td>4.77958</td></tr><tr><th>21</th><td>35.73</td><td>8</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>22</th><td>37.47</td><td>9</td><td>2</td><td>enqueues</td><td>0.0</td></tr><tr><th>23</th><td>38.26</td><td>7</td><td>2</td><td>leaves</td><td>7.54359</td></tr><tr><th>24</th><td>38.26</td><td>8</td><td>1</td><td>now being served</td><td>2.5265</td></tr><tr><th>25</th><td>41.92</td><td>8</td><td>1</td><td>leaves</td><td>6.1911</td></tr><tr><th>26</th><td>41.92</td><td>9</td><td>0</td><td>now being served</td><td>4.44906</td></tr><tr><th>27</th><td>42.26</td><td>10</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>28</th><td>44.22</td><td>9</td><td>1</td><td>leaves</td><td>6.74951</td></tr><tr><th>29</th><td>44.22</td><td>10</td><td>0</td><td>now being served</td><td>1.96307</td></tr><tr><th>30</th><td>45.62</td><td>11</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>&vellip;</th><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td><td>&vellip;</td></tr></tbody></table>
+| no | time | cust | qlen | status | wtime |
+|----|------|-----:|-----:|--------|-------|
+| 1  | 1.2  | 1    | 1    | enqueues | 0.0 |
+| 2 | 1.2 | 1 | 0 | now being served | 0.0 |
+| 3 | 2.42 | 1 | 0 | leaves | 1.22333 |
+| 4 | 14.46 | 2 | 1 | enqueues | 0.0 |
+| 5 | 14.46 | 2 | 0 | now being served | 0.0 |
+| 6 | 15.33 | 2 | 0 | leaves | 0.869507 |
+| 7 | 15.59 | 3 | 1 | enqueues | 0.0 |
+| 8 | 15.59 | 3 | 0 | now being served | 0.0 |
+| 9 | 16.03 | 4 | 1 | enqueues | 0.0 |
+| 10 | 17.8 | 3 | 1 | leaves | 2.20916 |
+| 11 | 17.8 | 4 | 0 | now being served | 1.76564 |
+| 12 | 23.05 | 4 | 0 | leaves | 7.01425 |
+| 13 | 27.45 | 5 | 1 | enqueues | 0.0 |
+| 14 | 27.45 | 5 | 0 | now being served | 0.0 |
+| 15 | 27.5 | 6 | 1 | enqueues | 0.0 |
+| 16 | 30.71 | 7 | 2 | enqueues | 0.0 |
+| 17 | 32.32 | 5 | 2 | leaves | 4.86645 |
+| 18 | 32.32 | 6 | 1 | now being served | 4.81794 |
+| 19 | 35.49 | 6 | 1 | leaves | 7.99158 |
+| 20 | 35.49 | 7 | 0 | now being served | 4.77958 |
+| 21 | 35.73 | 8 | 1 | enqueues | 0.0 |
+| 22 | 37.47 | 9 | 2 | enqueues | 0.0 |
+| 23 | 38.26 | 7 | 2 | leaves | 7.54359 |
+| 24 | 38.26 | 8 | 1 | now being served | 2.5265 |
+| 25 | 41.92 | 8 | 1 | leaves | 6.1911 |
+| 26 | 41.92 | 9 | 0 | now being served | 4.44906 |
+| 27 | 42.26 | 10 | 1 | enqueues | 0.0 |
+| 28 | 44.22 | 9 | 1 | leaves | 6.74951 |
+| 29 | 44.22 | 10 | 0 | now being served | 1.96307 |
+| 30 | 45.62 | 11 | 1 | enqueues | 0.0 |
+| &vellip; | &vellip; | &vellip; | &vellip; | &vellip; | &vellip; |
+</tbody></table>
 
 
 
@@ -131,7 +156,14 @@ last(df, 5)
 
 
 
-<table class="data-frame"><thead><tr><th></th><th>time</th><th>cust</th><th>qlen</th><th>status</th><th>wtime</th></tr><tr><th></th><th>Float64</th><th>Int64</th><th>Int64</th><th>String</th><th>Float64</th></tr></thead><tbody><p>5 rows × 5 columns</p><tr><th>1</th><td>592.49</td><td>177</td><td>0</td><td>now being served</td><td>2.89088</td></tr><tr><th>2</th><td>594.74</td><td>178</td><td>1</td><td>enqueues</td><td>0.0</td></tr><tr><th>3</th><td>595.95</td><td>177</td><td>1</td><td>leaves</td><td>6.35064</td></tr><tr><th>4</th><td>595.95</td><td>178</td><td>0</td><td>now being served</td><td>1.21605</td></tr><tr><th>5</th><td>598.03</td><td>178</td><td>0</td><td>leaves</td><td>3.29656</td></tr></tbody></table>
+| no | time    | cust  | qlen  | status           | wtime   |
+|----|---------|------:|------:| -----------------|---------|
+| 1 | 592.49 | 177 | 0 | now being served | 2.89088 |
+| 2 | 594.74 | 178 | 1 | enqueues | 0.0 |
+| 3 | 595.95 | 177 | 1 | leaves | 6.35064 |
+| 4 | 595.95 | 178 | 0 | now being served | 1.21605 |
+| 5 | 598.03 | 178 | 0 | leaves | 3.29656 |
+</tbody></table>
 
 
 
@@ -162,7 +194,13 @@ by(df, :status, df -> size(df, 1))
 
 
 
-<table class="data-frame"><thead><tr><th></th><th>status</th><th>x1</th></tr><tr><th></th><th>String</th><th>Int64</th></tr></thead><tbody><p>4 rows × 2 columns</p><tr><th>1</th><td>enqueues</td><td>170</td></tr><tr><th>2</th><td>now being served</td><td>170</td></tr><tr><th>3</th><td>leaves</td><td>170</td></tr><tr><th>4</th><td>leaves - queue is full!</td><td>8</td></tr></tbody></table>
+| no | status | x1 |
+|---|-----|---:|
+| 1 | enqueues | 170 |
+| 2 | now being served | 170 |
+| 3 | leaves | 170 |
+| 4 | leaves - queue is full! | 8 |
+</tbody></table>
 
 
 
@@ -173,13 +211,16 @@ Of the $178$ customers, $170$ of them participated in the whole process and were
 df[df.wtime .< 0,:]
 ```
 
-
-
-
-<table class="data-frame"><thead><tr><th></th><th>time</th><th>cust</th><th>qlen</th><th>status</th><th>wtime</th></tr><tr><th></th><th>Float64</th><th>Int64</th><th>Int64</th><th>String</th><th>Float64</th></tr></thead><tbody><p>8 rows × 5 columns</p><tr><th>1</th><td>134.96</td><td>36</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>2</th><td>140.39</td><td>38</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>3</th><td>166.69</td><td>47</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>4</th><td>169.14</td><td>49</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>5</th><td>169.2</td><td>50</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>6</th><td>212.92</td><td>64</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>7</th><td>237.76</td><td>72</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr><tr><th>8</th><td>575.38</td><td>172</td><td>5</td><td>leaves - queue is full!</td><td>-1.0</td></tr></tbody></table>
-
-
-
+| no | time | cust | qlen | status | wtime |
+|---|-----|---:|---:|----------|-----|
+| 1 | 134.96 | 36 | 5 | leaves - queue is full! | -1.0 |
+| 2 | 140.39 | 38 | 5 | leaves - queue is full! | -1.0 |
+| 3 | 166.69 | 47 | 5 | leaves - queue is full! | -1.0 |
+| 4 | 169.14 | 49 | 5 | leaves - queue is full! | -1.0 |
+| 5 | 169.2 | 50 | 5 | leaves - queue is full! | -1.0 |
+| 6 | 212.92 | 64 | 5 | leaves - queue is full! | -1.0 |
+| 7 | 237.76 | 72 | 5 | leaves - queue is full! | -1.0 |
+| 8 | 575.38 | 172 | 5 | leaves - queue is full! | -1.0 |
 
 ```julia
 using PyPlot
